@@ -12,8 +12,8 @@
 	#include <arpa/inet.h> // Required for ntohl
 #endif
 
-#pragma comment(lib,"vfilesystem.lib")
-#pragma comment(lib,"util.lib")
+//#pragma comment(lib,"vfilesystem.lib")
+//#pragma comment(lib,"sharedutils.lib")
 #pragma comment(lib,"Ws2_32.lib") // Required for ntohl
 
 namespace uimg
