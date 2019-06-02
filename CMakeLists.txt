@@ -63,6 +63,7 @@ link_external_library(lpng)
 link_external_library(zlib)
 
 add_include_dir(glm)
+add_include_dir(lpng_build)
 
 set(DEFINITIONS)
 
