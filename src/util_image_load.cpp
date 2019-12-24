@@ -31,7 +31,11 @@ std::shared_ptr<uimg::Image> uimg::load_image(std::shared_ptr<VFilePtrInternal> 
 	switch(format)
 	{
 		case ImageFormat::PNG:
-			return uimg::impl::load_png_image(file);
+		{
+			auto img = uimg::impl::load_png_image(file);
+			img->SwapChannels(uimg::Channel::Red,uimg::Channel::Blue);
+			return img;
+		}
 		case ImageFormat::TGA:
 			return uimg::impl::load_tga_image(file);
 	}

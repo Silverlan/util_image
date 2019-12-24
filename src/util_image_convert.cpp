@@ -67,7 +67,7 @@ void uimg::Image::FlipVertically()
 bool uimg::Image::SwapChannels(Channel channelA,Channel channelB)
 {
 	auto numChannels = GetChannelCount();
-	if(numChannels >= umath::to_integral(channelA) || numChannels >= umath::to_integral(channelB))
+	if(umath::to_integral(channelA) >= numChannels || umath::to_integral(channelB) >= numChannels)
 		return false;
 	for(auto i=decltype(m_data.size()){0u};i<(m_width *m_height);++i)
 	{
