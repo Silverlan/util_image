@@ -1,132 +1,199 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image.h"
-#include <fsys/filesystem.h>
-#include <sharedutils/util_file.h>
+#include "util_image.hpp"
+#include "util_image_buffer.hpp"
+#include "stb_image_write.h"
+#include "stb_image.h"
 #include <sharedutils/util_string.h>
-#include <array>
-#include <cstring>
-#ifdef __linux__
-	#include <arpa/inet.h> // Required for ntohl
-#endif
+#include <fsys/filesystem.h>
+#include <cmath>
 
-#pragma comment(lib,"Ws2_32.lib") // Required for ntohl
-
-namespace uimg
+#pragma optimize("",off)
+void uimg::calculate_mipmap_size(uint32_t w,uint32_t h,uint32_t &outWMipmap,uint32_t &outHMipmap,uint32_t level)
 {
-	bool read_ktx_size(VFilePtr &f,uint32_t &pixelWidth,uint32_t &pixelHeight);
-	bool read_dds_size(VFilePtr &f,uint32_t &pixelWidth,uint32_t &pixelHeight);
-	bool read_png_size(VFilePtr &f,uint32_t &pixelWidth,uint32_t &pixelHeight);
-	bool read_vtf_size(VFilePtr &f,uint32_t &pixelWidth,uint32_t &pixelHeight);
-	bool read_tga_size(VFilePtr &f,uint32_t &pixelWidth,uint32_t &pixelHeight);
-};
-
-static bool compare_header(const char *src,const char *dst,size_t len)
-{
-	return (strncmp(src,dst,len) == 0) ? true : false;
+	outWMipmap = w;
+	outHMipmap = h;
+	int scale = static_cast<int>(std::pow(2,level));
+	outWMipmap /= scale;
+	outHMipmap /= scale;
+	if(outWMipmap == 0)
+		outWMipmap = 1;
+	if(outHMipmap == 0)
+		outHMipmap = 1;
 }
 
-bool uimg::read_ktx_size(VFilePtr &f,uint32_t &pixelWidth,uint32_t &pixelHeight)
+std::optional<uimg::ImageFormat> uimg::string_to_image_output_format(const std::string &str)
 {
-	// See https://www.khronos.org/opengles/sdk/tools/KTX/file_format_spec/#2.10
-	std::array<char,12> identifier;
-	f->Read(identifier.data(),identifier.size());
-	const std::array<char,12> cmpIdentifier = {
-		'«','K','T','X',' ','1','1','»','\r','\n','\x1A','\n'
+	if(ustring::compare(str,"PNG",false))
+		return ImageFormat::PNG;
+	else if(ustring::compare(str,"BMP",false))
+		return ImageFormat::BMP;
+	else if(ustring::compare(str,"TGA",false))
+		return ImageFormat::TGA;
+	else if(ustring::compare(str,"JPG",false))
+		return ImageFormat::JPG;
+	else if(ustring::compare(str,"HDR",false))
+		return ImageFormat::HDR;
+	return {};
+}
+
+std::string uimg::get_image_output_format_extension(ImageFormat format)
+{
+	switch(format)
+	{
+	case ImageFormat::PNG:
+		return "png";
+	case ImageFormat::BMP:
+		return "bmp";
+	case ImageFormat::TGA:
+		return "tga";
+	case ImageFormat::JPG:
+		return "jpg";
+	case ImageFormat::HDR:
+		return "hdr";
+	}
+	return "";
+}
+
+std::optional<uimg::ImageBuffer::ToneMapping> uimg::string_to_tone_mapping(const std::string &str)
+{
+	if(ustring::compare(str,"gamma_correction",false))
+		return uimg::ImageBuffer::ToneMapping::GammaCorrection;
+	else if(ustring::compare(str,"reinhard",false))
+		return uimg::ImageBuffer::ToneMapping::Reinhard;
+	else if(ustring::compare(str,"hejil_richard",false))
+		return uimg::ImageBuffer::ToneMapping::HejilRichard;
+	else if(ustring::compare(str,"uncharted",false))
+		return uimg::ImageBuffer::ToneMapping::Uncharted;
+	else if(ustring::compare(str,"aces",false))
+		return uimg::ImageBuffer::ToneMapping::Aces;
+	else if(ustring::compare(str,"gran_turismo",false))
+		return uimg::ImageBuffer::ToneMapping::GranTurismo;
+	return {};
+}
+
+std::string uimg::get_file_extension(ImageFormat format)
+{
+	switch(format)
+	{
+	case ImageFormat::PNG:
+		return "png";
+	case ImageFormat::BMP:
+		return "bmp";
+	case ImageFormat::TGA:
+		return "tga";
+	case ImageFormat::JPG:
+		return "jpg";
+	case ImageFormat::HDR:
+		return "hdr";
+	}
+	static_assert(umath::to_integral(ImageFormat::Count) == 5);
+	return "";
+}
+
+std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(const std::string &fileName,PixelFormat pixelFormat)
+{
+	auto f = FileManager::OpenFile(fileName.c_str(),"rb");
+	if(f == nullptr)
+		return nullptr;
+	return load_image(f,pixelFormat);
+}
+
+std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(std::shared_ptr<VFilePtrInternal> f,PixelFormat pixelFormat)
+{
+	int width,height,nrComponents;
+	stbi_io_callbacks ioCallbacks {};
+	ioCallbacks.read = [](void *user,char *data,int size) -> int {
+		return static_cast<VFilePtrInternal*>(user)->Read(data,size);
 	};
-	if(compare_header(identifier.data(),cmpIdentifier.data(),identifier.size()) == false)
-		return false; // Incorrect header
-	f->Seek(f->Tell() +sizeof(uint32_t) *6); // Skip all header information which we don't need
-	pixelWidth = f->Read<uint32_t>();
-	pixelHeight = f->Read<uint32_t>();
-	return true;
+	ioCallbacks.skip = [](void *user,int n) -> void {
+		auto *f = static_cast<VFilePtrInternal*>(user);
+		f->Seek(f->Tell() +n);
+	};
+	ioCallbacks.eof = [](void *user) -> int {
+		return static_cast<VFilePtrInternal*>(user)->Eof();
+	};
+	std::shared_ptr<::uimg::ImageBuffer> imgBuffer = nullptr;
+	switch(pixelFormat)
+	{
+	case PixelFormat::LDR:
+	{
+		auto *data = stbi_load_from_callbacks(&ioCallbacks,f.get(),&width,&height,&nrComponents,4);
+		imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data,width,height,uimg::ImageBuffer::Format::RGBA8,[](void *data) {stbi_image_free(data);}) : nullptr;
+		break;
+	}
+	case PixelFormat::HDR:
+	{
+		auto *data = stbi_load_16_from_callbacks(&ioCallbacks,f.get(),&width,&height,&nrComponents,4);
+		imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data,width,height,uimg::ImageBuffer::Format::RGBA16,[](void *data) {stbi_image_free(data);}) : nullptr;
+		break;
+	}
+	case PixelFormat::Float:
+	{
+		auto *data = stbi_loadf_from_callbacks(&ioCallbacks,f.get(),&width,&height,&nrComponents,4);
+		imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data,width,height,uimg::ImageBuffer::Format::RGBA32,[](void *data) {stbi_image_free(data);}) : nullptr;
+		break;
+	}
+	}
+	return imgBuffer;
 }
 
-bool uimg::read_dds_size(VFilePtr &f,uint32_t &pixelWidth,uint32_t &pixelHeight)
+bool uimg::save_image(std::shared_ptr<VFilePtrInternalReal> f,::uimg::ImageBuffer &imgBuffer,ImageFormat format,float quality)
 {
-	// See https://msdn.microsoft.com/de-de/library/windows/desktop/bb943991(v=vs.85).aspx#File_Layout1
-	std::array<char,4> dwMagic;
-	f->Read(dwMagic.data(),dwMagic.size());
-	const std::array<char,4> cmpMagic = {'D','D','S',' '};
-	if(compare_header(dwMagic.data(),cmpMagic.data(),dwMagic.size()) == false)
-		return false; // Incorrect header
-	f->Seek(f->Tell() +sizeof(uint32_t) *2); // Skip all header information which we don't need
-	pixelHeight = f->Read<uint32_t>();
-	pixelWidth = f->Read<uint32_t>();
-	return true;
-}
+	auto *fptr = f.get();
 
-bool uimg::read_png_size(VFilePtr &f,uint32_t &pixelWidth,uint32_t &pixelHeight)
-{
-	std::array<char,8> dwMagic;
-	f->Read(dwMagic.data(),dwMagic.size());
-	const std::array<char,8> cmpMagic = {'\211','P','N','G','\r','\n','\032','\n'};
-	if(compare_header(dwMagic.data(),cmpMagic.data(),dwMagic.size()) == false)
-		return false; // Incorrect header
-	f->Seek(f->Tell() +sizeof(uint32_t) *1); // Skip all header information which we don't need
-	std::array<char,4> chunkType;
-	f->Read(chunkType.data(),chunkType.size());
-	const std::array<char,4> chunkIHDR = {'I','H','D','R'};
-	if(compare_header(chunkType.data(),chunkIHDR.data(),chunkType.size()) == false)
-		return false;
-	pixelWidth = ntohl(f->Read<uint32_t>());
-	pixelHeight = ntohl(f->Read<uint32_t>());
-	return true;
+	auto imgFormat = imgBuffer.GetFormat();
+	imgFormat = ::uimg::ImageBuffer::ToRGBFormat(imgFormat);
+	if(format != ImageFormat::HDR)
+		imgFormat = ::uimg::ImageBuffer::ToLDRFormat(imgFormat);
+	else
+		imgFormat = ::uimg::ImageBuffer::ToFloatFormat(imgFormat);
+	imgBuffer.Convert(imgFormat);
+	auto w = imgBuffer.GetWidth();
+	auto h = imgBuffer.GetHeight();
+	auto *data = imgBuffer.GetData();
+	auto numChannels = imgBuffer.GetChannelCount();
+	int result = 0;
+	switch(format)
+	{
+	case ImageFormat::PNG:
+		if(quality >= 0.9f)
+			stbi_write_png_compression_level = 0;
+		else if(quality >= 0.75f)
+			stbi_write_png_compression_level = 6;
+		else if(quality >= 0.5f)
+			stbi_write_png_compression_level = 8;
+		else if(quality >= 0.25f)
+			stbi_write_png_compression_level = 10;
+		else
+			stbi_write_png_compression_level = 12;
+		result = stbi_write_png_to_func([](void *context,void *data,int size) {
+			static_cast<VFilePtrInternalReal*>(context)->Write(data,size);
+			},fptr,w,h,numChannels,data,imgBuffer.GetPixelSize() *w);
+		break;
+	case ImageFormat::BMP:
+		result = stbi_write_bmp_to_func([](void *context,void *data,int size) {
+			static_cast<VFilePtrInternalReal*>(context)->Write(data,size);
+			},fptr,w,h,numChannels,data);
+		break;
+	case ImageFormat::TGA:
+		result = stbi_write_tga_to_func([](void *context,void *data,int size) {
+			static_cast<VFilePtrInternalReal*>(context)->Write(data,size);
+			},fptr,w,h,numChannels,data);
+		break;
+	case ImageFormat::JPG:
+		result = stbi_write_jpg_to_func([](void *context,void *data,int size) {
+			static_cast<VFilePtrInternalReal*>(context)->Write(data,size);
+			},fptr,w,h,numChannels,data,static_cast<int32_t>(quality *100.f));
+		break;
+	case ImageFormat::HDR:
+		result = stbi_write_hdr_to_func([](void *context,void *data,int size) {
+			static_cast<VFilePtrInternalReal*>(context)->Write(data,size);
+			},fptr,w,h,numChannels,reinterpret_cast<float*>(data));
+		break;
+	}
+	return result != 0;
 }
-
-bool uimg::read_vtf_size(VFilePtr &f,uint32_t &pixelWidth,uint32_t &pixelHeight)
-{
-	std::array<char,4> signature;
-	f->Read(signature.data(),signature.size());
-	const std::array<char,4> cmpSignature = {'V','T','F','\0'};
-	if(compare_header(signature.data(),cmpSignature.data(),signature.size()) == false)
-		return false; // Incorrect header
-	f->Seek(f->Tell() +sizeof(uint32_t) *3);
-	pixelWidth = static_cast<uint32_t>(f->Read<uint16_t>());
-	pixelHeight = static_cast<uint32_t>(f->Read<uint16_t>());
-	return true;
-}
-
-bool uimg::read_tga_size(VFilePtr &f,uint32_t &pixelWidth,uint32_t &pixelHeight)
-{
-	f->Seek(f->Tell() +sizeof(int8_t) *4 +sizeof(int16_t) *4);
-	pixelWidth = static_cast<uint32_t>(f->Read<int16_t>());
-	pixelHeight = static_cast<uint32_t>(f->Read<int16_t>());
-	return true;
-}
-
-bool uimg::read_image_size(const std::string &file,uint32_t &pixelWidth,uint32_t &pixelHeight)
-{
-	std::string ext;
-	if(ufile::get_extension(file,&ext) == false)
-		return false; // TODO: Search available extensions? (Which order?)
-	ustring::to_lower(ext);
-	if(ext == "ktx")
-	{
-		auto f = FileManager::OpenFile(file.c_str(),"rb");
-		return (f != nullptr && read_ktx_size(f,pixelWidth,pixelHeight) == true) ? true : false;
-	}
-	else if(ext == "dds")
-	{
-		auto f = FileManager::OpenFile(file.c_str(),"rb");
-		return (f != nullptr && read_dds_size(f,pixelWidth,pixelHeight) == true) ? true : false;
-	}
-	else if(ext == "png")
-	{
-		auto f = FileManager::OpenFile(file.c_str(),"rb");
-		return (f != nullptr && read_png_size(f,pixelWidth,pixelHeight) == true) ? true : false;
-	}
-	else if(ext == "vtf")
-	{
-		auto f = FileManager::OpenFile(file.c_str(),"rb");
-		return (f != nullptr && read_vtf_size(f,pixelWidth,pixelHeight) == true) ? true : false;
-	}
-	else if(ext == "tga")
-	{
-		auto f = FileManager::OpenFile(file.c_str(),"rb");
-		return (f != nullptr && read_tga_size(f,pixelWidth,pixelHeight) == true) ? true : false;
-	}
-	return false;
-}
+#pragma optimize("",on)

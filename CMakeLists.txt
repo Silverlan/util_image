@@ -61,6 +61,18 @@ link_external_library(mathutil)
 link_external_library(vfilesystem)
 link_external_library(lpng)
 link_external_library(zlib)
+link_external_library(nvidia_texture_tools)
+
+add_external_library(nvidia_texture_tools)
+add_external_library(nvidia_texture_tools_image)
+add_external_library(nvidia_texture_tools_core)
+add_external_library(nvidia_texture_tools_math)
+add_external_library(nvidia_texture_tools_bc7)
+add_external_library(nvidia_texture_tools_bc6h)
+add_external_library(nvidia_texture_tools_thread)
+
+add_definitions(-DUIMG_ENABLE_NVTT)
+add_definitions(-DUIMG_DLL)
 
 add_include_dir(glm)
 add_include_dir(lpng_build)
@@ -69,7 +81,7 @@ set(DEFINITIONS)
 
 ##### CONFIGURATION #####
 
-set(LIB_TYPE STATIC)
+set(LIB_TYPE SHARED)
 if(ENABLE_STATIC_LIBRARY_FLAG)
 	option(CONFIG_STATIC_LIBRARY "Build as static library?" OFF)
 endif()

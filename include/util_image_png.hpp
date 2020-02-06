@@ -10,10 +10,10 @@
 class VFilePtrInternal;
 namespace uimg
 {
-	class Image;
+	class ImageBuffer;
 	namespace impl
 	{
-		std::shared_ptr<Image> load_png_image(std::shared_ptr<VFilePtrInternal> &file);
+		std::shared_ptr<ImageBuffer> load_png_image(std::shared_ptr<VFilePtrInternal> &file);
 	};
 };
 

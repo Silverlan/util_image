@@ -1,9 +1,48 @@
+/*---------------------------------------------------------------------------
+rpng - simple PNG display program                              readpng.c
+---------------------------------------------------------------------------
+Copyright (c) 1998-2007 Greg Roelofs.  All rights reserved.
+This software is provided "as is," without warranty of any kind,
+express or implied.  In no event shall the author or contributors
+be held liable for any damages arising in any way from the use of
+this software.
+The contents of this file are DUAL-LICENSED.  You may modify and/or
+redistribute this software according to the terms of one of the
+following two licenses (at your option):
+LICENSE 1 ("BSD-like with advertising clause"):
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute
+it freely, subject to the following restrictions:
+1. Redistributions of source code must retain the above copyright
+notice, disclaimer, and this list of conditions.
+2. Redistributions in binary form must reproduce the above copyright
+notice, disclaimer, and this list of conditions in the documenta-
+tion and/or other materials provided with the distribution.
+3. All advertising materials mentioning features or use of this
+software must display the following acknowledgment:
+This product includes software developed by Greg Roelofs
+and contributors for the book, "PNG: The Definitive Guide,"
+published by O'Reilly and Associates.
+LICENSE 2 (GNU GPL v2 or later):
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+---------------------------------------------------------------------------*/
+
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image.h"
 #include "util_image_png.hpp"
+#include "util_image_buffer.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/scope_guard.h>
 #include <stdio.h>
@@ -310,87 +349,75 @@ void PNGImage::readpng_cleanup(int free_image_data)
     }
 }
 
-std::shared_ptr<uimg::Image> uimg::impl::load_png_image(std::shared_ptr<VFilePtrInternal> &file)
+std::shared_ptr<uimg::ImageBuffer> uimg::impl::load_png_image(std::shared_ptr<VFilePtrInternal> &file)
 {
-	auto image = std::make_shared<uimg::Image>();
-	auto bSuccess = image->Initialize([&file](std::vector<uint8_t> &outData,uimg::ImageType &outType,uint32_t &outWidth,uint32_t &outHeight) -> bool {
-		PNGImage pngImg {};
-		unsigned long width,height;
-		if(pngImg.readpng_init(file,&width,&height) != 0)
-			return false;
-		ScopeGuard sg([&pngImg]() {
-			pngImg.readpng_cleanup(true);
+	PNGImage pngImg {};
+	unsigned long width,height;
+	if(pngImg.readpng_init(file,&width,&height) != 0)
+		return nullptr;
+	ScopeGuard sg([&pngImg]() {
+		pngImg.readpng_cleanup(true);
 		});
-		switch(pngImg.color_type)
+	switch(pngImg.color_type)
+	{
+	case PNG_COLOR_TYPE_PALETTE:
+		png_set_palette_to_rgb(pngImg.png_ptr);
+		break;
+	case PNG_COLOR_TYPE_GRAY:
+	case PNG_COLOR_TYPE_GRAY_ALPHA:
+		png_set_gray_to_rgb(pngImg.png_ptr);
+		break;
+	case PNG_COLOR_TYPE_RGB:
+		png_set_filler(pngImg.png_ptr,0xffff,PNG_FILLER_AFTER);
+		break;
+	}
+	if(pngImg.bit_depth < 8)
+		png_set_packing(pngImg.png_ptr);
+	if(pngImg.bit_depth == 16)
+		png_set_strip_16(pngImg.png_ptr);
+	if(pngImg.bit_depth != 8)
+		return nullptr;
+
+	/*if (pngImg.color_type == PNG_COLOR_TYPE_PALETTE)
+	png_set_palette_to_rgb(pngImg.png_ptr);
+
+	if (pngImg.color_type == PNG_COLOR_TYPE_GRAY) png_set_gray_to_rgb(pngImg.png_ptr);
+
+	if (png_get_valid(pngImg.png_ptr, pngImg.info_ptr,
+	PNG_INFO_tRNS)) png_set_tRNS_to_alpha(pngImg.png_ptr);*/
+
+	if(pngImg.color_type == PNG_COLOR_TYPE_RGB || pngImg.color_type == PNG_COLOR_TYPE_RGB_ALPHA)
+		png_set_bgr(pngImg.png_ptr);
+
+	auto numChannels = -1;
+	unsigned long rowBytes = 0u;
+	auto *imgData = pngImg.readpng_get_image(1.0,&numChannels,&rowBytes);
+	std::shared_ptr<uimg::ImageBuffer> imgBuffer = nullptr;
+	if(pngImg.color_type &PNG_COLOR_MASK_COLOR)
+	{
+		if(numChannels == 4)
 		{
-			case PNG_COLOR_TYPE_PALETTE:
-				png_set_palette_to_rgb(pngImg.png_ptr);
-				break;
-			case PNG_COLOR_TYPE_GRAY:
-			case PNG_COLOR_TYPE_GRAY_ALPHA:
-				png_set_gray_to_rgb(pngImg.png_ptr);
-				break;
-			case PNG_COLOR_TYPE_RGB:
-				png_set_filler(pngImg.png_ptr,0xffff,PNG_FILLER_AFTER);
-				break;
-		}
-		if(pngImg.bit_depth < 8)
-			png_set_packing(pngImg.png_ptr);
-		if(pngImg.bit_depth == 16)
-			png_set_strip_16(pngImg.png_ptr);
-		if(pngImg.bit_depth != 8)
-			return false;
-
-		/*if (pngImg.color_type == PNG_COLOR_TYPE_PALETTE)
-			png_set_palette_to_rgb(pngImg.png_ptr);
-
-		if (pngImg.color_type == PNG_COLOR_TYPE_GRAY) png_set_gray_to_rgb(pngImg.png_ptr);
-
-		if (png_get_valid(pngImg.png_ptr, pngImg.info_ptr,
-			PNG_INFO_tRNS)) png_set_tRNS_to_alpha(pngImg.png_ptr);*/
-
-		if(pngImg.color_type == PNG_COLOR_TYPE_RGB || pngImg.color_type == PNG_COLOR_TYPE_RGB_ALPHA)
-			png_set_bgr(pngImg.png_ptr);
-
-		outWidth = width;
-		outHeight = height;
-		
-		auto numChannels = -1;
-		unsigned long rowBytes = 0u;
-		auto *imgData = pngImg.readpng_get_image(1.0,&numChannels,&rowBytes);
-		if(pngImg.color_type &PNG_COLOR_MASK_COLOR)
-		{
-			if(numChannels == 4)
-			{
-				outType = uimg::ImageType::RGBA;
-				outData.resize(width *height *4);
-				memcpy(outData.data(),imgData,outData.size());
-				if((pngImg.color_type &PNG_COLOR_MASK_ALPHA) == 0)
-				{
-					for(auto i=decltype(outData.size()){0};i<outData.size();i+=4)
-						outData.at(i +3u) = std::numeric_limits<uint8_t>::max();
-				}
-			}
-			else
-			{
-				if(numChannels != 3)
-					return false;
-				outType = uimg::ImageType::RGB;
-				outData.resize(width *height *3);
-				memcpy(outData.data(),imgData,outData.size());
-			}
-		}
-		else if(pngImg.color_type &PNG_COLOR_MASK_ALPHA)
-		{
-			if(numChannels != 1)
-				return false;
-			outType = uimg::ImageType::Alpha;
-			outData.resize(width *height);
-			memcpy(outData.data(),imgData,outData.size());
+			imgBuffer = uimg::ImageBuffer::Create(width,height,uimg::ImageBuffer::Format::RGBA8);
+			memcpy(imgBuffer->GetData(),imgData,imgBuffer->GetSize());
+			if((pngImg.color_type &PNG_COLOR_MASK_ALPHA) == 0)
+				imgBuffer->ClearAlpha();
 		}
 		else
-			return false;
-		return true;
-	});
-	return bSuccess ? image : nullptr;
+		{
+			if(numChannels != 3)
+				return nullptr;
+			imgBuffer = uimg::ImageBuffer::Create(width,height,uimg::ImageBuffer::Format::RGB8);
+			memcpy(imgBuffer->GetData(),imgData,imgBuffer->GetSize());
+		}
+	}
+	else if(pngImg.color_type &PNG_COLOR_MASK_ALPHA)
+	{
+		if(numChannels != 1)
+			return nullptr;
+		imgBuffer = uimg::ImageBuffer::Create(width,height,uimg::ImageBuffer::Format::RGBA8);
+		memcpy(imgBuffer->GetData(),imgData,imgBuffer->GetSize());
+	}
+	else
+		return nullptr;
+	return imgBuffer;
 }

@@ -2,16 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image.h"
+#include "util_image.hpp"
+#include "util_image_buffer.hpp"
 #include "util_image_tga.hpp"
 #include "util_image_png.hpp"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_string.h>
 #include <fsys/filesystem.h>
 
-bool uimg::Image::Initialize(const std::function<bool(std::vector<uint8_t>&,ImageType&,uint32_t&,uint32_t&)> &fInitializer) {return fInitializer(m_data,m_type,m_width,m_height);}
-
-std::shared_ptr<uimg::Image> uimg::load_image(const std::string &fileName)
+#if 0
+std::shared_ptr<uimg::ImageBuffer> uimg::load_image(const std::string &fileName)
 {
 	std::string ext;
 	if(ufile::get_extension(fileName,&ext) == false)
@@ -26,14 +26,14 @@ std::shared_ptr<uimg::Image> uimg::load_image(const std::string &fileName)
 		return load_image(f,ImageFormat::PNG);
 	return nullptr;
 }
-std::shared_ptr<uimg::Image> uimg::load_image(std::shared_ptr<VFilePtrInternal> &file,ImageFormat format)
+std::shared_ptr<uimg::ImageBuffer> uimg::load_image(std::shared_ptr<VFilePtrInternal> &file,ImageFormat format)
 {
 	switch(format)
 	{
 		case ImageFormat::PNG:
 		{
 			auto img = uimg::impl::load_png_image(file);
-			img->SwapChannels(uimg::Channel::Red,uimg::Channel::Blue);
+			img->SwapChannels(uimg::ImageBuffer::Channel::Red,uimg::ImageBuffer::Channel::Blue);
 			return img;
 		}
 		case ImageFormat::TGA:
@@ -41,3 +41,4 @@ std::shared_ptr<uimg::Image> uimg::load_image(std::shared_ptr<VFilePtrInternal> 
 	}
 	return nullptr;
 }
+#endif
