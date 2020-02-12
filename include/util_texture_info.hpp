@@ -108,6 +108,7 @@ namespace uimg
 			mipMapFilter = MipmapFilter::Kaiser;
 		}
 	};
+	DLLUIMG std::string get_absolute_path(const std::string &fileName,uimg::TextureInfo::ContainerFormat containerFormat);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(uimg::TextureInfo::Flags)
 

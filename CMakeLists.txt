@@ -70,6 +70,7 @@ add_external_library(nvidia_texture_tools_math)
 add_external_library(nvidia_texture_tools_bc7)
 add_external_library(nvidia_texture_tools_bc6h)
 add_external_library(nvidia_texture_tools_thread)
+add_external_library(squish)
 
 add_definitions(-DUIMG_ENABLE_NVTT)
 add_definitions(-DUIMG_DLL)

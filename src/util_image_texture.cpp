@@ -184,7 +184,7 @@ private:
 	std::function<void(const std::string&)> m_errorHandler = nullptr;
 };
 
-static std::string get_full_name(const std::string &fileName,uimg::TextureInfo::ContainerFormat containerFormat)
+std::string uimg::get_absolute_path(const std::string &fileName,uimg::TextureInfo::ContainerFormat containerFormat)
 {
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
@@ -201,31 +201,6 @@ static std::string get_full_name(const std::string &fileName,uimg::TextureInfo::
 	}
 	return FileManager::GetProgramPath() +'/' +fileNameWithExt;
 }
-
-#if 0
-static Anvil::Format get_anvil_format(uimg::TextureInfo::InputFormat format)
-{
-	Anvil::Format anvFormat;
-	switch(format)
-	{
-	case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
-		anvFormat = Anvil::Format::B8G8R8A8_UNORM;
-		break;
-	case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
-		anvFormat = Anvil::Format::R16G16B16A16_SFLOAT;
-		break;
-	case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
-		anvFormat = Anvil::Format::R32G32B32A32_SFLOAT;
-		break;
-	case uimg::TextureInfo::InputFormat::R32_Float:
-		anvFormat = Anvil::Format::R32_SFLOAT;
-		break;
-	case uimg::TextureInfo::InputFormat::KeepInputImageFormat:
-		break;
-	}
-	return anvFormat;
-}
-#endif
 
 static nvtt::InputFormat get_nvtt_format(uimg::TextureInfo::InputFormat format)
 {
@@ -250,30 +225,30 @@ static nvtt::InputFormat get_nvtt_format(uimg::TextureInfo::InputFormat format)
 	return nvttFormat;
 }
 
-static bool save_image(
-	const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
-	uint32_t numLayers,uint32_t numMipmaps,bool cubemap,const std::string &fileName,
-	const uimg::TextureInfo &ktxCreateInfo,const std::function<void(const std::string&)> &errorHandler
+bool uimg::save_texture(
+	const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
+	uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
+	const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler
 )
 {
 	auto size = width *height *szPerPixel;
 
-	auto nvttFormat = get_nvtt_format(ktxCreateInfo.inputFormat);
+	auto nvttFormat = get_nvtt_format(texInfo.inputFormat);
 	nvtt::InputOptions inputOptions {};
 	inputOptions.reset();
 	inputOptions.setTextureLayout(nvtt::TextureType_2D,width,height);
 	inputOptions.setFormat(nvttFormat);
-	inputOptions.setWrapMode(to_nvtt_enum(ktxCreateInfo.wrapMode));
-	inputOptions.setMipmapFilter(to_nvtt_enum(ktxCreateInfo.mipMapFilter));
+	inputOptions.setWrapMode(to_nvtt_enum(texInfo.wrapMode));
+	inputOptions.setMipmapFilter(to_nvtt_enum(texInfo.mipMapFilter));
 
-	if(umath::is_flag_set(ktxCreateInfo.flags,uimg::TextureInfo::Flags::GenerateMipmaps))
+	if(umath::is_flag_set(texInfo.flags,uimg::TextureInfo::Flags::GenerateMipmaps))
 		inputOptions.setMipmapGeneration(true);
 	else
 		inputOptions.setMipmapGeneration(numMipmaps > 1,numMipmaps -1u);
 
 	auto texType = cubemap ? nvtt::TextureType_Cube : nvtt::TextureType_2D;
-	auto alphaMode = ktxCreateInfo.alphaMode;
-	if(ktxCreateInfo.outputFormat == uimg::TextureInfo::OutputFormat::BC6)
+	auto alphaMode = texInfo.alphaMode;
+	if(texInfo.outputFormat == uimg::TextureInfo::OutputFormat::BC6)
 		alphaMode = uimg::TextureInfo::AlphaMode::Transparency;
 	inputOptions.setTextureLayout(texType,width,height);
 	for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
@@ -335,13 +310,13 @@ static bool save_image(
 	//OutputHandler outputHandler {f};
 	nvtt::OutputOptions outputOptions {};
 	outputOptions.reset();
-	outputOptions.setContainer(to_nvtt_enum(ktxCreateInfo.containerFormat,ktxCreateInfo.outputFormat));
-	outputOptions.setSrgbFlag(umath::is_flag_set(ktxCreateInfo.flags,uimg::TextureInfo::Flags::SRGB));
+	outputOptions.setContainer(to_nvtt_enum(texInfo.containerFormat,texInfo.outputFormat));
+	outputOptions.setSrgbFlag(umath::is_flag_set(texInfo.flags,uimg::TextureInfo::Flags::SRGB));
 	//outputOptions.setOutputHandler(&outputHandler); // Does not seem to work? TODO: FIXME
-	outputOptions.setFileName(get_full_name(fileName,ktxCreateInfo.containerFormat).c_str());
+	outputOptions.setFileName(get_absolute_path(fileName,texInfo.containerFormat).c_str());
 	outputOptions.setErrorHandler(&errHandler);
 
-	auto nvttOutputFormat = to_nvtt_enum(ktxCreateInfo.outputFormat);
+	auto nvttOutputFormat = to_nvtt_enum(texInfo.outputFormat);
 	nvtt::CompressionOptions compressionOptions {};
 	compressionOptions.reset();
 	compressionOptions.setFormat(nvttOutputFormat);
@@ -366,14 +341,14 @@ static bool save_image(
 		break;
 	}
 
-	if(umath::is_flag_set(ktxCreateInfo.flags,uimg::TextureInfo::Flags::NormalMap))
+	if(umath::is_flag_set(texInfo.flags,uimg::TextureInfo::Flags::NormalMap))
 	{
 		inputOptions.setNormalMap(true);
 		inputOptions.setConvertToNormalMap(false);
 		inputOptions.setGamma(1.0f, 1.0f);
 		inputOptions.setNormalizeMipmaps(true);
 	}
-	else if(umath::is_flag_set(ktxCreateInfo.flags,uimg::TextureInfo::Flags::ConvertToNormalMap))
+	else if(umath::is_flag_set(texInfo.flags,uimg::TextureInfo::Flags::ConvertToNormalMap))
 	{
 		inputOptions.setNormalMap(false);
 		inputOptions.setConvertToNormalMap(true);
@@ -396,268 +371,31 @@ static bool save_image(
 	return compressor.process(inputOptions,compressionOptions,outputOptions);
 }
 
-#if 0
-static bool save_image(
-	uimg::ImageBuffer &imgBuffer,const std::string &fileName,const uimg::TextureInfo &ktxCreateInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler
+bool uimg::save_texture(
+	const std::string &fileName,uimg::ImageBuffer &imgBuffer,const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler
 )
 {
 	constexpr auto numLayers = 1u;
 	constexpr auto numMipmaps = 1u;
-	return ::save_image([&imgBuffer](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
+	return save_texture(fileName,[&imgBuffer](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
 		return static_cast<uint8_t*>(imgBuffer.GetData());
-		},imgBuffer.GetWidth(),imgBuffer.GetHeight(),get_anvil_format(ktxCreateInfo.inputFormat),numLayers,numMipmaps,cubemap,fileName,ktxCreateInfo,errorHandler);
+	},imgBuffer.GetWidth(),imgBuffer.GetHeight(),imgBuffer.GetPixelSize(),numLayers,numMipmaps,cubemap,texInfo,errorHandler);
 }
 
-static bool save_image(
-	const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,const std::string &fileName,
-	const uimg::TextureInfo &ktxCreateInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler
+bool uimg::save_texture(
+	const std::string &fileName,const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,uint32_t sizePerPixel,
+	const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler
 )
 {
 	auto numLayers = imgLayerMipmapData.size();
 	auto numMipmaps = imgLayerMipmapData.empty() ? 1 : imgLayerMipmapData.front().size();
-	return ::save_image([&imgLayerMipmapData](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
+	return save_texture(fileName,[&imgLayerMipmapData](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
 		if(iLayer >= imgLayerMipmapData.size())
 			return nullptr;
 		auto &mipmapData = imgLayerMipmapData.at(iLayer);
 		if(iMipmap >= mipmapData.size())
 			return nullptr;
 		return static_cast<const uint8_t*>(mipmapData.at(iMipmap));
-		},width,height,get_anvil_format(ktxCreateInfo.inputFormat),numLayers,numMipmaps,cubemap,fileName,ktxCreateInfo,errorHandler);
+	},width,height,sizePerPixel,numLayers,numMipmaps,cubemap,texInfo,errorHandler);
 }
-
-static bool save_image(uimg::ImageBuffer &image,const std::string &fileName,const uimg::TextureInfo &ktxCreateInfo,const std::function<void(const std::string&)> &errorHandler)
-{
-	std::shared_ptr<prosper::Image> imgRead = image.shared_from_this();
-	auto srcFormat = image.GetFormat();
-	auto dstFormat = srcFormat;
-	if(ktxCreateInfo.inputFormat != uimg::TextureInfo::InputFormat::KeepInputImageFormat)
-		dstFormat = get_anvil_format(ktxCreateInfo.inputFormat);
-	auto nvttFormat = get_nvtt_format(ktxCreateInfo.inputFormat);
-	if(ktxCreateInfo.outputFormat == uimg::TextureInfo::OutputFormat::KeepInputImageFormat || prosper::util::is_compressed_format(imgRead->GetFormat()))
-	{
-		// No compression needed, just copy the image data to a buffer and save it directly
-
-		auto extents = imgRead->GetExtents();
-		auto numLayers = imgRead->GetLayerCount();
-		auto numLevels = imgRead->GetMipmapCount();
-		auto &context = image.GetContext();
-		auto &setupCmd = context.GetSetupCommandBuffer();
-
-		gli::extent2d gliExtents {extents.width,extents.height};
-		gli::texture2d gliTex {static_cast<gli::texture::format_type>(imgRead->GetFormat()),gliExtents,numLevels};
-
-		prosper::util::BufferCreateInfo bufCreateInfo {};
-		bufCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::GPUToCPU;
-		bufCreateInfo.size = gliTex.size();
-		bufCreateInfo.usageFlags = Anvil::BufferUsageFlagBits::TRANSFER_DST_BIT;
-		auto buf = prosper::util::create_buffer(context.GetDevice(),bufCreateInfo);
-		buf->SetPermanentlyMapped(true);
-
-		prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-		// Initialize buffer with image data
-		size_t bufferOffset = 0;
-		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
-		{
-			for(auto iMipmap=decltype(numLevels){0u};iMipmap<numLevels;++iMipmap)
-			{
-				auto extents = imgRead->GetExtents(iMipmap);
-				auto mipmapSize = gliTex.size(iMipmap);
-				prosper::util::BufferImageCopyInfo copyInfo {};
-				copyInfo.baseArrayLayer = iLayer;
-				copyInfo.bufferOffset = bufferOffset;
-				copyInfo.dstImageLayout = Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL;
-				copyInfo.width = extents.width;
-				copyInfo.height = extents.height;
-				copyInfo.layerCount = 1;
-				copyInfo.mipLevel = iMipmap;
-				prosper::util::record_copy_image_to_buffer(**setupCmd,copyInfo,*image,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,*buf);
-
-				bufferOffset += mipmapSize;
-			}
-		}
-		prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-		context.FlushSetupCommandBuffer();
-
-		// Copy the data to a gli texture object
-		bufferOffset = 0ull;
-		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
-		{
-			for(auto iMipmap=decltype(numLevels){0u};iMipmap<numLevels;++iMipmap)
-			{
-				auto extents = imgRead->GetExtents(iMipmap);
-				auto mipmapSize = gliTex.size(iMipmap);
-				auto *dstData = gliTex.data(iLayer,0u /* face */,iMipmap);
-				buf->Read(bufferOffset,mipmapSize,dstData);
-				bufferOffset += mipmapSize;
-			}
-		}
-		auto fullFileName = get_full_name(fileName,ktxCreateInfo.containerFormat);
-		switch(ktxCreateInfo.containerFormat)
-		{
-		case uimg::TextureInfo::ContainerFormat::DDS:
-			return gli::save_dds(gliTex,fullFileName);
-		case uimg::TextureInfo::ContainerFormat::KTX:
-			return gli::save_ktx(gliTex,fullFileName);
-		}
-		return false;
-	}
-
-	std::shared_ptr<prosper::Buffer> buf = nullptr;
-	uint32_t sizePerLayer = 0u;
-	uint32_t sizePerPixel = 0u;
-	if(
-		image.GetTiling() != Anvil::ImageTiling::LINEAR ||
-		(image.GetAnvilImage().get_memory_block()->get_create_info_ptr()->get_memory_features() &Anvil::MemoryFeatureFlagBits::MAPPABLE_BIT) == Anvil::MemoryFeatureFlagBits::NONE ||
-		image.GetFormat() != dstFormat
-		)
-	{
-		// Convert the image into the target format
-		auto &context = image.GetContext();
-		auto &setupCmd = context.GetSetupCommandBuffer();
-
-		prosper::util::ImageCreateInfo copyCreateInfo {};
-		image.GetCreateInfo(copyCreateInfo);
-		copyCreateInfo.format = dstFormat;
-		copyCreateInfo.memoryFeatures = prosper::util::MemoryFeatureFlags::DeviceLocal;
-		copyCreateInfo.postCreateLayout = Anvil::ImageLayout::TRANSFER_DST_OPTIMAL;
-		copyCreateInfo.tiling = Anvil::ImageTiling::OPTIMAL; // Needs to be in optimal tiling because some GPUs do not support linear tiling with mipmaps
-		prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-		imgRead = image.Copy(*setupCmd,copyCreateInfo);
-		prosper::util::record_image_barrier(**setupCmd,*image,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,Anvil::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
-
-		// Copy the image data to a buffer
-		uint64_t size = 0;
-		auto numLayers = image.GetLayerCount();
-		auto numMipmaps = image.GetMipmapCount();
-		sizePerPixel = prosper::util::get_byte_size(dstFormat);
-		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
-		{
-			for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
-			{
-				auto extents = image.GetExtents(iMipmap);
-				size += extents.width *extents.height *sizePerPixel;
-			}
-		}
-		buf = context.AllocateTemporaryBuffer(size);
-		if(buf == nullptr)
-		{
-			context.FlushSetupCommandBuffer();
-			return false; // Buffer allocation failed; Requested size too large?
-		}
-		prosper::util::record_image_barrier(**setupCmd,**imgRead,Anvil::ImageLayout::TRANSFER_DST_OPTIMAL,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL);
-
-		prosper::util::BufferImageCopyInfo copyInfo {};
-		copyInfo.dstImageLayout = Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL;
-
-		struct ImageMipmapData
-		{
-			uint32_t mipmapIndex = 0u;
-			uint64_t bufferOffset = 0ull;
-			uint64_t bufferSize = 0ull;
-			vk::Extent2D extents = {};
-		};
-		struct ImageLayerData
-		{
-			std::vector<ImageMipmapData> mipmaps = {};
-			uint32_t layerIndex = 0u;
-		};
-		std::vector<ImageLayerData> layers = {};
-		uint64_t bufferOffset = 0ull;
-		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
-		{
-			layers.push_back({});
-			auto &layerData = layers.back();
-			layerData.layerIndex = iLayer;
-			for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
-			{
-				layerData.mipmaps.push_back({});
-				auto &mipmapData = layerData.mipmaps.back();
-				mipmapData.mipmapIndex = iMipmap;
-				mipmapData.bufferOffset = bufferOffset;
-
-				auto extents = image.GetExtents(iMipmap);
-				mipmapData.extents = extents;
-				mipmapData.bufferSize = extents.width *extents.height *sizePerPixel;
-				bufferOffset += mipmapData.bufferSize;
-
-				if(iLayer == 0)
-					sizePerLayer += extents.width *extents.height *sizePerPixel;
-			}
-		}
-		for(auto &layerData : layers)
-		{
-			for(auto &mipmapData : layerData.mipmaps)
-			{
-				copyInfo.mipLevel = mipmapData.mipmapIndex;
-				copyInfo.baseArrayLayer = layerData.layerIndex;
-				copyInfo.bufferOffset = mipmapData.bufferOffset;
-				prosper::util::record_copy_image_to_buffer(**setupCmd,copyInfo,**imgRead,Anvil::ImageLayout::TRANSFER_SRC_OPTIMAL,*buf);
-			}
-		}
-		context.FlushSetupCommandBuffer();
-
-		/*// The dds library expects the image data in RGB form, so we have to do some conversions in some cases.
-		std::optional<util::ImageBuffer::Format> imgBufFormat = {};
-		switch(srcFormat)
-		{
-		case Anvil::Format::B8G8R8_UNORM:
-		case Anvil::Format::B8G8R8A8_UNORM:
-		imgBufFormat = util::ImageBuffer::Format::RGBA32; // TODO: dst format
-		break;
-		}
-		if(imgBufFormat.has_value())
-		{
-		for(auto &layerData : layers)
-		{
-		for(auto &mipmapData : layerData.mipmaps)
-		{
-		std::vector<uint8_t> imgData {};
-		imgData.resize(mipmapData.bufferSize);
-		if(buf->Read(mipmapData.bufferOffset,mipmapData.bufferSize,imgData.data()))
-		{
-		// Swap red and blue channels, then write the new image data back to the buffer
-		auto imgBuf = util::ImageBuffer::Create(imgData.data(),mipmapData.extents.width,mipmapData.extents.height,*imgBufFormat,true);
-		imgBuf->SwapChannels(util::ImageBuffer::Channel::Red,util::ImageBuffer::Channel::Blue);
-		buf->Write(mipmapData.bufferOffset,mipmapData.bufferSize,imgData.data());
-		}
-		}
-		}
-		}*/
-	}
-	auto numLayers = imgRead->GetLayerCount();
-	auto numMipmaps = imgRead->GetMipmapCount();
-	auto cubemap = imgRead->IsCubemap();
-	auto extents = imgRead->GetExtents();
-	if(buf != nullptr)
-	{
-		return ::save_image([imgRead,buf,sizePerLayer,sizePerPixel](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
-			void *data;
-			auto *memBlock = (*buf)->get_memory_block(0u);
-			auto offset = iLayer *sizePerLayer;
-			auto extents = imgRead->GetExtents(iMipmap);
-			auto size = extents.width *extents.height *sizePerPixel;
-			if(memBlock->map(offset,sizePerPixel,&data) == false)
-				return nullptr;
-			outDeleter = [memBlock]() {
-				memBlock->unmap(); // Note: setMipmapData copies the data, so we don't need to keep it mapped
-			};
-			return static_cast<uint8_t*>(data);
-			},extents.width,extents.height,dstFormat,numLayers,numMipmaps,cubemap,fileName,ktxCreateInfo,errorHandler);
-	}
-	return ::save_image([imgRead](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
-		auto subresourceLayout = imgRead->GetSubresourceLayout(iLayer,iMipmap);
-		if(subresourceLayout.has_value() == false)
-			return nullptr;
-		void *data;
-		auto *memBlock = (*imgRead)->get_memory_block();
-		if(memBlock->map(subresourceLayout->offset,subresourceLayout->size,&data) == false)
-			return nullptr;
-		outDeleter = [memBlock]() {
-			memBlock->unmap(); // Note: setMipmapData copies the data, so we don't need to keep it mapped
-		};
-		return static_cast<uint8_t*>(data);
-		},extents.width,extents.height,dstFormat,numLayers,numMipmaps,cubemap,fileName,ktxCreateInfo,errorHandler);
-}
-#endif
-
 #endif
