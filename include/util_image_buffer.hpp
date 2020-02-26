@@ -175,7 +175,7 @@ namespace uimg
 		void FlipVertically();
 
 		void InitPixelView(uint32_t x,uint32_t y,PixelView &pxView);
-		PixelView GetPixelView();
+		PixelView GetPixelView(Offset offset=0);
 
 		PixelIterator begin();
 		PixelIterator end();

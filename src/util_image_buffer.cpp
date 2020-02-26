@@ -188,9 +188,9 @@ void uimg::ImageBuffer::InitPixelView(uint32_t x,uint32_t y,PixelView &pxView)
 {
 	pxView.m_offset = GetPixelOffset(x,y);
 }
-uimg::ImageBuffer::PixelView uimg::ImageBuffer::GetPixelView()
+uimg::ImageBuffer::PixelView uimg::ImageBuffer::GetPixelView(Offset offset)
 {
-	return PixelView{*this,0};
+	return PixelView{*this,offset};
 }
 uint8_t uimg::ImageBuffer::GetChannelCount(Format format)
 {
