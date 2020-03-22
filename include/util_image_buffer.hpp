@@ -88,6 +88,7 @@ namespace uimg
 			ImageBuffer &GetImageBuffer() const;
 		private:
 			PixelView(ImageBuffer &imgBuffer,Offset offset);
+			Offset GetAbsoluteOffset() const;
 			friend PixelIterator;
 			friend ImageBuffer;
 			ImageBuffer &m_imageBuffer;
@@ -118,6 +119,9 @@ namespace uimg
 		static std::shared_ptr<ImageBuffer> CreateWithCustomDeleter(void *data,uint32_t width,uint32_t height,Format format,const std::function<void(void*)> &customDeleter);
 		static std::shared_ptr<ImageBuffer> Create(const void *data,uint32_t width,uint32_t height,Format format);
 		static std::shared_ptr<ImageBuffer> Create(uint32_t width,uint32_t height,Format format);
+		static std::shared_ptr<ImageBuffer> Create(ImageBuffer &parent,uint32_t x,uint32_t y,uint32_t w,uint32_t h);
+		// Order: Right, left, up, down, forward, backward
+		static std::shared_ptr<ImageBuffer> CreateCubemap(const std::array<std::shared_ptr<ImageBuffer>,6> &cubemapSides);
 		static Size GetPixelSize(Format format);
 		static uint8_t GetChannelSize(Format format);
 		static uint8_t GetChannelCount(Format format);
@@ -150,6 +154,7 @@ namespace uimg
 		void *GetData();
 		std::shared_ptr<ImageBuffer> Copy() const;
 		std::shared_ptr<ImageBuffer> Copy(Format format) const;
+		void Copy(ImageBuffer &dst,uint32_t xSrc,uint32_t ySrc,uint32_t xDst,uint32_t yDst,uint32_t w,uint32_t h) const;
 		void Convert(Format targetFormat);
 		void SwapChannels(Channel channel0,Channel channel1);
 		void ToLDR();
@@ -166,6 +171,7 @@ namespace uimg
 
 		PixelIndex GetPixelIndex(uint32_t x,uint32_t y) const;
 		Offset GetPixelOffset(uint32_t x,uint32_t y) const;
+		Offset GetPixelOffset(PixelIndex index) const;
 
 		void Read(Offset offset,Size size,void *outData);
 		void Write(Offset offset,Size size,const void *inData);
@@ -176,17 +182,33 @@ namespace uimg
 
 		void InitPixelView(uint32_t x,uint32_t y,PixelView &pxView);
 		PixelView GetPixelView(Offset offset=0);
+		PixelView GetPixelView(uint32_t x,uint32_t y);
+
+		void SetPixelColor(uint32_t x,uint32_t y,const std::array<uint8_t,4> &color);
+		void SetPixelColor(PixelIndex index,const std::array<uint8_t,4> &color);
+		void SetPixelColor(uint32_t x,uint32_t y,const std::array<uint16_t,4> &color);
+		void SetPixelColor(PixelIndex index,const std::array<uint16_t,4> &color);
+		void SetPixelColor(uint32_t x,uint32_t y,const Vector4 &color);
+		void SetPixelColor(PixelIndex index,const Vector4 &color);
+
+		ImageBuffer *GetParent();
+		const std::pair<uint64_t,uint64_t> &GetPixelCoordinatesRelativeToParent() const;
+		Offset GetAbsoluteOffset(Offset localOffset) const;
 
 		PixelIterator begin();
 		PixelIterator end();
 	private:
 		static void Convert(ImageBuffer &srcImg,ImageBuffer &dstImg,Format targetFormat);
 		ImageBuffer(const std::shared_ptr<void> &data,uint32_t width,uint32_t height,Format format);
+		std::pair<uint32_t,uint32_t> GetPixelCoordinates(Offset offset) const;
 		void Reallocate();
 		std::shared_ptr<void> m_data = nullptr;
 		uint32_t m_width = 0u;
 		uint32_t m_height = 0u;
 		Format m_format = Format::None;
+
+		std::weak_ptr<ImageBuffer> m_parent = {};
+		std::pair<uint64_t,uint64_t> m_offsetRelToParent = {};
 	};
 
 	DLLUIMG std::optional<ImageBuffer::ToneMapping> string_to_tone_mapping(const std::string &str);

@@ -9,13 +9,16 @@ uimg::ImageBuffer::PixelView::PixelView(ImageBuffer &imgBuffer,Offset offset)
 	: m_imageBuffer{imgBuffer},m_offset{offset}
 {}
 uimg::ImageBuffer::Offset uimg::ImageBuffer::PixelView::GetOffset() const {return m_offset;}
-uimg::ImageBuffer::PixelIndex uimg::ImageBuffer::PixelView::GetPixelIndex() const {return m_imageBuffer.GetPixelIndex(GetX(),GetY());}
+uimg::ImageBuffer::Offset uimg::ImageBuffer::PixelView::GetAbsoluteOffset() const {return m_imageBuffer.GetAbsoluteOffset(m_offset);}
+uimg::ImageBuffer::PixelIndex uimg::ImageBuffer::PixelView::GetPixelIndex() const {return m_offset /m_imageBuffer.GetPixelSize();}
 uint32_t uimg::ImageBuffer::PixelView::GetX() const {return GetPixelIndex() %m_imageBuffer.GetWidth();}
 uint32_t uimg::ImageBuffer::PixelView::GetY() const {return GetPixelIndex() /m_imageBuffer.GetWidth();}
 const void *uimg::ImageBuffer::PixelView::GetPixelData() const {return const_cast<PixelView*>(this)->GetPixelData();}
-void *uimg::ImageBuffer::PixelView::GetPixelData() {return static_cast<uint8_t*>(m_imageBuffer.GetData()) +GetOffset();}
+void *uimg::ImageBuffer::PixelView::GetPixelData() {return static_cast<uint8_t*>(m_imageBuffer.GetData()) +GetAbsoluteOffset();}
 uimg::ImageBuffer::LDRValue uimg::ImageBuffer::PixelView::GetLDRValue(Channel channel) const
 {
+	if(m_imageBuffer.m_width == 0 || m_imageBuffer.m_height == 0)
+		return 0;
 	if(channel == Channel::Alpha && m_imageBuffer.HasAlphaChannel() == false)
 		return std::numeric_limits<LDRValue>::max();
 	auto *data = static_cast<const void*>(static_cast<const uint8_t*>(GetPixelData()) +m_imageBuffer.GetChannelSize() *umath::to_integral(channel));
@@ -36,6 +39,8 @@ uimg::ImageBuffer::LDRValue uimg::ImageBuffer::PixelView::GetLDRValue(Channel ch
 }
 uimg::ImageBuffer::HDRValue uimg::ImageBuffer::PixelView::GetHDRValue(Channel channel) const
 {
+	if(m_imageBuffer.m_width == 0 || m_imageBuffer.m_height == 0)
+		return 0;
 	if(channel == Channel::Alpha && m_imageBuffer.HasAlphaChannel() == false)
 		return umath::float32_to_float16_glm(std::numeric_limits<FloatValue>::max());
 	auto *data = static_cast<const void*>(static_cast<const uint8_t*>(GetPixelData()) +m_imageBuffer.GetChannelSize() *umath::to_integral(channel));
@@ -56,6 +61,8 @@ uimg::ImageBuffer::HDRValue uimg::ImageBuffer::PixelView::GetHDRValue(Channel ch
 }
 uimg::ImageBuffer::FloatValue uimg::ImageBuffer::PixelView::GetFloatValue(Channel channel) const
 {
+	if(m_imageBuffer.m_width == 0 || m_imageBuffer.m_height == 0)
+		return 0;
 	if(channel == Channel::Alpha && m_imageBuffer.HasAlphaChannel() == false)
 		return std::numeric_limits<FloatValue>::max();
 	auto *data = static_cast<const void*>(static_cast<const uint8_t*>(GetPixelData()) +m_imageBuffer.GetChannelSize() *umath::to_integral(channel));
@@ -76,6 +83,8 @@ uimg::ImageBuffer::FloatValue uimg::ImageBuffer::PixelView::GetFloatValue(Channe
 }
 void uimg::ImageBuffer::PixelView::SetValue(Channel channel,LDRValue value)
 {
+	if(m_imageBuffer.m_width == 0 || m_imageBuffer.m_height == 0)
+		return;
 	if(channel == Channel::Alpha && m_imageBuffer.HasAlphaChannel() == false)
 		return;
 	auto *data = static_cast<void*>(static_cast<uint8_t*>(GetPixelData()) +m_imageBuffer.GetChannelSize() *umath::to_integral(channel));

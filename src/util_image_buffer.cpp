@@ -5,9 +5,9 @@
 #include "util_image_buffer.hpp"
 #include <mathutil/color.h>
 #include <mathutil/umath.h>
+#include <thread>
 #include <stdexcept>
 
-#pragma optimize("",off)
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(const void *data,uint32_t width,uint32_t height,Format format)
 {
 	return Create(const_cast<void*>(data),width,height,format,false);
@@ -35,6 +35,57 @@ std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(uint32_t width,uint
 	auto buf = std::shared_ptr<ImageBuffer>{new ImageBuffer{nullptr,width,height,format}};
 	buf->Reallocate();
 	return buf;
+}
+std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(ImageBuffer &parent,uint32_t x,uint32_t y,uint32_t w,uint32_t h)
+{
+	auto xMax = parent.GetWidth();
+	auto yMax = parent.GetHeight();
+	x = umath::min(x,xMax);
+	y = umath::min(y,yMax);
+	w = umath::min(x +w,xMax) -x;
+	h = umath::min(y +h,yMax) -y;
+
+	auto buf = std::shared_ptr<ImageBuffer>{new ImageBuffer{nullptr,w,h,parent.GetFormat()}};
+	buf->m_offsetRelToParent = {x,y};
+	buf->m_parent = parent.shared_from_this();
+	buf->m_data = parent.m_data;
+	return buf;
+}
+std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::CreateCubemap(const std::array<std::shared_ptr<ImageBuffer>,6> &cubemapSides)
+{
+	auto &img0 = cubemapSides.front();
+	auto w = img0->GetWidth();
+	auto h = img0->GetHeight();
+	auto format = img0->GetFormat();
+	for(auto &img : cubemapSides)
+	{
+		// Make sure all sides have the same format
+		if(img->GetWidth() != w || img->GetHeight() != h || img->GetFormat() != format)
+			return nullptr;
+	}
+	auto cubemap = Create(w *4,h *3,format);
+	cubemap->Clear(Vector4{0.f,0.f,0.f,0.f});
+
+	std::array<std::pair<uint32_t,uint32_t>,6> pxOffsetCoords = {
+		std::pair<uint32_t,uint32_t>{w *2,h}, // Right
+		std::pair<uint32_t,uint32_t>{0,h}, // Left
+		std::pair<uint32_t,uint32_t>{w,0}, // Top
+		std::pair<uint32_t,uint32_t>{w,h *2}, // Bottom
+		std::pair<uint32_t,uint32_t>{w,h}, // Front
+		std::pair<uint32_t,uint32_t>{w *3,h} // Back
+	};
+	std::array<std::thread,6> threads {};
+	for(auto i=decltype(pxOffsetCoords.size()){0u};i<pxOffsetCoords.size();++i)
+	{
+		auto coords = pxOffsetCoords.at(i);
+		auto imgSide = cubemapSides.at(i);
+		threads.at(i) = std::thread{[i,coords,cubemap,&cubemapSides,w,h]() {
+			cubemapSides.at(i)->Copy(*cubemap,0,0,coords.first,coords.second,w,h);
+		}};
+	}
+	for(auto &t : threads)
+		t.join();
+	return cubemap;
 }
 uimg::ImageBuffer::LDRValue uimg::ImageBuffer::ToLDRValue(HDRValue value)
 {
@@ -188,9 +239,41 @@ void uimg::ImageBuffer::InitPixelView(uint32_t x,uint32_t y,PixelView &pxView)
 {
 	pxView.m_offset = GetPixelOffset(x,y);
 }
-uimg::ImageBuffer::PixelView uimg::ImageBuffer::GetPixelView(Offset offset)
+uimg::ImageBuffer::PixelView uimg::ImageBuffer::GetPixelView(Offset offset) {return PixelView{*this,offset};}
+uimg::ImageBuffer::PixelView uimg::ImageBuffer::GetPixelView(uint32_t x,uint32_t y) {return GetPixelView(GetPixelOffset(x,y));}
+void uimg::ImageBuffer::SetPixelColor(uint32_t x,uint32_t y,const std::array<uint8_t,4> &color) {SetPixelColor(GetPixelIndex(x,y),color);}
+void uimg::ImageBuffer::SetPixelColor(PixelIndex index,const std::array<uint8_t,4> &color)
 {
-	return PixelView{*this,offset};
+	auto pxView = GetPixelView(GetPixelOffset(index));
+	for(uint8_t i=0;i<4;++i)
+		pxView.SetValue(static_cast<uimg::ImageBuffer::Channel>(i),color.at(i));
+}
+void uimg::ImageBuffer::SetPixelColor(uint32_t x,uint32_t y,const std::array<uint16_t,4> &color) {SetPixelColor(GetPixelIndex(x,y),color);}
+void uimg::ImageBuffer::SetPixelColor(PixelIndex index,const std::array<uint16_t,4> &color)
+{
+	auto pxView = GetPixelView(GetPixelOffset(index));
+	for(uint8_t i=0;i<4;++i)
+		pxView.SetValue(static_cast<uimg::ImageBuffer::Channel>(i),color.at(i));
+}
+void uimg::ImageBuffer::SetPixelColor(uint32_t x,uint32_t y,const Vector4 &color) {SetPixelColor(GetPixelIndex(x,y),color);}
+void uimg::ImageBuffer::SetPixelColor(PixelIndex index,const Vector4 &color)
+{
+	auto pxView = GetPixelView(GetPixelOffset(index));
+	for(uint8_t i=0;i<4;++i)
+		pxView.SetValue(static_cast<uimg::ImageBuffer::Channel>(i),color[i]);
+}
+
+uimg::ImageBuffer *uimg::ImageBuffer::GetParent() {return (m_parent.expired() == false) ? m_parent.lock().get() : nullptr;}
+const std::pair<uint64_t,uint64_t> &uimg::ImageBuffer::GetPixelCoordinatesRelativeToParent() const {return m_offsetRelToParent;}
+uimg::ImageBuffer::Offset uimg::ImageBuffer::GetAbsoluteOffset(Offset localOffset) const
+{
+	if(m_parent.expired())
+		return localOffset;
+	auto parent = m_parent.lock();
+	auto pxCoords = GetPixelCoordinates(localOffset);
+	pxCoords.first += m_offsetRelToParent.first;
+	pxCoords.second += m_offsetRelToParent.second;
+	return parent->GetAbsoluteOffset(parent->GetPixelOffset(pxCoords.first,pxCoords.second));
 }
 uint8_t uimg::ImageBuffer::GetChannelCount(Format format)
 {
@@ -232,6 +315,13 @@ uimg::ImageBuffer::Size uimg::ImageBuffer::GetPixelSize(Format format)
 uimg::ImageBuffer::ImageBuffer(const std::shared_ptr<void> &data,uint32_t width,uint32_t height,Format format)
 	: m_data{data},m_width{width},m_height{height},m_format{format}
 {}
+std::pair<uint32_t,uint32_t> uimg::ImageBuffer::GetPixelCoordinates(Offset offset) const
+{
+	offset /= GetPixelSize();
+	auto x = offset %GetWidth();
+	auto y = offset /GetWidth();
+	return {x,y};
+}
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Copy() const
 {
 	return uimg::ImageBuffer::Create(m_data.get(),m_width,m_height,m_format,false);
@@ -242,6 +332,16 @@ std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Copy(Format format) const
 	auto cpy = uimg::ImageBuffer::Create(nullptr,m_width,m_height,m_format,true);
 	Convert(const_cast<ImageBuffer&>(*this),*cpy,format);
 	return cpy;
+}
+void uimg::ImageBuffer::Copy(ImageBuffer &dst,uint32_t xSrc,uint32_t ySrc,uint32_t xDst,uint32_t yDst,uint32_t w,uint32_t h) const
+{
+	auto imgViewSrc = Create(const_cast<ImageBuffer&>(*this),xSrc,ySrc,w,h);
+	auto imgViewDst = Create(dst,xDst,yDst,w,h);
+	for(auto &px : *imgViewSrc)
+	{
+		auto pxDst = imgViewDst->GetPixelView(px.GetX(),px.GetY());
+		pxDst.CopyValues(px);
+	}
 }
 uimg::ImageBuffer::Format uimg::ImageBuffer::GetFormat() const {return m_format;}
 uint32_t uimg::ImageBuffer::GetWidth() const {return m_width;}
@@ -282,7 +382,8 @@ bool uimg::ImageBuffer::IsFloatFormat() const
 uint8_t uimg::ImageBuffer::GetChannelCount() const {return GetChannelCount(GetFormat());}
 uint8_t uimg::ImageBuffer::GetChannelSize() const {return GetChannelSize(GetFormat());}
 uimg::ImageBuffer::PixelIndex uimg::ImageBuffer::GetPixelIndex(uint32_t x,uint32_t y) const {return y *GetWidth() +x;}
-uimg::ImageBuffer::Offset uimg::ImageBuffer::GetPixelOffset(uint32_t x,uint32_t y) const {return GetPixelIndex(x,y) *GetPixelSize();}
+uimg::ImageBuffer::Offset uimg::ImageBuffer::GetPixelOffset(uint32_t x,uint32_t y) const {return GetPixelOffset(GetPixelIndex(x,y));}
+uimg::ImageBuffer::Offset uimg::ImageBuffer::GetPixelOffset(PixelIndex index) const {return index *GetPixelSize();}
 const void *uimg::ImageBuffer::GetData() const {return const_cast<ImageBuffer*>(this)->GetData();}
 void *uimg::ImageBuffer::GetData() {return m_data.get();}
 void uimg::ImageBuffer::Reallocate()
@@ -455,4 +556,3 @@ void uimg::ImageBuffer::Resize(Size width,Size height)
 	// TODO
 	throw std::runtime_error{"Resizing images not yet implemented!"};
 }
-#pragma optimize("",on)
