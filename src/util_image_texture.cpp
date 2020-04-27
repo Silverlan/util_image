@@ -10,6 +10,7 @@
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
 
+#pragma optimize("",off)
 static nvtt::Format to_nvtt_enum(uimg::TextureInfo::OutputFormat format)
 {
 	switch(format)
@@ -341,7 +342,7 @@ bool uimg::save_texture(
 		break;
 	}
 
-	if(umath::is_flag_set(texInfo.flags,uimg::TextureInfo::Flags::NormalMap))
+	if(texInfo.IsNormalMap())
 	{
 		inputOptions.setNormalMap(true);
 		inputOptions.setConvertToNormalMap(false);
@@ -399,3 +400,4 @@ bool uimg::save_texture(
 	},width,height,sizePerPixel,numLayers,numMipmaps,cubemap,texInfo,errorHandler);
 }
 #endif
+#pragma optimize("",on)

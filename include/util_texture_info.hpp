@@ -58,9 +58,9 @@ namespace uimg
 			ColorMap1BitAlpha = DXT1a,
 			ColorMapSharpAlpha = DXT3,
 			ColorMapSmoothAlpha = DXT5,
-			NormalMap = DXT5, // TODO: BC5 might be a better choice, but is not supported by cycles! DXT5n may also be a better choice but has some strange rules associated.
+			NormalMap = DXT5, // TODO: BC5 might be a better choice, but is currently not supported by cycles/oiio! DXT5n may also be a better choice but has some strange rules associated.
 			HDRColorMap = BC6,
-			GradientMap = BC1 // TODO: Is this a good idea?
+			GradientMap = BC4
 		};
 		enum class ContainerFormat : uint8_t
 		{
@@ -72,8 +72,7 @@ namespace uimg
 		enum class Flags : uint32_t
 		{
 			None = 0u,
-			NormalMap = 1u,
-			ConvertToNormalMap = NormalMap<<1u,
+			ConvertToNormalMap = 1u,
 			SRGB = ConvertToNormalMap<<1u,
 			GenerateMipmaps = SRGB<<1u
 		};
@@ -103,10 +102,13 @@ namespace uimg
 		AlphaMode alphaMode = AlphaMode::Auto;
 		void SetNormalMap()
 		{
-			flags = static_cast<Flags>(umath::to_integral(flags) | umath::to_integral(Flags::NormalMap));
-			outputFormat = OutputFormat::BC5;
+			m_normalMap = true;
+			outputFormat = OutputFormat::NormalMap;
 			mipMapFilter = MipmapFilter::Kaiser;
 		}
+		bool IsNormalMap() const {return m_normalMap;}
+	private:
+		bool m_normalMap = false;
 	};
 	DLLUIMG std::string get_absolute_path(const std::string &fileName,uimg::TextureInfo::ContainerFormat containerFormat);
 };

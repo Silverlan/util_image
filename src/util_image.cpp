@@ -145,7 +145,7 @@ bool uimg::save_image(std::shared_ptr<VFilePtrInternalReal> f,::uimg::ImageBuffe
 	auto *fptr = f.get();
 
 	auto imgFormat = imgBuffer.GetFormat();
-	imgFormat = ::uimg::ImageBuffer::ToRGBFormat(imgFormat);
+	// imgFormat = ::uimg::ImageBuffer::ToRGBFormat(imgFormat);
 	if(format != ImageFormat::HDR)
 		imgFormat = ::uimg::ImageBuffer::ToLDRFormat(imgFormat);
 	else
