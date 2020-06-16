@@ -7,7 +7,7 @@
 #include <mathutil/umath.h>
 #include <thread>
 #include <stdexcept>
-
+#pragma optimize("",off)
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(const void *data,uint32_t width,uint32_t height,Format format)
 {
 	return Create(const_cast<void*>(data),width,height,format,false);
@@ -274,6 +274,44 @@ uimg::ImageBuffer::Offset uimg::ImageBuffer::GetAbsoluteOffset(Offset localOffse
 	pxCoords.first += m_offsetRelToParent.first;
 	pxCoords.second += m_offsetRelToParent.second;
 	return parent->GetAbsoluteOffset(parent->GetPixelOffset(pxCoords.first,pxCoords.second));
+}
+float uimg::calc_luminance(const Vector3 &color)
+{
+	return 0.212671 *color.r +0.71516 *color.g +0.072169 *color.b;
+}
+void uimg::ImageBuffer::CalcLuminance(float &outAvgLuminance,float &outMinLuminance,float &outMaxLuminance,Vector3 &outAvgIntensity,float *optOutLogAvgLuminance) const
+{
+	float delta = 1e-4f;
+	outAvgLuminance = 0.f;
+	if(optOutLogAvgLuminance)
+		*optOutLogAvgLuminance = 0.f;
+	outMinLuminance = std::numeric_limits<float>::max();
+	outMaxLuminance = std::numeric_limits<float>::lowest();
+	outAvgIntensity = Vector3{};
+
+	for(auto &pxView : const_cast<ImageBuffer&>(*this))
+	{
+		Vector3 col {
+			pxView.GetFloatValue(Channel::Red),
+			pxView.GetFloatValue(Channel::Green),
+			pxView.GetFloatValue(Channel::Blue)
+		};
+		outAvgIntensity += col;
+		auto lum = calc_luminance(col);
+		outAvgLuminance += lum;
+		if(optOutLogAvgLuminance)
+			*optOutLogAvgLuminance += std::log(delta +lum);
+		if(lum > outMaxLuminance)
+			outMaxLuminance = lum;
+		if(lum < outMinLuminance)
+			outMinLuminance = lum;
+	}
+
+	auto numPixels = static_cast<float>(GetPixelCount());
+	outAvgIntensity = outAvgIntensity /numPixels;
+	outAvgLuminance = outAvgLuminance /numPixels;
+	if(optOutLogAvgLuminance)
+		*optOutLogAvgLuminance = std::exp(*optOutLogAvgLuminance /numPixels);
 }
 uint8_t uimg::ImageBuffer::GetChannelCount(Format format)
 {
@@ -556,3 +594,4 @@ void uimg::ImageBuffer::Resize(Size width,Size height)
 	// TODO
 	throw std::runtime_error{"Resizing images not yet implemented!"};
 }
+#pragma optimize("",on)

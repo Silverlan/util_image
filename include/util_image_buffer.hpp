@@ -16,6 +16,7 @@
 struct Color;
 namespace uimg
 {
+	DLLUIMG float calc_luminance(const Vector3 &color);
 	class DLLUIMG ImageBuffer
 		: public std::enable_shared_from_this<ImageBuffer>
 	{
@@ -194,6 +195,8 @@ namespace uimg
 		ImageBuffer *GetParent();
 		const std::pair<uint64_t,uint64_t> &GetPixelCoordinatesRelativeToParent() const;
 		Offset GetAbsoluteOffset(Offset localOffset) const;
+
+		void CalcLuminance(float &outAvgLuminance,float &outMinLuminance,float &outMaxLuminance,Vector3 &outAvgIntensity,float *optOutLogAvgLuminance=nullptr) const;
 
 		PixelIterator begin();
 		PixelIterator end();
