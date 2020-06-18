@@ -378,9 +378,16 @@ bool uimg::save_texture(
 {
 	constexpr auto numLayers = 1u;
 	constexpr auto numMipmaps = 1u;
-	return save_texture(fileName,[&imgBuffer](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
+
+	auto swapRedBlue = (texInfo.inputFormat == uimg::TextureInfo::InputFormat::R8G8B8A8_UInt);
+	if(swapRedBlue)
+		imgBuffer.SwapChannels(uimg::ImageBuffer::Channel::Red,uimg::ImageBuffer::Channel::Blue);
+	auto success = save_texture(fileName,[&imgBuffer](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
 		return static_cast<uint8_t*>(imgBuffer.GetData());
 	},imgBuffer.GetWidth(),imgBuffer.GetHeight(),imgBuffer.GetPixelSize(),numLayers,numMipmaps,cubemap,texInfo,errorHandler);
+	if(swapRedBlue)
+		imgBuffer.SwapChannels(uimg::ImageBuffer::Channel::Red,uimg::ImageBuffer::Channel::Blue);
+	return success;
 }
 
 bool uimg::save_texture(
