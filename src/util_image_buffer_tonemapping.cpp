@@ -117,6 +117,39 @@ static std::array<uint8_t,3> to_ldr_color(const Vector3 &col)
 	};
 }
 
+void uimg::ImageBuffer::ApplyExposure(float exposure)
+{
+	if(exposure == 0.f)
+		return;
+	auto powExposure = std::powf(2.f,exposure);
+	auto numChannels = umath::min(GetChannelCount(),static_cast<uint8_t>(3));
+	for(auto &pxView : *this)
+	{
+		for(auto i=decltype(numChannels){0u};i<numChannels;++i)
+		{
+			auto val = pxView.GetFloatValue(static_cast<uimg::ImageBuffer::Channel>(i));
+			val *= powExposure;
+			pxView.SetValue(static_cast<uimg::ImageBuffer::Channel>(i),val);
+		}
+	}
+}
+
+void uimg::ImageBuffer::ApplyGammaCorrection(float gamma)
+{
+	if(gamma == 1.f)
+		return;
+	auto INV_GAMMA = 1.0 /gamma;
+	auto numChannels = umath::min(GetChannelCount(),static_cast<uint8_t>(3));
+	for(auto &pxView : *this)
+	{
+		for(auto i=decltype(numChannels){0u};i<numChannels;++i)
+		{
+			auto channel = static_cast<uimg::ImageBuffer::Channel>(i);
+			pxView.SetValue(channel,static_cast<float>(glm::pow(pxView.GetFloatValue(channel),INV_GAMMA)));
+		}
+	}
+}
+
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::ApplyToneMapping(ToneMapping toneMappingMethod)
 {
 	std::function<std::array<uint8_t,3>(const Vector3&)> fToneMapper = nullptr;
