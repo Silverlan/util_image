@@ -3,6 +3,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "util_image_buffer.hpp"
+#include <sharedutils/util.h>
 #include <mathutil/color.h>
 #include <mathutil/umath.h>
 #include <thread>
@@ -201,39 +202,103 @@ uimg::ImageBuffer::Format uimg::ImageBuffer::ToRGBAFormat(Format format)
 	static_assert(umath::to_integral(Format::Count) == 7u);
 	return Format::None;
 }
+size_t uimg::ImageBuffer::GetRowStride() const {return GetPixelSize() *GetWidth();}
+size_t uimg::ImageBuffer::GetPixelStride() const {return GetPixelSize();}
 void uimg::ImageBuffer::FlipHorizontally()
 {
-	auto imgFlipped = Copy();
-	auto srcPxView = imgFlipped->GetPixelView();
-	auto dstPxView = GetPixelView();
 	auto w = GetWidth();
 	auto h = GetHeight();
-	for(auto x=decltype(w){0u};x<w;++x)
+	auto rowStride = GetRowStride();
+	auto *p = static_cast<uint8_t*>(GetData());
+	for(auto y=decltype(h){0u};y<h;++y)
 	{
-		for(auto y=decltype(h){0};y<h;++y)
-		{
-			imgFlipped->InitPixelView(w -x -1,y,srcPxView);
-			InitPixelView(x,y,dstPxView);
-			dstPxView.CopyValues(srcPxView);
-		}
+		util::flip_item_sequence(p,w *3,w,3);
+		p += rowStride;
 	}
 }
 void uimg::ImageBuffer::FlipVertically()
 {
-	auto imgFlipped = Copy();
-	auto srcPxView = imgFlipped->GetPixelView();
-	auto dstPxView = GetPixelView();
 	auto w = GetWidth();
 	auto h = GetHeight();
-	for(auto x=decltype(w){0u};x<w;++x)
+	util::flip_item_sequence(GetData(),w *h *3,h,GetRowStride());
+}
+void uimg::ImageBuffer::Flip(bool horizontally,bool vertically)
+{
+	if(horizontally && vertically)
 	{
-		for(auto y=decltype(h){0};y<h;++y)
+		// Optimized algorithm for flipping both axes at once
+		auto w = GetWidth();
+		auto h = GetHeight();
+		auto rowStride = GetRowStride();
+		auto pxStride = GetPixelStride();
+		auto *sequence = GetData();
+		auto *tmp = new uint8_t[rowStride];
+		auto *row0 = static_cast<uint8_t*>(sequence);
+		auto *row1 = row0 +GetSize() -rowStride;
+		for(auto y=decltype(h){0u};y<h /2;++y)
 		{
-			imgFlipped->InitPixelView(x,h -y -1,srcPxView);
-			InitPixelView(x,y,dstPxView);
-			dstPxView.CopyValues(srcPxView);
+			memcpy(tmp,row1,rowStride);
+			memcpy(row1,row0,rowStride);
+			memcpy(row0,tmp,rowStride);
+
+			// Flip both rows horizontally
+			for(auto *rowStart : {row0,row1})
+			{
+				auto *px0 = rowStart;
+				auto *px1 = rowStart +rowStride -pxStride;
+				for(auto x=decltype(w){0u};x<w /2;++x)
+				{
+					memcpy(tmp,px1,pxStride);
+					memcpy(px1,px0,pxStride);
+					memcpy(px0,tmp,pxStride);
+
+					px0 += pxStride;
+					px1 -= pxStride;
+				}
+			}
+
+			row0 += rowStride;
+			row1 -= rowStride;
 		}
+		if((h %2) != 0)
+		{
+			// Uneven height; We still have to flip the center row horizontally
+			auto *p = static_cast<uint8_t*>(sequence) +(h /2) *GetRowStride();
+			util::flip_item_sequence(p,GetRowStride(),GetWidth(),GetPixelStride());
+		}
+		delete[] tmp;
+		return;
 	}
+	if(horizontally)
+		FlipHorizontally();
+	if(vertically)
+		FlipVertically();
+}
+void uimg::ImageBuffer::Crop(uint32_t x,uint32_t y,uint32_t w,uint32_t h,void *optOutCroppedData)
+{
+	std::shared_ptr<void> newData = nullptr;
+	void *newDataPtr = optOutCroppedData;
+	if(optOutCroppedData == nullptr)
+	{
+		newData = std::shared_ptr<void>{new uint8_t[w *h *GetPixelStride()],[](const void *ptr) {
+			delete[] static_cast<const uint8_t*>(ptr);
+		}};
+		newDataPtr = newData.get();
+	}
+	auto *srcData = static_cast<uint8_t*>(GetData());
+	auto *dstData = static_cast<uint8_t*>(newDataPtr);
+	auto srcRowStride = GetRowStride();
+	auto dstRowStride = w *GetPixelStride();
+	for(auto yc=y;yc<(y +h);++yc)
+	{
+		memmove(dstData,srcData,dstRowStride);
+		srcData += srcRowStride;
+		dstData += dstRowStride;
+	}
+	if(newData)
+		m_data = newData;
+	m_width = w;
+	m_height = h;
 }
 void uimg::ImageBuffer::InitPixelView(uint32_t x,uint32_t y,PixelView &pxView)
 {

@@ -180,8 +180,12 @@ namespace uimg
 		void Write(Offset offset,Size size,const void *inData);
 		void Resize(Size width,Size height);
 
+		size_t GetRowStride() const;
+		size_t GetPixelStride() const;
 		void FlipHorizontally();
 		void FlipVertically();
+		void Flip(bool horizontally,bool vertically);
+		void Crop(uint32_t x,uint32_t y,uint32_t w,uint32_t h,void *optOutCroppedData=nullptr);
 
 		void InitPixelView(uint32_t x,uint32_t y,PixelView &pxView);
 		PixelView GetPixelView(Offset offset=0);
