@@ -209,10 +209,11 @@ void uimg::ImageBuffer::FlipHorizontally()
 	auto w = GetWidth();
 	auto h = GetHeight();
 	auto rowStride = GetRowStride();
+	auto pxStride = GetPixelStride();
 	auto *p = static_cast<uint8_t*>(GetData());
 	for(auto y=decltype(h){0u};y<h;++y)
 	{
-		util::flip_item_sequence(p,w *3,w,3);
+		util::flip_item_sequence(p,w *pxStride,w,pxStride);
 		p += rowStride;
 	}
 }
@@ -220,7 +221,7 @@ void uimg::ImageBuffer::FlipVertically()
 {
 	auto w = GetWidth();
 	auto h = GetHeight();
-	util::flip_item_sequence(GetData(),w *h *3,h,GetRowStride());
+	util::flip_item_sequence(GetData(),w *h *GetPixelStride(),h,GetRowStride());
 }
 void uimg::ImageBuffer::Flip(bool horizontally,bool vertically)
 {
@@ -627,14 +628,14 @@ void uimg::ImageBuffer::ClearAlpha(LDRValue alpha)
 	}
 	if(IsHDRFormat())
 	{
-		auto value = ToHDRValue((alpha /static_cast<float>(std::numeric_limits<LDRValue>::max())) *std::numeric_limits<float>::max());
+		auto value = ToHDRValue((alpha /static_cast<float>(std::numeric_limits<LDRValue>::max())));// *std::numeric_limits<float>::max());
 		for(auto &px : *this)
 			px.SetValue(Channel::Alpha,value);
 		return;
 	}
 	if(IsFloatFormat())
 	{
-		auto value = (alpha /static_cast<float>(std::numeric_limits<LDRValue>::max())) *std::numeric_limits<float>::max();
+		auto value = (alpha /static_cast<float>(std::numeric_limits<LDRValue>::max()));// *std::numeric_limits<float>::max();
 		for(auto &px : *this)
 			px.SetValue(Channel::Alpha,value);
 		return;

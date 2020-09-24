@@ -21,6 +21,8 @@ namespace uimg
 		: public std::enable_shared_from_this<ImageBuffer>
 	{
 	public:
+		static constexpr uint8_t FULLY_TRANSPARENT = 0u;
+		static constexpr uint8_t FULLY_OPAQUE = std::numeric_limits<uint8_t>::max();
 		enum class Format : uint8_t
 		{
 			None = 0u,
