@@ -45,15 +45,16 @@ namespace uimg
 	DLLUIMG bool save_texture(
 		const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
 		uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
-		const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler=nullptr
+		const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler=nullptr,
+		bool absoluteFileName=false
 	);
 	DLLUIMG bool save_texture(std::shared_ptr<VFilePtrInternalReal> f,ImageBuffer &imgBuffer,const TextureInfo &texInfo);
 	DLLUIMG bool save_texture(
-		const std::string &fileName,uimg::ImageBuffer &imgBuffer,const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler=nullptr
+		const std::string &fileName,uimg::ImageBuffer &imgBuffer,const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler=nullptr,bool absoluteFileName=false
 	);
 	DLLUIMG bool save_texture(
 		const std::string &fileName,const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,uint32_t sizePerPixel,
-		const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler=nullptr
+		const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler=nullptr,bool absoluteFileName=false
 	);
 #endif
 	DLLUIMG std::optional<ImageFormat> string_to_image_output_format(const std::string &str);

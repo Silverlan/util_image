@@ -229,7 +229,7 @@ static nvtt::InputFormat get_nvtt_format(uimg::TextureInfo::InputFormat format)
 bool uimg::save_texture(
 	const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
 	uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
-	const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler
+	const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
 )
 {
 	auto size = width *height *szPerPixel;
@@ -314,7 +314,7 @@ bool uimg::save_texture(
 	outputOptions.setContainer(to_nvtt_enum(texInfo.containerFormat,texInfo.outputFormat));
 	outputOptions.setSrgbFlag(umath::is_flag_set(texInfo.flags,uimg::TextureInfo::Flags::SRGB));
 	//outputOptions.setOutputHandler(&outputHandler); // Does not seem to work? TODO: FIXME
-	outputOptions.setFileName(get_absolute_path(fileName,texInfo.containerFormat).c_str());
+	outputOptions.setFileName(absoluteFileName ? fileName.c_str() : get_absolute_path(fileName,texInfo.containerFormat).c_str());
 	outputOptions.setErrorHandler(&errHandler);
 
 	auto nvttOutputFormat = to_nvtt_enum(texInfo.outputFormat);
@@ -373,7 +373,7 @@ bool uimg::save_texture(
 }
 
 bool uimg::save_texture(
-	const std::string &fileName,uimg::ImageBuffer &imgBuffer,const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler
+	const std::string &fileName,uimg::ImageBuffer &imgBuffer,const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
 )
 {
 	constexpr auto numLayers = 1u;
@@ -384,7 +384,7 @@ bool uimg::save_texture(
 		imgBuffer.SwapChannels(uimg::ImageBuffer::Channel::Red,uimg::ImageBuffer::Channel::Blue);
 	auto success = save_texture(fileName,[&imgBuffer](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
 		return static_cast<uint8_t*>(imgBuffer.GetData());
-	},imgBuffer.GetWidth(),imgBuffer.GetHeight(),imgBuffer.GetPixelSize(),numLayers,numMipmaps,cubemap,texInfo,errorHandler);
+	},imgBuffer.GetWidth(),imgBuffer.GetHeight(),imgBuffer.GetPixelSize(),numLayers,numMipmaps,cubemap,texInfo,errorHandler,absoluteFileName);
 	if(swapRedBlue)
 		imgBuffer.SwapChannels(uimg::ImageBuffer::Channel::Red,uimg::ImageBuffer::Channel::Blue);
 	return success;
@@ -392,7 +392,7 @@ bool uimg::save_texture(
 
 bool uimg::save_texture(
 	const std::string &fileName,const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,uint32_t sizePerPixel,
-	const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler
+	const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
 )
 {
 	auto numLayers = imgLayerMipmapData.size();
@@ -404,7 +404,7 @@ bool uimg::save_texture(
 		if(iMipmap >= mipmapData.size())
 			return nullptr;
 		return static_cast<const uint8_t*>(mipmapData.at(iMipmap));
-	},width,height,sizePerPixel,numLayers,numMipmaps,cubemap,texInfo,errorHandler);
+	},width,height,sizePerPixel,numLayers,numMipmaps,cubemap,texInfo,errorHandler,absoluteFileName);
 }
 #endif
 #pragma optimize("",on)
