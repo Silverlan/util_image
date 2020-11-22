@@ -3,6 +3,8 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "util_image_buffer.hpp"
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include "stb_image_resize.h"
 #include <sharedutils/util.h>
 #include <mathutil/color.h>
 #include <mathutil/umath.h>
@@ -655,9 +657,81 @@ void uimg::ImageBuffer::Write(Offset offset,Size size,const void *inData)
 	auto *dstPtr = static_cast<uint8_t*>(m_data.get()) +offset;
 	memcpy(dstPtr,inData,size);
 }
-void uimg::ImageBuffer::Resize(Size width,Size height)
+void uimg::ImageBuffer::Resize(Size width,Size height,EdgeAddressMode addressMode,Filter filter,ColorSpace colorSpace)
 {
-	// TODO
-	throw std::runtime_error{"Resizing images not yet implemented!"};
+	if(width == m_width && height == m_height)
+		return;
+	auto imgResized = Create(width,height,GetFormat());
+	stbir_datatype stformat;
+	if(IsLDRFormat()) stformat = stbir_datatype::STBIR_TYPE_UINT8;
+	else if(IsHDRFormat()) stformat = stbir_datatype::STBIR_TYPE_UINT16;
+	else if(IsFloatFormat()) stformat = stbir_datatype::STBIR_TYPE_FLOAT;
+	else return;
+
+	stbir_edge stedge;
+	switch(addressMode)
+	{
+	case EdgeAddressMode::Clamp:
+		stedge = stbir_edge::STBIR_EDGE_CLAMP;
+		break;
+	case EdgeAddressMode::Reflect:
+		stedge = stbir_edge::STBIR_EDGE_REFLECT;
+		break;
+	case EdgeAddressMode::Wrap:
+		stedge = stbir_edge::STBIR_EDGE_WRAP;
+		break;
+	case EdgeAddressMode::Zero:
+		stedge = stbir_edge::STBIR_EDGE_ZERO;
+		break;
+	}
+	static_assert(umath::to_integral(EdgeAddressMode::Count) == 4);
+
+	stbir_filter stfilter;
+	switch(filter)
+	{
+	case Filter::Default:
+		stfilter = stbir_filter::STBIR_FILTER_DEFAULT;
+		break;
+	case Filter::Box:
+		stfilter = stbir_filter::STBIR_FILTER_BOX;
+		break;
+	case Filter::Triangle:
+		stfilter = stbir_filter::STBIR_FILTER_TRIANGLE;
+		break;
+	case Filter::CubicBSpline:
+		stfilter = stbir_filter::STBIR_FILTER_CUBICBSPLINE;
+		break;
+	case Filter::CatmullRom:
+		stfilter = stbir_filter::STBIR_FILTER_CATMULLROM;
+		break;
+	case Filter::Mitchell:
+		stfilter = stbir_filter::STBIR_FILTER_MITCHELL;
+		break;
+	}
+	static_assert(umath::to_integral(Filter::Count) == 6);
+
+	stbir_colorspace stColorspace;
+	switch(colorSpace)
+	{
+	case ColorSpace::Auto:
+		stColorspace = !IsLDRFormat() ? stbir_colorspace::STBIR_COLORSPACE_LINEAR : stbir_colorspace::STBIR_COLORSPACE_SRGB;
+		break;
+	case ColorSpace::Linear:
+		stColorspace = stbir_colorspace::STBIR_COLORSPACE_LINEAR;
+		break;
+	case ColorSpace::SRGB:
+		stColorspace = stbir_colorspace::STBIR_COLORSPACE_SRGB;
+		break;
+	}
+	static_assert(umath::to_integral(ColorSpace::Count) == 3);
+
+	auto res = stbir_resize(
+		static_cast<uint8_t*>(GetData()),GetWidth(),GetHeight(),0 /* stride */,
+		static_cast<uint8_t*>(imgResized->GetData()),imgResized->GetWidth(),imgResized->GetHeight(),0 /* stride */,
+		stformat,GetChannelCount(),HasAlphaChannel() ? umath::to_integral(Channel::Alpha) : STBIR_ALPHA_CHANNEL_NONE,0 /* flags */,stedge,stedge,stfilter,stfilter,stColorspace,nullptr
+	);
+	if(res == 0)
+		return;
+	*this = *imgResized;
 }
 #pragma optimize("",on)

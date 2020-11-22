@@ -232,6 +232,7 @@ bool uimg::save_texture(
 	const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
 )
 {
+	numMipmaps = umath::max(numMipmaps,static_cast<uint32_t>(1));
 	auto size = width *height *szPerPixel;
 
 	auto nvttFormat = get_nvtt_format(texInfo.inputFormat);

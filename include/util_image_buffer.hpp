@@ -64,6 +64,34 @@ namespace uimg
 			Aces,
 			GranTurismo
 		};
+		enum class EdgeAddressMode : uint8_t
+		{
+			Clamp = 0,
+			Reflect,
+			Wrap,
+			Zero,
+
+			Count
+		};
+		enum class Filter : uint8_t
+		{
+			Default = 0,
+			Box,
+			Triangle,
+			CubicBSpline,
+			CatmullRom,
+			Mitchell,
+
+			Count
+		};
+		enum class ColorSpace : uint8_t
+		{
+			Auto = 0,
+			Linear,
+			SRGB,
+
+			Count
+		};
 		using Offset = size_t;
 		using Size = size_t;
 		using PixelIndex = uint32_t;
@@ -180,7 +208,7 @@ namespace uimg
 
 		void Read(Offset offset,Size size,void *outData);
 		void Write(Offset offset,Size size,const void *inData);
-		void Resize(Size width,Size height);
+		void Resize(Size width,Size height,EdgeAddressMode addressMode=EdgeAddressMode::Clamp,Filter filter=Filter::Default,ColorSpace colorSpace=ColorSpace::Auto);
 
 		size_t GetRowStride() const;
 		size_t GetPixelStride() const;
