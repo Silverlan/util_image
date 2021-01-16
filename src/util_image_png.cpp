@@ -355,7 +355,7 @@ std::shared_ptr<uimg::ImageBuffer> uimg::impl::load_png_image(std::shared_ptr<VF
 	unsigned long width,height;
 	if(pngImg.readpng_init(file,&width,&height) != 0)
 		return nullptr;
-	ScopeGuard sg([&pngImg]() {
+	util::ScopeGuard sg([&pngImg]() {
 		pngImg.readpng_cleanup(true);
 		});
 	switch(pngImg.color_type)
