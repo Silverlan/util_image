@@ -8,6 +8,7 @@
 #include "util_texture_info.hpp"
 #include <nvtt/nvtt.h>
 #include <fsys/filesystem.h>
+#include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
 
 #pragma optimize("",off)
@@ -190,7 +191,7 @@ std::string uimg::get_absolute_path(const std::string &fileName,uimg::TextureInf
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
 	auto fileNameWithExt = fileName;
-	ufile::remove_extension_from_filename(fileNameWithExt);
+	ufile::remove_extension_from_filename(fileNameWithExt,std::array<std::string,2>{"dds","ktx"});
 	switch(containerFormat)
 	{
 	case uimg::TextureInfo::ContainerFormat::DDS:
