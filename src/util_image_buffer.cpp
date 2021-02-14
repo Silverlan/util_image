@@ -124,6 +124,14 @@ uimg::ImageBuffer::Format uimg::ImageBuffer::ToLDRFormat(Format format)
 {
 	switch(format)
 	{
+	case Format::R8:
+	case Format::R16:
+	case Format::R32:
+		return Format::R8;
+	case Format::RG8:
+	case Format::RG16:
+	case Format::RG32:
+		return Format::RG8;
 	case Format::RGB8:
 	case Format::RGB16:
 	case Format::RGB32:
@@ -133,13 +141,21 @@ uimg::ImageBuffer::Format uimg::ImageBuffer::ToLDRFormat(Format format)
 	case Format::RGBA32:
 		return Format::RGBA8;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
 uimg::ImageBuffer::Format uimg::ImageBuffer::ToHDRFormat(Format format)
 {
 	switch(format)
 	{
+	case Format::R8:
+	case Format::R16:
+	case Format::R32:
+		return Format::R16;
+	case Format::RG8:
+	case Format::RG16:
+	case Format::RG32:
+		return Format::RG16;
 	case Format::RGB8:
 	case Format::RGB16:
 	case Format::RGB32:
@@ -149,13 +165,21 @@ uimg::ImageBuffer::Format uimg::ImageBuffer::ToHDRFormat(Format format)
 	case Format::RGBA32:
 		return Format::RGBA16;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
 uimg::ImageBuffer::Format uimg::ImageBuffer::ToFloatFormat(Format format)
 {
 	switch(format)
 	{
+	case Format::R8:
+	case Format::R16:
+	case Format::R32:
+		return Format::R32;
+	case Format::RG8:
+	case Format::RG16:
+	case Format::RG32:
+		return Format::RG32;
 	case Format::RGB8:
 	case Format::RGB16:
 	case Format::RGB32:
@@ -165,43 +189,53 @@ uimg::ImageBuffer::Format uimg::ImageBuffer::ToFloatFormat(Format format)
 	case Format::RGBA32:
 		return Format::RGBA32;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
 uimg::ImageBuffer::Format uimg::ImageBuffer::ToRGBFormat(Format format)
 {
 	switch(format)
 	{
+	case Format::R8:
+	case Format::RG8:
 	case Format::RGB8:
-	case Format::RGB16:
-	case Format::RGB32:
-		return format;
 	case Format::RGBA8:
 		return Format::RGB8;
+	case Format::R16:
+	case Format::RG16:
+	case Format::RGB16:
 	case Format::RGBA16:
 		return Format::RGB16;
+	case Format::R32:
+	case Format::RG32:
+	case Format::RGB32:
 	case Format::RGBA32:
 		return Format::RGB32;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
 uimg::ImageBuffer::Format uimg::ImageBuffer::ToRGBAFormat(Format format)
 {
 	switch(format)
 	{
+	case Format::R8:
+	case Format::RG8:
 	case Format::RGB8:
-		return Format::RGBA8;
-	case Format::RGB16:
-		return Format::RGBA16;
-	case Format::RGB32:
-		return Format::RGBA32;
 	case Format::RGBA8:
+		return Format::RGBA8;
+	case Format::R16:
+	case Format::RG16:
+	case Format::RGB16:
 	case Format::RGBA16:
+		return Format::RGBA16;
+	case Format::R32:
+	case Format::RG32:
+	case Format::RGB32:
 	case Format::RGBA32:
-		return format;
+		return Format::RGBA32;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
 size_t uimg::ImageBuffer::GetRowStride() const {return GetPixelSize() *GetWidth();}
@@ -385,6 +419,14 @@ uint8_t uimg::ImageBuffer::GetChannelCount(Format format)
 {
 	switch(format)
 	{
+	case Format::R8:
+	case Format::R16:
+	case Format::R32:
+		return 1;
+	case Format::RG8:
+	case Format::RG16:
+	case Format::RG32:
+		return 2;
 	case Format::RGB8:
 	case Format::RGB16:
 	case Format::RGB32:
@@ -394,24 +436,30 @@ uint8_t uimg::ImageBuffer::GetChannelCount(Format format)
 	case Format::RGBA32:
 		return 4;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return 0;
 }
 uint8_t uimg::ImageBuffer::GetChannelSize(Format format)
 {
 	switch(format)
 	{
+	case Format::R8:
+	case Format::RG8:
 	case Format::RGB8:
 	case Format::RGBA8:
 		return 1;
+	case Format::R16:
+	case Format::RG16:
 	case Format::RGB16:
 	case Format::RGBA16:
 		return 2;
+	case Format::R32:
+	case Format::RG32:
 	case Format::RGB32:
 	case Format::RGBA32:
 		return 4;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return 0;
 }
 uimg::ImageBuffer::Size uimg::ImageBuffer::GetPixelSize(Format format)
@@ -459,30 +507,39 @@ bool uimg::ImageBuffer::IsLDRFormat() const
 {
 	switch(GetFormat())
 	{
+	case Format::R_LDR:
+	case Format::RG_LDR:
 	case Format::RGB_LDR:
 	case Format::RGBA_LDR:
 		return true;
 	}
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return false;
 }
 bool uimg::ImageBuffer::IsHDRFormat() const
 {
 	switch(GetFormat())
 	{
+	case Format::R_HDR:
+	case Format::RG_HDR:
 	case Format::RGB_HDR:
 	case Format::RGBA_HDR:
 		return true;
 	}
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return false;
 }
 bool uimg::ImageBuffer::IsFloatFormat() const
 {
 	switch(GetFormat())
 	{
+	case Format::R_FLOAT:
+	case Format::RG_FLOAT:
 	case Format::RGB_FLOAT:
 	case Format::RGBA_FLOAT:
 		return true;
 	}
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return false;
 }
 uint8_t uimg::ImageBuffer::GetChannelCount() const {return GetChannelCount(GetFormat());}
@@ -524,19 +581,26 @@ void uimg::ImageBuffer::Convert(ImageBuffer &srcImg,ImageBuffer &dstImg,Format t
 			auto channel = static_cast<Channel>(i);
 			switch(targetFormat)
 			{
+			case Format::R8:
+			case Format::RG8:
 			case Format::RGB8:
 			case Format::RGBA8:
 				dstPixel.SetValue(channel,srcPixel.GetLDRValue(channel));
 				break;
+			case Format::R16:
+			case Format::RG16:
 			case Format::RGB16:
 			case Format::RGBA16:
 				dstPixel.SetValue(channel,srcPixel.GetHDRValue(channel));
 				break;
+			case Format::R32:
+			case Format::RG32:
 			case Format::RGB32:
 			case Format::RGBA32:
 				dstPixel.SetValue(channel,srcPixel.GetFloatValue(channel));
 				break;
 			}
+			static_assert(umath::to_integral(Format::Count) == 13u);
 		}
 		++itSrc;
 		++itDst;
@@ -568,6 +632,14 @@ void uimg::ImageBuffer::ToLDR()
 {
 	switch(m_format)
 	{
+	case Format::R16:
+	case Format::R32:
+		Convert(Format::R8);
+		return;
+	case Format::RG16:
+	case Format::RG32:
+		Convert(Format::RG8);
+		return;
 	case Format::RGB16:
 	case Format::RGB32:
 		Convert(Format::RGB8);
@@ -577,12 +649,20 @@ void uimg::ImageBuffer::ToLDR()
 		Convert(Format::RGBA8);
 		return;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 }
 void uimg::ImageBuffer::ToHDR()
 {
 	switch(m_format)
 	{
+	case Format::R8:
+	case Format::R32:
+		Convert(Format::R16);
+		return;
+	case Format::RG8:
+	case Format::RG32:
+		Convert(Format::RG16);
+		return;
 	case Format::RGB8:
 	case Format::RGB32:
 		Convert(Format::RGB16);
@@ -592,12 +672,20 @@ void uimg::ImageBuffer::ToHDR()
 		Convert(Format::RGBA16);
 		return;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 }
 void uimg::ImageBuffer::ToFloat()
 {
 	switch(m_format)
 	{
+	case Format::R8:
+	case Format::R16:
+		Convert(Format::R32);
+		return;
+	case Format::RG8:
+	case Format::RG16:
+		Convert(Format::RG32);
+		return;
 	case Format::RGB8:
 	case Format::RGB16:
 		Convert(Format::RGB32);
@@ -607,7 +695,7 @@ void uimg::ImageBuffer::ToFloat()
 		Convert(Format::RGBA32);
 		return;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 }
 void uimg::ImageBuffer::Clear(const Color &color) {Clear(color.ToVector4());}
 void uimg::ImageBuffer::Clear(const Vector4 &color)

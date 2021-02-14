@@ -24,17 +24,23 @@ uimg::ImageBuffer::LDRValue uimg::ImageBuffer::PixelView::GetLDRValue(Channel ch
 	auto *data = static_cast<const void*>(static_cast<const uint8_t*>(GetPixelData()) +m_imageBuffer.GetChannelSize() *umath::to_integral(channel));
 	switch(m_imageBuffer.GetFormat())
 	{
+	case Format::R8:
+	case Format::RG8:
 	case Format::RGB8:
 	case Format::RGBA8:
 		return *static_cast<const LDRValue*>(data);
+	case Format::R16:
+	case Format::RG16:
 	case Format::RGB16:
 	case Format::RGBA16:
 		return ToLDRValue(*static_cast<const HDRValue*>(data));
+	case Format::R32:
+	case Format::RG32:
 	case Format::RGB32:
 	case Format::RGBA32:
 		return ToLDRValue(*static_cast<const FloatValue*>(data));
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return 0;
 }
 uimg::ImageBuffer::HDRValue uimg::ImageBuffer::PixelView::GetHDRValue(Channel channel) const
@@ -46,17 +52,23 @@ uimg::ImageBuffer::HDRValue uimg::ImageBuffer::PixelView::GetHDRValue(Channel ch
 	auto *data = static_cast<const void*>(static_cast<const uint8_t*>(GetPixelData()) +m_imageBuffer.GetChannelSize() *umath::to_integral(channel));
 	switch(m_imageBuffer.GetFormat())
 	{
+	case Format::R8:
+	case Format::RG8:
 	case Format::RGB8:
 	case Format::RGBA8:
 		return ToHDRValue(*static_cast<const LDRValue*>(data));
+	case Format::R16:
+	case Format::RG16:
 	case Format::RGB16:
 	case Format::RGBA16:
 		return *static_cast<const HDRValue*>(data);
+	case Format::R32:
+	case Format::RG32:
 	case Format::RGB32:
 	case Format::RGBA32:
 		return ToHDRValue(*static_cast<const FloatValue*>(data));
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return 0;
 }
 uimg::ImageBuffer::FloatValue uimg::ImageBuffer::PixelView::GetFloatValue(Channel channel) const
@@ -68,17 +80,23 @@ uimg::ImageBuffer::FloatValue uimg::ImageBuffer::PixelView::GetFloatValue(Channe
 	auto *data = static_cast<const void*>(static_cast<const uint8_t*>(GetPixelData()) +m_imageBuffer.GetChannelSize() *umath::to_integral(channel));
 	switch(m_imageBuffer.GetFormat())
 	{
+	case Format::R8:
+	case Format::RG8:
 	case Format::RGB8:
 	case Format::RGBA8:
 		return ToFloatValue(*static_cast<const LDRValue*>(data));
+	case Format::R16:
+	case Format::RG16:
 	case Format::RGB16:
 	case Format::RGBA16:
 		return ToFloatValue(*static_cast<const HDRValue*>(data));
+	case Format::R32:
+	case Format::RG32:
 	case Format::RGB32:
 	case Format::RGBA32:
 		return *static_cast<const FloatValue*>(data);
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 	return 0.f;
 }
 void uimg::ImageBuffer::PixelView::SetValue(Channel channel,LDRValue value)
@@ -90,20 +108,26 @@ void uimg::ImageBuffer::PixelView::SetValue(Channel channel,LDRValue value)
 	auto *data = static_cast<void*>(static_cast<uint8_t*>(GetPixelData()) +m_imageBuffer.GetChannelSize() *umath::to_integral(channel));
 	switch(m_imageBuffer.GetFormat())
 	{
+	case Format::R8:
+	case Format::RG8:
 	case Format::RGB8:
 	case Format::RGBA8:
 		*static_cast<LDRValue*>(data) = value;
 		return;
+	case Format::R16:
+	case Format::RG16:
 	case Format::RGB16:
 	case Format::RGBA16:
 		*static_cast<HDRValue*>(data) = ToHDRValue(value);
 		return;
+	case Format::R32:
+	case Format::RG32:
 	case Format::RGB32:
 	case Format::RGBA32:
 		*static_cast<HDRValue*>(data) = ToFloatValue(value);
 		return;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 }
 void uimg::ImageBuffer::PixelView::SetValue(Channel channel,HDRValue value)
 {
@@ -112,20 +136,26 @@ void uimg::ImageBuffer::PixelView::SetValue(Channel channel,HDRValue value)
 	auto *data = static_cast<void*>(static_cast<uint8_t*>(GetPixelData()) +m_imageBuffer.GetChannelSize() *umath::to_integral(channel));
 	switch(m_imageBuffer.GetFormat())
 	{
+	case Format::R8:
+	case Format::RG8:
 	case Format::RGB8:
 	case Format::RGBA8:
 		*static_cast<LDRValue*>(data) = ToLDRValue(value);
 		return;
+	case Format::R16:
+	case Format::RG16:
 	case Format::RGB16:
 	case Format::RGBA16:
 		*static_cast<HDRValue*>(data) = value;
 		return;
+	case Format::R32:
+	case Format::RG32:
 	case Format::RGB32:
 	case Format::RGBA32:
 		*static_cast<FloatValue*>(data) = ToFloatValue(value);
 		return;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 }
 void uimg::ImageBuffer::PixelView::SetValue(Channel channel,FloatValue value)
 {
@@ -134,20 +164,26 @@ void uimg::ImageBuffer::PixelView::SetValue(Channel channel,FloatValue value)
 	auto *data = static_cast<void*>(static_cast<uint8_t*>(GetPixelData()) +m_imageBuffer.GetChannelSize() *umath::to_integral(channel));
 	switch(m_imageBuffer.GetFormat())
 	{
+	case Format::R8:
+	case Format::RG8:
 	case Format::RGB8:
 	case Format::RGBA8:
 		*static_cast<LDRValue*>(data) = ToLDRValue(value);
 		return;
+	case Format::R16:
+	case Format::RG16:
 	case Format::RGB16:
 	case Format::RGBA16:
 		*static_cast<HDRValue*>(data) = ToHDRValue(value);
 		return;
+	case Format::R32:
+	case Format::RG32:
 	case Format::RGB32:
 	case Format::RGBA32:
 		*static_cast<FloatValue*>(data) = value;
 		return;
 	}
-	static_assert(umath::to_integral(Format::Count) == 7u);
+	static_assert(umath::to_integral(Format::Count) == 13u);
 }
 uimg::ImageBuffer &uimg::ImageBuffer::PixelView::GetImageBuffer() const {return m_imageBuffer;}
 void uimg::ImageBuffer::PixelView::CopyValue(Channel channel,const PixelView &outOther)
@@ -155,19 +191,26 @@ void uimg::ImageBuffer::PixelView::CopyValue(Channel channel,const PixelView &ou
 	auto format = outOther.GetImageBuffer().GetFormat();
 	switch(format)
 	{
+	case Format::R8:
+	case Format::RG8:
 	case Format::RGB8:
 	case Format::RGBA8:
 		SetValue(channel,outOther.GetLDRValue(channel));
 		break;
+	case Format::R16:
+	case Format::RG16:
 	case Format::RGB16:
 	case Format::RGBA16:
 		SetValue(channel,outOther.GetHDRValue(channel));
 		break;
+	case Format::R32:
+	case Format::RG32:
 	case Format::RGB32:
 	case Format::RGBA32:
 		SetValue(channel,outOther.GetFloatValue(channel));
 		break;
 	}
+	static_assert(umath::to_integral(Format::Count) == 13u);
 }
 void uimg::ImageBuffer::PixelView::CopyValues(const PixelView &outOther)
 {

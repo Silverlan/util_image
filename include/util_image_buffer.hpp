@@ -26,18 +26,35 @@ namespace uimg
 		enum class Format : uint8_t
 		{
 			None = 0u,
+
+			R8,
+			RG8,
 			RGB8,
 			RGBA8,
+
+			R16,
+			RG16,
 			RGB16,
 			RGBA16,
+
+			R32,
+			RG32,
 			RGB32,
 			RGBA32,
 			Count,
-
+			
+			R_LDR = R8,
+			RG_LDR = RG8,
 			RGB_LDR = RGB8,
 			RGBA_LDR = RGBA8,
+			
+			R_HDR = R16,
+			RG_HDR = RG16,
 			RGB_HDR = RGB16,
 			RGBA_HDR = RGBA16,
+			
+			R_FLOAT = R32,
+			RG_FLOAT = RG32,
 			RGB_FLOAT = RGB32,
 			RGBA_FLOAT = RGBA32
 		};
