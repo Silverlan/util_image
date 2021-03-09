@@ -19,7 +19,9 @@ namespace uimg
 			R8G8B8A8_UInt,
 			R16G16B16A16_Float,
 			R32G32B32A32_Float,
-			R32_Float
+			R32_Float,
+			B8G8R8A8_UInt,
+			Count
 		};
 		enum class OutputFormat : uint8_t
 		{

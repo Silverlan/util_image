@@ -42,6 +42,22 @@ namespace uimg
 	DLLUIMG std::shared_ptr<ImageBuffer> load_image(const std::string &fileName,PixelFormat pixelFormat=PixelFormat::LDR);
 	DLLUIMG bool save_image(std::shared_ptr<VFilePtrInternalReal> f,ImageBuffer &imgBuffer,ImageFormat format,float quality=1.f);
 #ifdef UIMG_ENABLE_NVTT
+    struct DLLUIMG TextureOutputHandler
+    {
+        std::function<void(int size, int width, int height, int depth, int face, int miplevel)> beginImage = nullptr;
+        std::function<bool(const void * data, int size)> writeData = nullptr;
+        std::function<void()> endImage = nullptr;
+    };
+	DLLUIMG bool compress_texture(
+		const TextureOutputHandler &outputHandler,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
+		uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
+		const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler=nullptr
+	);
+	DLLUIMG bool compress_texture(
+		std::vector<std::vector<std::vector<uint8_t>>> &outputData,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
+		uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
+		const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler=nullptr
+	);
 	DLLUIMG bool save_texture(
 		const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
 		uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
