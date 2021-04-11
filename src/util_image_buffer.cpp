@@ -565,10 +565,11 @@ uimg::ImageBuffer::PixelIterator uimg::ImageBuffer::end()
 }
 void uimg::ImageBuffer::Convert(ImageBuffer &srcImg,ImageBuffer &dstImg,Format targetFormat)
 {
-	if(dstImg.GetFormat() == targetFormat)
-		return;
-	dstImg.m_format = targetFormat;
-	dstImg.Reallocate();
+	if(dstImg.GetFormat() != targetFormat)
+	{
+		dstImg.m_format = targetFormat;
+		dstImg.Reallocate();
+	}
 	auto itSrc = srcImg.begin();
 	auto itDst = dstImg.begin();
 	while(itSrc != srcImg.end())
@@ -612,6 +613,10 @@ void uimg::ImageBuffer::Convert(Format targetFormat)
 		return;
 	auto cpy = *this;
 	Convert(cpy,*this,targetFormat);
+}
+void uimg::ImageBuffer::Convert(ImageBuffer &dst)
+{
+	Convert(*this,dst,dst.GetFormat());
 }
 void uimg::ImageBuffer::SwapChannels(Channel channel0,Channel channel1)
 {

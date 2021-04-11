@@ -204,6 +204,7 @@ namespace uimg
 		std::shared_ptr<ImageBuffer> Copy(Format format) const;
 		void Copy(ImageBuffer &dst,uint32_t xSrc,uint32_t ySrc,uint32_t xDst,uint32_t yDst,uint32_t w,uint32_t h) const;
 		void Convert(Format targetFormat);
+		void Convert(ImageBuffer &dst);
 		void SwapChannels(Channel channel0,Channel channel1);
 		void ToLDR();
 		void ToHDR();
