@@ -6,6 +6,7 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
 #include <sharedutils/util.h>
+#include <sharedutils/magic_enum.hpp>
 #include <mathutil/color.h>
 #include <mathutil/umath.h>
 #include <thread>
@@ -826,5 +827,14 @@ void uimg::ImageBuffer::Resize(Size width,Size height,EdgeAddressMode addressMod
 	if(res == 0)
 		return;
 	*this = *imgResized;
+}
+
+std::ostream &operator<<(std::ostream &out,const uimg::ImageBuffer &o)
+{
+	out<<"ImageBuffer";
+	out<<"[Format:"<<magic_enum::enum_name(o.GetFormat())<<"]";
+	out<<"[Resolution:"<<o.GetWidth()<<"x"<<o.GetHeight()<<"]";
+	out<<"[Channels:"<<o.GetChannelCount()<<"]";
+	return out;
 }
 #pragma optimize("",on)

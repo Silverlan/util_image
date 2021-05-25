@@ -270,5 +270,6 @@ namespace uimg
 
 	DLLUIMG std::optional<ImageBuffer::ToneMapping> string_to_tone_mapping(const std::string &str);
 };
+DLLUIMG std::ostream &operator<<(std::ostream &out,const uimg::ImageBuffer &o);
 
 #endif
