@@ -1,0 +1,3 @@
+[submodule "third_party_libs/nvtt"]
+	path = third_party_libs/nvtt
+	url = https://github.com/Silverlan/nvidia-texture-tools.git
