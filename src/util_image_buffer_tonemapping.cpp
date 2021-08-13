@@ -127,9 +127,9 @@ void uimg::ImageBuffer::ApplyExposure(float exposure)
 	{
 		for(auto i=decltype(numChannels){0u};i<numChannels;++i)
 		{
-			auto val = pxView.GetFloatValue(static_cast<uimg::ImageBuffer::Channel>(i));
+			auto val = pxView.GetFloatValue(static_cast<uimg::Channel>(i));
 			val *= powExposure;
-			pxView.SetValue(static_cast<uimg::ImageBuffer::Channel>(i),val);
+			pxView.SetValue(static_cast<uimg::Channel>(i),val);
 		}
 	}
 }
@@ -144,7 +144,7 @@ void uimg::ImageBuffer::ApplyGammaCorrection(float gamma)
 	{
 		for(auto i=decltype(numChannels){0u};i<numChannels;++i)
 		{
-			auto channel = static_cast<uimg::ImageBuffer::Channel>(i);
+			auto channel = static_cast<uimg::Channel>(i);
 			pxView.SetValue(channel,static_cast<float>(glm::pow(pxView.GetFloatValue(channel),INV_GAMMA)));
 		}
 	}

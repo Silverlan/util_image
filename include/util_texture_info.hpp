@@ -7,7 +7,9 @@
 
 #include <cinttypes>
 #include <mathutil/umath.h>
+#include <string>
 #include "util_image_definitions.hpp"
+#include "util_image_types.hpp"
 
 namespace uimg
 {

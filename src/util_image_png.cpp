@@ -397,7 +397,7 @@ std::shared_ptr<uimg::ImageBuffer> uimg::impl::load_png_image(std::shared_ptr<VF
 	{
 		if(numChannels == 4)
 		{
-			imgBuffer = uimg::ImageBuffer::Create(width,height,uimg::ImageBuffer::Format::RGBA8);
+			imgBuffer = uimg::ImageBuffer::Create(width,height,uimg::Format::RGBA8);
 			memcpy(imgBuffer->GetData(),imgData,imgBuffer->GetSize());
 			if((pngImg.color_type &PNG_COLOR_MASK_ALPHA) == 0)
 				imgBuffer->ClearAlpha();
@@ -406,7 +406,7 @@ std::shared_ptr<uimg::ImageBuffer> uimg::impl::load_png_image(std::shared_ptr<VF
 		{
 			if(numChannels != 3)
 				return nullptr;
-			imgBuffer = uimg::ImageBuffer::Create(width,height,uimg::ImageBuffer::Format::RGB8);
+			imgBuffer = uimg::ImageBuffer::Create(width,height,uimg::Format::RGB8);
 			memcpy(imgBuffer->GetData(),imgData,imgBuffer->GetSize());
 		}
 	}
@@ -414,7 +414,7 @@ std::shared_ptr<uimg::ImageBuffer> uimg::impl::load_png_image(std::shared_ptr<VF
 	{
 		if(numChannels != 1)
 			return nullptr;
-		imgBuffer = uimg::ImageBuffer::Create(width,height,uimg::ImageBuffer::Format::RGBA8);
+		imgBuffer = uimg::ImageBuffer::Create(width,height,uimg::Format::RGBA8);
 		memcpy(imgBuffer->GetData(),imgData,imgBuffer->GetSize());
 	}
 	else

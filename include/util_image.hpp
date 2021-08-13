@@ -6,6 +6,8 @@
 #define __UTIL_IMAGE_HPP__
 
 #include "util_image_definitions.hpp"
+#include "util_image_types.hpp"
+#include "util_texture_info.hpp"
 #include <string>
 #include <memory>
 #include <functional>
@@ -48,29 +50,42 @@ namespace uimg
         std::function<bool(const void * data, int size)> writeData = nullptr;
         std::function<void()> endImage = nullptr;
     };
+	struct DLLUIMG TextureSaveInfo
+	{
+		uimg::TextureInfo texInfo {};
+
+		// Only needed if no image buffer was specified
+		uint32_t width = 0;
+		uint32_t height = 0;
+		uint32_t szPerPixel = 0;
+
+		// Only needed if no layer data was specified
+		uint32_t numLayers = 0;
+		uint32_t numMipmaps = 0;
+
+		bool cubemap = false;
+		uimg::ChannelMask channelMask = {};
+	};
 	DLLUIMG bool compress_texture(
-		const TextureOutputHandler &outputHandler,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
-		uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
-		const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler=nullptr
+		const TextureOutputHandler &outputHandler,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,const TextureSaveInfo &texSaveInfo,
+		const std::function<void(const std::string&)> &errorHandler=nullptr
 	);
 	DLLUIMG bool compress_texture(
-		std::vector<std::vector<std::vector<uint8_t>>> &outputData,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
-		uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
-		const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler=nullptr
+		std::vector<std::vector<std::vector<uint8_t>>> &outputData,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,const TextureSaveInfo &texSaveInfo,
+		const std::function<void(const std::string&)> &errorHandler=nullptr
 	);
 	DLLUIMG bool save_texture(
-		const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
-		uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
-		const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler=nullptr,
+		const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,const TextureSaveInfo &texSaveInfo,
+		const std::function<void(const std::string&)> &errorHandler=nullptr,
 		bool absoluteFileName=false
 	);
-	DLLUIMG bool save_texture(std::shared_ptr<VFilePtrInternalReal> f,ImageBuffer &imgBuffer,const TextureInfo &texInfo);
+	DLLUIMG bool save_texture(std::shared_ptr<VFilePtrInternalReal> f,ImageBuffer &imgBuffer,const TextureSaveInfo &texInfo);
 	DLLUIMG bool save_texture(
-		const std::string &fileName,uimg::ImageBuffer &imgBuffer,const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler=nullptr,bool absoluteFileName=false
+		const std::string &fileName,uimg::ImageBuffer &imgBuffer,const TextureSaveInfo &texInfo,const std::function<void(const std::string&)> &errorHandler=nullptr,bool absoluteFileName=false
 	);
 	DLLUIMG bool save_texture(
-		const std::string &fileName,const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,uint32_t sizePerPixel,
-		const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler=nullptr,bool absoluteFileName=false
+		const std::string &fileName,const std::vector<std::vector<const void*>> &imgLayerMipmapData,
+		const TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler=nullptr,bool absoluteFileName=false
 	);
 #endif
 	DLLUIMG std::optional<ImageFormat> string_to_image_output_format(const std::string &str);

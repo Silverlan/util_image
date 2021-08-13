@@ -6,6 +6,7 @@
 #define __UTIL_IMAGE_BUFFER_HPP__
 
 #include "util_image_definitions.hpp"
+#include "util_image_types.hpp"
 #include <mathutil/uvec.h>
 #include <cinttypes>
 #include <functional>
@@ -17,98 +18,13 @@ struct Color;
 namespace uimg
 {
 	DLLUIMG float calc_luminance(const Vector3 &color);
+
 	class DLLUIMG ImageBuffer
 		: public std::enable_shared_from_this<ImageBuffer>
 	{
 	public:
 		static constexpr uint8_t FULLY_TRANSPARENT = 0u;
 		static constexpr uint8_t FULLY_OPAQUE = std::numeric_limits<uint8_t>::max();
-		enum class Format : uint8_t
-		{
-			None = 0u,
-
-			R8,
-			RG8,
-			RGB8,
-			RGBA8,
-
-			R16,
-			RG16,
-			RGB16,
-			RGBA16,
-
-			R32,
-			RG32,
-			RGB32,
-			RGBA32,
-			Count,
-			
-			R_LDR = R8,
-			RG_LDR = RG8,
-			RGB_LDR = RGB8,
-			RGBA_LDR = RGBA8,
-			
-			R_HDR = R16,
-			RG_HDR = RG16,
-			RGB_HDR = RGB16,
-			RGBA_HDR = RGBA16,
-			
-			R_FLOAT = R32,
-			RG_FLOAT = RG32,
-			RGB_FLOAT = RGB32,
-			RGBA_FLOAT = RGBA32
-		};
-		enum class Channel : uint8_t
-		{
-			Red = 0,
-			Green,
-			Blue,
-			Alpha,
-
-			Count,
-
-			R = Red,
-			G = Green,
-			B = Blue,
-			A = Alpha
-		};
-		enum class ToneMapping : uint8_t
-		{
-			GammaCorrection = 0,
-			Reinhard,
-			HejilRichard,
-			Uncharted,
-			Aces,
-			GranTurismo
-		};
-		enum class EdgeAddressMode : uint8_t
-		{
-			Clamp = 0,
-			Reflect,
-			Wrap,
-			Zero,
-
-			Count
-		};
-		enum class Filter : uint8_t
-		{
-			Default = 0,
-			Box,
-			Triangle,
-			CubicBSpline,
-			CatmullRom,
-			Mitchell,
-
-			Count
-		};
-		enum class ColorSpace : uint8_t
-		{
-			Auto = 0,
-			Linear,
-			SRGB,
-
-			Count
-		};
 		using Offset = size_t;
 		using Size = size_t;
 		using PixelIndex = uint32_t;
@@ -206,6 +122,7 @@ namespace uimg
 		void Convert(Format targetFormat);
 		void Convert(ImageBuffer &dst);
 		void SwapChannels(Channel channel0,Channel channel1);
+		void SwapChannels(ChannelMask swizzle);
 		void ToLDR();
 		void ToHDR();
 		void ToFloat();
@@ -268,7 +185,7 @@ namespace uimg
 		std::pair<uint64_t,uint64_t> m_offsetRelToParent = {};
 	};
 
-	DLLUIMG std::optional<ImageBuffer::ToneMapping> string_to_tone_mapping(const std::string &str);
+	DLLUIMG std::optional<ToneMapping> string_to_tone_mapping(const std::string &str);
 };
 DLLUIMG std::ostream &operator<<(std::ostream &out,const uimg::ImageBuffer &o);
 

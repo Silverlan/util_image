@@ -10,6 +10,7 @@
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
+#include <sharedutils/magic_enum.hpp>
 #include <variant>
 
 #pragma optimize("",off)
@@ -241,30 +242,56 @@ static uint32_t calculate_mipmap_size(uint32_t v,uint32_t level)
 }
 
 static bool compress_texture(
-	const std::variant<uimg::TextureOutputHandler,std::string> &outputHandler,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &pfGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
-	uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
-	const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler=nullptr,
+	const std::variant<uimg::TextureOutputHandler,std::string> &outputHandler,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &pfGetImgData,
+	const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler=nullptr,
 	bool absoluteFileName=false
 )
 {
-	numMipmaps = umath::max(numMipmaps,static_cast<uint32_t>(1));
+	auto &texInfo = texSaveInfo.texInfo;
+	auto channelMask = texSaveInfo.channelMask;
+	if(texInfo.inputFormat == uimg::TextureInfo::InputFormat::R8G8B8A8_UInt)
+		channelMask = uimg::ChannelMask{uimg::Channel::Blue,uimg::Channel::Green,uimg::Channel::Red,uimg::Channel::Alpha}; // Swap red and blue channels
+	auto numMipmaps = umath::max(texSaveInfo.numMipmaps,static_cast<uint32_t>(1));
+	auto numLayers = texSaveInfo.numLayers;
+	auto width = texSaveInfo.width;
+	auto height = texSaveInfo.height;
+	auto szPerPixel = texSaveInfo.szPerPixel;
+	auto cubemap = texSaveInfo.cubemap;
 	std::vector<std::shared_ptr<uimg::ImageBuffer>> imgBuffers;
 	auto fGetImgData = pfGetImgData;
-	if(texInfo.inputFormat == uimg::TextureInfo::InputFormat::R8G8B8A8_UInt)
+	if(channelMask != uimg::ChannelMask{})
 	{
-		// We need to switch the red and blue channels, so
-		// we'll have to create a copy of the images
 		imgBuffers.resize(numLayers *numMipmaps);
 		uint32_t idx = 0;
+
+		uimg::Format uimgFormat;
+		switch(texSaveInfo.texInfo.inputFormat)
+		{
+		case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
+			uimgFormat = uimg::Format::RGBA8;
+			break;
+		case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
+			uimgFormat = uimg::Format::RGBA16;
+			break;
+		case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
+			uimgFormat = uimg::Format::RGBA32;
+			break;
+		case uimg::TextureInfo::InputFormat::R32_Float:
+			uimgFormat = uimg::Format::R32;
+			break;
+		default:
+			throw std::runtime_error{"Texture compression error: Unsupported format " +std::string{magic_enum::enum_name(texSaveInfo.texInfo.inputFormat)}};
+		}
+
 		for(auto i=decltype(numLayers){0u};i<numLayers;++i)
 		{
 			for(auto m=decltype(numMipmaps){0u};m<numMipmaps;++m)
 			{
 				std::function<void()> deleter = nullptr;
 				auto *data = fGetImgData(i,m,deleter);
-				auto &imgBuf = imgBuffers[idx++] = uimg::ImageBuffer::Create(data,calculate_mipmap_size(width,m),calculate_mipmap_size(height,m),uimg::ImageBuffer::Format::RGBA8);
+				auto &imgBuf = imgBuffers[idx++] = uimg::ImageBuffer::Create(data,calculate_mipmap_size(width,m),calculate_mipmap_size(height,m),uimgFormat);
 				
-				imgBuf->SwapChannels(uimg::ImageBuffer::Channel::Red,uimg::ImageBuffer::Channel::Blue);
+				imgBuf->SwapChannels(channelMask);
 				if(deleter)
 					deleter();
 			}
@@ -452,21 +479,19 @@ static bool compress_texture(
 }
 
 bool uimg::compress_texture(
-	const TextureOutputHandler &outputHandler,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
-	uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
-	const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler
+	const TextureOutputHandler &outputHandler,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,
+	const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler
 )
 {
-	return ::compress_texture(outputHandler,fGetImgData,width,height,szPerPixel,numLayers,numMipmaps,cubemap,texInfo,errorHandler);
+	return ::compress_texture(outputHandler,fGetImgData,texSaveInfo,errorHandler);
 }
 
 bool uimg::compress_texture(
-	std::vector<std::vector<std::vector<uint8_t>>> &outputData,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
-	uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
-	const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler
+	std::vector<std::vector<std::vector<uint8_t>>> &outputData,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,
+	const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler
 )
 {
-	outputData.resize(numLayers,std::vector<std::vector<uint8_t>>(numMipmaps,std::vector<uint8_t>{}));
+	outputData.resize(texSaveInfo.numLayers,std::vector<std::vector<uint8_t>>(texSaveInfo.numMipmaps,std::vector<uint8_t>{}));
 	auto iLevel = std::numeric_limits<uint32_t>::max();
 	auto iMipmap = std::numeric_limits<uint32_t>::max();
 	uimg::TextureOutputHandler outputHandler {};
@@ -485,43 +510,47 @@ bool uimg::compress_texture(
 		iLevel = std::numeric_limits<uint32_t>::max();
 		iMipmap = std::numeric_limits<uint32_t>::max();
 	};
-	return ::compress_texture(outputHandler,fGetImgData,width,height,szPerPixel,numLayers,numMipmaps,cubemap,texInfo,errorHandler);
+	return ::compress_texture(outputHandler,fGetImgData,texSaveInfo,errorHandler);
 }
 
 bool uimg::save_texture(
-	const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
-	uint32_t numLayers,uint32_t numMipmaps,bool cubemap,
-	const uimg::TextureInfo &texInfo,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
+	const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,
+	const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
 )
 {
-	return ::compress_texture(fileName,fGetImgData,width,height,szPerPixel,numLayers,numMipmaps,cubemap,texInfo,errorHandler,absoluteFileName);
+	return ::compress_texture(fileName,fGetImgData,texSaveInfo,errorHandler,absoluteFileName);
 }
 
 bool uimg::save_texture(
-	const std::string &fileName,uimg::ImageBuffer &imgBuffer,const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
+	const std::string &fileName,uimg::ImageBuffer &imgBuffer,const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
 )
 {
 	constexpr auto numLayers = 1u;
 	constexpr auto numMipmaps = 1u;
 
-	auto newTexInfo = texInfo;
-	auto swapRedBlue = (texInfo.inputFormat == uimg::TextureInfo::InputFormat::R8G8B8A8_UInt);
+	auto newTexSaveInfo = texSaveInfo;
+	auto swapRedBlue = (texSaveInfo.texInfo.inputFormat == uimg::TextureInfo::InputFormat::R8G8B8A8_UInt);
 	if(swapRedBlue)
 	{
-		imgBuffer.SwapChannels(uimg::ImageBuffer::Channel::Red,uimg::ImageBuffer::Channel::Blue);
-		newTexInfo.inputFormat = uimg::TextureInfo::InputFormat::B8G8R8A8_UInt;
+		imgBuffer.SwapChannels(uimg::Channel::Red,uimg::Channel::Blue);
+		newTexSaveInfo.texInfo.inputFormat = uimg::TextureInfo::InputFormat::B8G8R8A8_UInt;
 	}
+	newTexSaveInfo.width = imgBuffer.GetWidth();
+	newTexSaveInfo.height = imgBuffer.GetHeight();
+	newTexSaveInfo.szPerPixel = imgBuffer.GetPixelSize();
+	newTexSaveInfo.numLayers = numLayers;
+	newTexSaveInfo.numMipmaps = numMipmaps;
 	auto success = save_texture(fileName,[&imgBuffer](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
 		return static_cast<uint8_t*>(imgBuffer.GetData());
-	},imgBuffer.GetWidth(),imgBuffer.GetHeight(),imgBuffer.GetPixelSize(),numLayers,numMipmaps,cubemap,newTexInfo,errorHandler,absoluteFileName);
+	},newTexSaveInfo,errorHandler,absoluteFileName);
 	if(swapRedBlue)
-		imgBuffer.SwapChannels(uimg::ImageBuffer::Channel::Red,uimg::ImageBuffer::Channel::Blue);
+		imgBuffer.SwapChannels(uimg::Channel::Red,uimg::Channel::Blue);
 	return success;
 }
 
 bool uimg::save_texture(
-	const std::string &fileName,const std::vector<std::vector<const void*>> &imgLayerMipmapData,uint32_t width,uint32_t height,uint32_t sizePerPixel,
-	const uimg::TextureInfo &texInfo,bool cubemap,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
+	const std::string &fileName,const std::vector<std::vector<const void*>> &imgLayerMipmapData,
+	const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
 )
 {
 	auto numLayers = imgLayerMipmapData.size();
@@ -533,7 +562,7 @@ bool uimg::save_texture(
 		if(iMipmap >= mipmapData.size())
 			return nullptr;
 		return static_cast<const uint8_t*>(mipmapData.at(iMipmap));
-	},width,height,sizePerPixel,numLayers,numMipmaps,cubemap,texInfo,errorHandler,absoluteFileName);
+	},texSaveInfo,errorHandler,absoluteFileName);
 }
 #endif
 #pragma optimize("",on)

@@ -43,9 +43,9 @@ static bool load_uncompressed_tga(std::shared_ptr<uimg::ImageBuffer> &texture,VF
 	if((width <= 0) || (height <= 0) || ((bpp != 24) && (bpp != 32)))
 		return false;
 	if(bpp == 24)
-		texture = uimg::ImageBuffer::Create(width,height,uimg::ImageBuffer::Format::RGB8);
+		texture = uimg::ImageBuffer::Create(width,height,uimg::Format::RGB8);
 	else
-		texture = uimg::ImageBuffer::Create(width,height,uimg::ImageBuffer::Format::RGBA8);
+		texture = uimg::ImageBuffer::Create(width,height,uimg::Format::RGBA8);
 
 	tga.bytesPerPixel = (tga.Bpp /8);
 	tga.imageSize = (tga.bytesPerPixel *tga.Width *tga.Height);
@@ -77,9 +77,9 @@ static bool load_compressed_tga(std::shared_ptr<uimg::ImageBuffer> &texture,VFil
 	if((width <= 0) || (height <= 0) || ((bpp != 24) && (bpp != 32)))
 		return false;
 	if(bpp == 24)
-		texture = uimg::ImageBuffer::Create(width,height,uimg::ImageBuffer::Format::RGB8);
+		texture = uimg::ImageBuffer::Create(width,height,uimg::Format::RGB8);
 	else
-		texture = uimg::ImageBuffer::Create(width,height,uimg::ImageBuffer::Format::RGBA8);
+		texture = uimg::ImageBuffer::Create(width,height,uimg::Format::RGBA8);
 
 	tga.bytesPerPixel = (tga.Bpp /8);
 	tga.imageSize = (tga.bytesPerPixel *tga.Width *tga.Height);

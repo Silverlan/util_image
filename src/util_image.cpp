@@ -57,20 +57,20 @@ std::string uimg::get_image_output_format_extension(ImageFormat format)
 	return "";
 }
 
-std::optional<uimg::ImageBuffer::ToneMapping> uimg::string_to_tone_mapping(const std::string &str)
+std::optional<uimg::ToneMapping> uimg::string_to_tone_mapping(const std::string &str)
 {
 	if(ustring::compare(str,"gamma_correction",false))
-		return uimg::ImageBuffer::ToneMapping::GammaCorrection;
+		return uimg::ToneMapping::GammaCorrection;
 	else if(ustring::compare(str,"reinhard",false))
-		return uimg::ImageBuffer::ToneMapping::Reinhard;
+		return uimg::ToneMapping::Reinhard;
 	else if(ustring::compare(str,"hejil_richard",false))
-		return uimg::ImageBuffer::ToneMapping::HejilRichard;
+		return uimg::ToneMapping::HejilRichard;
 	else if(ustring::compare(str,"uncharted",false))
-		return uimg::ImageBuffer::ToneMapping::Uncharted;
+		return uimg::ToneMapping::Uncharted;
 	else if(ustring::compare(str,"aces",false))
-		return uimg::ImageBuffer::ToneMapping::Aces;
+		return uimg::ToneMapping::Aces;
 	else if(ustring::compare(str,"gran_turismo",false))
-		return uimg::ImageBuffer::ToneMapping::GranTurismo;
+		return uimg::ToneMapping::GranTurismo;
 	return {};
 }
 
@@ -121,19 +121,19 @@ std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(std::shared_ptr<VFilePtrIn
 	case PixelFormat::LDR:
 	{
 		auto *data = stbi_load_from_callbacks(&ioCallbacks,f.get(),&width,&height,&nrComponents,4);
-		imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data,width,height,uimg::ImageBuffer::Format::RGBA8,[](void *data) {stbi_image_free(data);}) : nullptr;
+		imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data,width,height,uimg::Format::RGBA8,[](void *data) {stbi_image_free(data);}) : nullptr;
 		break;
 	}
 	case PixelFormat::HDR:
 	{
 		auto *data = stbi_load_16_from_callbacks(&ioCallbacks,f.get(),&width,&height,&nrComponents,4);
-		imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data,width,height,uimg::ImageBuffer::Format::RGBA16,[](void *data) {stbi_image_free(data);}) : nullptr;
+		imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data,width,height,uimg::Format::RGBA16,[](void *data) {stbi_image_free(data);}) : nullptr;
 		break;
 	}
 	case PixelFormat::Float:
 	{
 		auto *data = stbi_loadf_from_callbacks(&ioCallbacks,f.get(),&width,&height,&nrComponents,4);
-		imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data,width,height,uimg::ImageBuffer::Format::RGBA32,[](void *data) {stbi_image_free(data);}) : nullptr;
+		imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data,width,height,uimg::Format::RGBA32,[](void *data) {stbi_image_free(data);}) : nullptr;
 		break;
 	}
 	}

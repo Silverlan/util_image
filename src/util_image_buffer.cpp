@@ -121,7 +121,7 @@ uimg::ImageBuffer::FloatValue uimg::ImageBuffer::ToFloatValue(HDRValue value)
 {
 	return umath::float16_to_float32_glm(value);
 }
-uimg::ImageBuffer::Format uimg::ImageBuffer::ToLDRFormat(Format format)
+uimg::Format uimg::ImageBuffer::ToLDRFormat(Format format)
 {
 	switch(format)
 	{
@@ -145,7 +145,7 @@ uimg::ImageBuffer::Format uimg::ImageBuffer::ToLDRFormat(Format format)
 	static_assert(umath::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
-uimg::ImageBuffer::Format uimg::ImageBuffer::ToHDRFormat(Format format)
+uimg::Format uimg::ImageBuffer::ToHDRFormat(Format format)
 {
 	switch(format)
 	{
@@ -169,7 +169,7 @@ uimg::ImageBuffer::Format uimg::ImageBuffer::ToHDRFormat(Format format)
 	static_assert(umath::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
-uimg::ImageBuffer::Format uimg::ImageBuffer::ToFloatFormat(Format format)
+uimg::Format uimg::ImageBuffer::ToFloatFormat(Format format)
 {
 	switch(format)
 	{
@@ -193,7 +193,7 @@ uimg::ImageBuffer::Format uimg::ImageBuffer::ToFloatFormat(Format format)
 	static_assert(umath::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
-uimg::ImageBuffer::Format uimg::ImageBuffer::ToRGBFormat(Format format)
+uimg::Format uimg::ImageBuffer::ToRGBFormat(Format format)
 {
 	switch(format)
 	{
@@ -216,7 +216,7 @@ uimg::ImageBuffer::Format uimg::ImageBuffer::ToRGBFormat(Format format)
 	static_assert(umath::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
-uimg::ImageBuffer::Format uimg::ImageBuffer::ToRGBAFormat(Format format)
+uimg::Format uimg::ImageBuffer::ToRGBAFormat(Format format)
 {
 	switch(format)
 	{
@@ -349,21 +349,21 @@ void uimg::ImageBuffer::SetPixelColor(PixelIndex index,const std::array<uint8_t,
 {
 	auto pxView = GetPixelView(GetPixelOffset(index));
 	for(uint8_t i=0;i<4;++i)
-		pxView.SetValue(static_cast<uimg::ImageBuffer::Channel>(i),color.at(i));
+		pxView.SetValue(static_cast<uimg::Channel>(i),color.at(i));
 }
 void uimg::ImageBuffer::SetPixelColor(uint32_t x,uint32_t y,const std::array<uint16_t,4> &color) {SetPixelColor(GetPixelIndex(x,y),color);}
 void uimg::ImageBuffer::SetPixelColor(PixelIndex index,const std::array<uint16_t,4> &color)
 {
 	auto pxView = GetPixelView(GetPixelOffset(index));
 	for(uint8_t i=0;i<4;++i)
-		pxView.SetValue(static_cast<uimg::ImageBuffer::Channel>(i),color.at(i));
+		pxView.SetValue(static_cast<uimg::Channel>(i),color.at(i));
 }
 void uimg::ImageBuffer::SetPixelColor(uint32_t x,uint32_t y,const Vector4 &color) {SetPixelColor(GetPixelIndex(x,y),color);}
 void uimg::ImageBuffer::SetPixelColor(PixelIndex index,const Vector4 &color)
 {
 	auto pxView = GetPixelView(GetPixelOffset(index));
 	for(uint8_t i=0;i<4;++i)
-		pxView.SetValue(static_cast<uimg::ImageBuffer::Channel>(i),color[i]);
+		pxView.SetValue(static_cast<uimg::Channel>(i),color[i]);
 }
 
 uimg::ImageBuffer *uimg::ImageBuffer::GetParent() {return (m_parent.expired() == false) ? m_parent.lock().get() : nullptr;}
@@ -498,7 +498,7 @@ void uimg::ImageBuffer::Copy(ImageBuffer &dst,uint32_t xSrc,uint32_t ySrc,uint32
 		pxDst.CopyValues(px);
 	}
 }
-uimg::ImageBuffer::Format uimg::ImageBuffer::GetFormat() const {return m_format;}
+uimg::Format uimg::ImageBuffer::GetFormat() const {return m_format;}
 uint32_t uimg::ImageBuffer::GetWidth() const {return m_width;}
 uint32_t uimg::ImageBuffer::GetHeight() const {return m_height;}
 uimg::ImageBuffer::Size uimg::ImageBuffer::GetPixelSize() const {return GetPixelSize(GetFormat());}
@@ -618,6 +618,26 @@ void uimg::ImageBuffer::Convert(Format targetFormat)
 void uimg::ImageBuffer::Convert(ImageBuffer &dst)
 {
 	Convert(*this,dst,dst.GetFormat());
+}
+void uimg::ImageBuffer::SwapChannels(ChannelMask swizzle)
+{
+	if(swizzle == ChannelMask{})
+		return;
+	auto channelSize = GetChannelSize();
+	auto numChannels = GetChannelCount();
+	auto pxSize = channelSize *numChannels;
+	std::vector<uint8_t> tmpChannelData {};
+	tmpChannelData.resize(pxSize);
+	for(auto &px : *this)
+	{
+		auto *pxData = px.GetPixelData();
+		auto *channelData = static_cast<uint8_t*>(pxData);
+
+		for(auto i=decltype(numChannels){0u};i<numChannels;++i)
+			memcpy(tmpChannelData.data() +i *channelSize,channelData +umath::to_integral(swizzle[i]) *channelSize,channelSize);
+
+		memcpy(channelData,tmpChannelData.data(),pxSize);
+	}
 }
 void uimg::ImageBuffer::SwapChannels(Channel channel0,Channel channel1)
 {
