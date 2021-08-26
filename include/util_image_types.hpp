@@ -7,6 +7,7 @@
 
 #include "util_image_definitions.hpp"
 #include <cinttypes>
+#include <optional>
 
 namespace uimg
 {
@@ -66,9 +67,14 @@ namespace uimg
 		Channel alpha : 8 = Channel::Alpha;
 		bool operator==(const ChannelMask&) const=default;
 		bool operator!=(const ChannelMask&) const=default;
-		Channel operator[](uint32_t idx) const {
-			return *reinterpret_cast<const Channel*>(reinterpret_cast<const uint8_t*>(this) +idx);
+		Channel &operator[](uint32_t idx) {
+			return *reinterpret_cast<Channel*>(reinterpret_cast<uint8_t*>(this) +idx);
 		}
+		const Channel &operator[](uint32_t idx) const {return const_cast<ChannelMask*>(this)->operator[](idx);}
+		void Reverse();
+		ChannelMask GetReverse() const;
+		void SwapChannels(Channel a,Channel b);
+		std::optional<uint8_t> GetChannelIndex(Channel channel) const;
 	};
 	enum class ToneMapping : uint8_t
 	{

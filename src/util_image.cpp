@@ -11,6 +11,35 @@
 #include <cmath>
 
 #pragma optimize("",off)
+void uimg::ChannelMask::Reverse() {*this = GetReverse();}
+uimg::ChannelMask uimg::ChannelMask::GetReverse() const
+{
+	uimg::ChannelMask rmask;
+	rmask.red = alpha;
+	rmask.green = blue;
+	rmask.blue = green;
+	rmask.alpha = red;
+	return rmask;
+}
+void uimg::ChannelMask::SwapChannels(Channel a,Channel b)
+{
+	umath::swap((*this)[umath::to_integral(a)],(*this)[umath::to_integral(b)]);
+}
+std::optional<uint8_t> uimg::ChannelMask::GetChannelIndex(Channel channel) const
+{
+	if(red == channel)
+		return 0;
+	if(green == channel)
+		return 1;
+	if(blue == channel)
+		return 2;
+	if(alpha == channel)
+		return 3;
+	return {};
+}
+
+///////////
+
 void uimg::calculate_mipmap_size(uint32_t w,uint32_t h,uint32_t &outWMipmap,uint32_t &outHMipmap,uint32_t level)
 {
 	outWMipmap = w;

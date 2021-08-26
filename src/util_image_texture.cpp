@@ -248,9 +248,20 @@ static bool compress_texture(
 )
 {
 	auto &texInfo = texSaveInfo.texInfo;
-	auto channelMask = texSaveInfo.channelMask;
-	if(texInfo.inputFormat == uimg::TextureInfo::InputFormat::R8G8B8A8_UInt)
-		channelMask = uimg::ChannelMask{uimg::Channel::Blue,uimg::Channel::Green,uimg::Channel::Red,uimg::Channel::Alpha}; // Swap red and blue channels
+	uimg::ChannelMask channelMask {};
+	if(texSaveInfo.channelMask.has_value())
+		channelMask = *texSaveInfo.channelMask;
+	else if(texInfo.inputFormat == uimg::TextureInfo::InputFormat::R8G8B8A8_UInt)
+		channelMask.SwapChannels(uimg::Channel::Red,uimg::Channel::Blue);
+
+	auto nvttFormat = get_nvtt_format(texInfo.inputFormat);
+	switch(nvttFormat)
+	{
+	case nvtt::InputFormat_BGRA_8UB:
+		channelMask.SwapChannels(uimg::Channel::Red,uimg::Channel::Blue);
+		break;
+	}
+
 	auto numMipmaps = umath::max(texSaveInfo.numMipmaps,static_cast<uint32_t>(1));
 	auto numLayers = texSaveInfo.numLayers;
 	auto width = texSaveInfo.width;
@@ -306,7 +317,6 @@ static bool compress_texture(
 
 	auto size = width *height *szPerPixel;
 
-	auto nvttFormat = get_nvtt_format(texInfo.inputFormat);
 	nvtt::InputOptions inputOptions {};
 	inputOptions.reset();
 	inputOptions.setTextureLayout(nvtt::TextureType_2D,width,height);

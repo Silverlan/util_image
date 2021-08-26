@@ -64,7 +64,7 @@ namespace uimg
 		uint32_t numMipmaps = 0;
 
 		bool cubemap = false;
-		uimg::ChannelMask channelMask = {};
+		std::optional<uimg::ChannelMask> channelMask {};
 	};
 	DLLUIMG bool compress_texture(
 		const TextureOutputHandler &outputHandler,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,const TextureSaveInfo &texSaveInfo,
