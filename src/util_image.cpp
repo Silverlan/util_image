@@ -55,15 +55,15 @@ void uimg::calculate_mipmap_size(uint32_t w,uint32_t h,uint32_t &outWMipmap,uint
 
 std::optional<uimg::ImageFormat> uimg::string_to_image_output_format(const std::string &str)
 {
-	if(ustring::compare(str,"PNG",false))
+	if(ustring::compare<std::string>(str,"PNG",false))
 		return ImageFormat::PNG;
-	else if(ustring::compare(str,"BMP",false))
+	else if(ustring::compare<std::string>(str,"BMP",false))
 		return ImageFormat::BMP;
-	else if(ustring::compare(str,"TGA",false))
+	else if(ustring::compare<std::string>(str,"TGA",false))
 		return ImageFormat::TGA;
-	else if(ustring::compare(str,"JPG",false))
+	else if(ustring::compare<std::string>(str,"JPG",false))
 		return ImageFormat::JPG;
-	else if(ustring::compare(str,"HDR",false))
+	else if(ustring::compare<std::string>(str,"HDR",false))
 		return ImageFormat::HDR;
 	return {};
 }
@@ -88,17 +88,17 @@ std::string uimg::get_image_output_format_extension(ImageFormat format)
 
 std::optional<uimg::ToneMapping> uimg::string_to_tone_mapping(const std::string &str)
 {
-	if(ustring::compare(str,"gamma_correction",false))
+	if(ustring::compare<std::string>(str,"gamma_correction",false))
 		return uimg::ToneMapping::GammaCorrection;
-	else if(ustring::compare(str,"reinhard",false))
+	else if(ustring::compare<std::string>(str,"reinhard",false))
 		return uimg::ToneMapping::Reinhard;
-	else if(ustring::compare(str,"hejil_richard",false))
+	else if(ustring::compare<std::string>(str,"hejil_richard",false))
 		return uimg::ToneMapping::HejilRichard;
-	else if(ustring::compare(str,"uncharted",false))
+	else if(ustring::compare<std::string>(str,"uncharted",false))
 		return uimg::ToneMapping::Uncharted;
-	else if(ustring::compare(str,"aces",false))
+	else if(ustring::compare<std::string>(str,"aces",false))
 		return uimg::ToneMapping::Aces;
-	else if(ustring::compare(str,"gran_turismo",false))
+	else if(ustring::compare<std::string>(str,"gran_turismo",false))
 		return uimg::ToneMapping::GranTurismo;
 	return {};
 }
