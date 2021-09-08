@@ -565,6 +565,9 @@ bool uimg::save_texture(
 {
 	auto numLayers = imgLayerMipmapData.size();
 	auto numMipmaps = imgLayerMipmapData.empty() ? 1 : imgLayerMipmapData.front().size();
+	auto ltexSaveInfo = texSaveInfo;
+	ltexSaveInfo.numLayers = numLayers;
+	ltexSaveInfo.numMipmaps = numMipmaps;
 	return save_texture(fileName,[&imgLayerMipmapData](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
 		if(iLayer >= imgLayerMipmapData.size())
 			return nullptr;
@@ -572,7 +575,7 @@ bool uimg::save_texture(
 		if(iMipmap >= mipmapData.size())
 			return nullptr;
 		return static_cast<const uint8_t*>(mipmapData.at(iMipmap));
-	},texSaveInfo,errorHandler,absoluteFileName);
+	},ltexSaveInfo,errorHandler,absoluteFileName);
 }
 #endif
 #pragma optimize("",on)
