@@ -54,8 +54,9 @@ jobs:
           build_target: zlib
           build_dir: 'build/third_party_libs/zlib'
           cmake_script_location: 'third_party_libs/zlib'
-      
-      
+      - name: Copy zconf.h
+        run: |
+          cp $GA_ROOT_DIR/build/third_party_libs/zlib/zconf.h $GA_ROOT_DIR/third_party_libs/zlib/zconf.h
       
       
       
