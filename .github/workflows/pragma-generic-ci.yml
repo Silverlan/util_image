@@ -41,7 +41,7 @@ jobs:
           git submodule update --init --recursive
           
       - name: Download common external libs
-        uses: Silverlan/common_actions/get_common_external_libs@main
+        uses: Silverlan/common_actions/get_common_external_libs@actions
         
       - name: Download submodule - squish
         uses: Silverlan/common_actions/get_submodule@main
