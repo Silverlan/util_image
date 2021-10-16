@@ -8,7 +8,7 @@ on: [push]
 #    branches: [ master ]
     
 env:
-  shared_cmake_definitions: -DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE=./third_party_libs/nvtt/src -DDEPENDENCY_ZLIB_INCLUDE=./third_party_libs/zlib -DDEPENDENCY_LPNG_INCLUDE=./third_party_libs/libpng -DDEPENDENCY_GLM_INCLUDE=./third_party_libs/glm -DDEPENDENCY_MATHUTIL_INCLUDE=./external_libs/mathutil/include -DDEPENDENCY_SHAREDUTILS_INCLUDE=./external_libs/sharedutils/include -DDEPENDENCY_VFILESYSTEM_INCLUDE=./external_libs/sharedutils/include -DMATHUTIL_ENABLE_MESH_FUNCTIONS=OFF
+  shared_cmake_definitions: -DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE=../third_party_libs/nvtt/src -DDEPENDENCY_ZLIB_INCLUDE=../third_party_libs/zlib -DDEPENDENCY_LPNG_INCLUDE=../third_party_libs/libpng -DDEPENDENCY_GLM_INCLUDE=../third_party_libs/glm -DDEPENDENCY_MATHUTIL_INCLUDE=../external_libs/mathutil/include -DDEPENDENCY_SHAREDUTILS_INCLUDE=../external_libs/sharedutils/include -DDEPENDENCY_VFILESYSTEM_INCLUDE=../external_libs/sharedutils/include -DMATHUTIL_ENABLE_MESH_FUNCTIONS=OFF
 
 jobs:
   # WINDOWS x64 MSVC
