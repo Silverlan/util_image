@@ -36,27 +36,34 @@ jobs:
       - uses: actions/checkout@v2
       
       
-      
       - name: Download submodule - zlib
-        uses: Silverlan/common_actions/get_submodule@actions
+        uses: Silverlan/common_actions/build_submodule@actions
         with:
-          dir: 'third_party_libs'
           repo: 'https://github.com/madler/zlib.git'
           repo_name: 'zlib'
           repo_branch: 'master'
-          
-      - name: Build zlib
-        uses: Silverlan/common_actions/build_cmake@actions
-        with:
-          build_type: ${{ matrix.config.build_type }}
-          build_generator: ${{ matrix.config.generators }}
-          cmake_definitions: ${{ env.shared_cmake_definitions }} -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
           build_target: zlib
-          build_dir: 'build/third_party_libs/zlib'
-          cmake_script_location: 'third_party_libs/zlib'
-      - name: Copy zconf.h
-        run: |
-          cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
+          
+      #- name: Download submodule - zlib
+      #  uses: Silverlan/common_actions/get_submodule@actions
+      #  with:
+      #    dir: 'third_party_libs'
+      #    repo: 'https://github.com/madler/zlib.git'
+      #    repo_name: 'zlib'
+      #    repo_branch: 'master'
+      #    
+      #- name: Build zlib
+      #  uses: Silverlan/common_actions/build_cmake@actions
+      #  with:
+      #    build_type: ${{ matrix.config.build_type }}
+      #    build_generator: ${{ matrix.config.generators }}
+      #    cmake_definitions: ${{ env.shared_cmake_definitions }} -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+      #    build_target: zlib
+      #    build_dir: 'build/third_party_libs/zlib'
+      #    cmake_script_location: 'third_party_libs/zlib'
+      #- name: Copy zconf.h
+      #  run: |
+      #    cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
       
       
       
