@@ -78,7 +78,7 @@ jobs:
           build_type: ${{ matrix.config.build_type }}
           build_generator: ${{ matrix.config.generators }}
           cmake_definitions: ${{ env.shared_cmake_definitions }} -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} -DZLIB_INCLUDE_DIR=../third_party_libs/zlib -DZLIB_LIBRARY_RELEASE=../third_party_libs/zlib/RelWithDebInfo/zlib.lib
-          build_target: libpng
+          build_target: png
           build_dir: 'build/third_party_libs/libpng'
           cmake_script_location: 'third_party_libs/libpng'
 
