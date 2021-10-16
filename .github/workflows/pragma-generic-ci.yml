@@ -35,11 +35,6 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
-      #- name: Init CMake defintions
-      #  shell: bash
-      #  run: |
-      #    echo "cmake_definitions=" >> $GITHUB_ENV
   
       - name: Download submodules
         run: |
@@ -47,6 +42,12 @@ jobs:
           
       - name: Download common external libs
         uses: Silverlan/common_actions/get_common_external_libs@actions
+        
+      - name: Print Test
+        shell: bash
+        run: |
+          echo "FINAL CMAKE DEFS:"
+          echo "$cmake_definitions"
         
       - name: Download submodule - squish
         uses: Silverlan/common_actions/get_submodule@main
