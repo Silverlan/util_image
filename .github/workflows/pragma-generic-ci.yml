@@ -65,6 +65,8 @@ jobs:
           repo_branch: 'master'
           build_target: zlib
           cmake_definitions: ${{ env.cmake_definitions }}
+          cmake_var: 'ZLIB_INCLUDE_DIR'
+          cmake_var_lib: 'ZLIB_LIBRARY'
       - name: Copy zconf.h
         run: |
           cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
