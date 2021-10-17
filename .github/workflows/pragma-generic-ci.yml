@@ -49,12 +49,13 @@ jobs:
           echo "$cmake_definitions"
         
       - name: Download submodule - squish
-        uses: Silverlan/common_actions/get_submodule@main
+        uses: Silverlan/common_actions/get_submodule@actions
         with:
           dir: 'third_party_libs'
           repo: 'https://github.com/ivan-kulikov-dev/squish.git'
           repo_name: 'squish'
           repo_branch: 'master'
+          cmake_definitions: ${{ env.cmake_definitions }}
         
       - name: Build submodule - zlib
         uses: Silverlan/common_actions/build_submodule@actions
@@ -63,6 +64,7 @@ jobs:
           repo_name: 'zlib'
           repo_branch: 'master'
           build_target: zlib
+          cmake_definitions: ${{ env.cmake_definitions }}
       - name: Copy zconf.h
         run: |
           cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
@@ -74,14 +76,15 @@ jobs:
           repo_name: 'libpng'
           repo_branch: 'libpng16'
           build_target: png
-          cmake_definitions: -DZLIB_INCLUDE_DIR=$GA_ROOT_DIR/third_party_libs/zlib -DZLIB_LIBRARY_RELEASE=$GA_ROOT_DIR/build/third_party_libs/zlib/RelWithDebInfo/zlib.lib
+          cmake_definitions: ${{ env.cmake_definitions }}
+          # cmake_definitions: -DZLIB_INCLUDE_DIR=$GA_ROOT_DIR/third_party_libs/zlib -DZLIB_LIBRARY_RELEASE=$GA_ROOT_DIR/build/third_party_libs/zlib/RelWithDebInfo/zlib.lib
 
       - name: CMake Build
-        uses: Silverlan/common_actions/build_cmake@main
+        uses: Silverlan/common_actions/build_cmake@actions
         with:
           build_type: ${{ matrix.config.build_type }}
           build_generator: ${{ matrix.config.generators }}
-          cmake_definitions: ${{ env.shared_cmake_definitions }} -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+          cmake_definitions: ${{ env.cmake_definitions }}
           build_target: util_image
           
   # UBUNTU x64 GCC
