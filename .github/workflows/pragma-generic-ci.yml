@@ -58,21 +58,13 @@ jobs:
           build_target: zlib
           cmake_definitions: ${{ env.cmake_definitions }}
           cmake_var: 'ZLIB_INCLUDE_DIR'
+          cmake_var_alias: 'DDEPENDENCY_ZLIB_INCLUDE'
           cmake_var_lib: 'ZLIB_LIBRARY'
+          cmake_var_lib_alias: 'DDEPENDENCY_ZLIB_LIBRARY'
           include_dir: '.'
       - name: Copy zconf.h
         run: |
           cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
-          
-      - name: Define CMake Variable DEPENDENCY_ZLIB_INCLUDE
-        uses: Silverlan/common_actions/define_cmake_var@actions
-        with:
-          cmake_var: ' -DDEPENDENCY_ZLIB_INCLUDE=\${ZLIB_INCLUDE_DIR}'
-          
-      - name: Define CMake Variable DEPENDENCY_ZLIB_LIBRARY
-        uses: Silverlan/common_actions/define_cmake_var@actions
-        with:
-          cmake_var: ' -DDEPENDENCY_ZLIB_LIBRARY=\${ZLIB_LIBRARY}'
           
       - name: Build submodule - libpng
         uses: Silverlan/common_actions/build_submodule@actions
