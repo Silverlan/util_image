@@ -38,6 +38,10 @@ jobs:
         run: |
           git submodule update --init --recursive
           
+      - name: Initialize Env
+        id: init-env
+        uses: Silverlan/common_actions/set_common_env_vars@actions
+          
       - name: Define nvtt CMake Variables
         uses: Silverlan/common_actions/define_cmake_var@actions
         with:
@@ -84,7 +88,10 @@ jobs:
           cmake_definitions: ${{ env.cmake_definitions }}
           include_dir: '.'
           # cmake_definitions: -DZLIB_INCLUDE_DIR=$GA_ROOT_DIR/third_party_libs/zlib -DZLIB_LIBRARY_RELEASE=$GA_ROOT_DIR/build/third_party_libs/zlib/RelWithDebInfo/zlib.lib
-
+      - name: Copy pnglibconf.h
+        run: |
+          cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/zconf.h
+          
       - name: CMake Build
         uses: Silverlan/common_actions/build_cmake@actions
         with:
