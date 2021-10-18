@@ -59,7 +59,6 @@ jobs:
         with:
           build_target: nvtt
           lib_name: src/nvtt/${{ matrix.config.build_type }}/nvtt
-          lib_name: nvtt
           build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
           cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY'
           cmake_script_location: 'third_party_libs/nvtt'
