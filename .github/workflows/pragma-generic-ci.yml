@@ -81,7 +81,6 @@ jobs:
       - name: CMake Build
         uses: Silverlan/common_actions/build_cmake@actions
         with:
-          build_target: 'util_image'
           build_type: ${{ matrix.config.build_type }}
           build_generator: ${{ matrix.config.generators }}
           cmake_definitions: ${{ env.cmake_definitions }}
