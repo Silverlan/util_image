@@ -132,6 +132,7 @@ runs:
         cmake_var_lib_alias: 'DEPENDENCY_ZLIB_LIBRARY'
         include_dir: '.'
     - name: Copy zconf.h
+      shell: bash
       run: |
         cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
 
