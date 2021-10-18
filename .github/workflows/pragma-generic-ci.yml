@@ -32,7 +32,15 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - name: Initialize Env
+        id: init-env
+        uses: Silverlan/common_actions/set_common_env_vars@actions
+
       - name: Build
         id: build
         uses: Silverlan/util_image/github_actions/build@actions
           
+      - uses: actions/upload-artifact@v2
+        with:
+          name: upload-binary
+          path: "build/${{ matrix.config.build_type }}/util_image{{ env.GA_SHARED_LINK_LIBRARY_EXT }}"
