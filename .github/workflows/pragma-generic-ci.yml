@@ -73,6 +73,8 @@ jobs:
           repo_name: 'libpng'
           repo_branch: 'libpng16'
           build_target: png
+          cmake_var: 'DEPENDENCY_LPNG_INCLUDE'
+          cmake_var_lib: 'DEPENDENCY_LPNG_LIBRARY'
           cmake_definitions: ${{ env.cmake_definitions }}
           # cmake_definitions: -DZLIB_INCLUDE_DIR=$GA_ROOT_DIR/third_party_libs/zlib -DZLIB_LIBRARY_RELEASE=$GA_ROOT_DIR/build/third_party_libs/zlib/RelWithDebInfo/zlib.lib
 
