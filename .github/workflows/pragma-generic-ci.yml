@@ -27,7 +27,7 @@ jobs:
             cc: "cl",
             cxx: "cl",
             archiver: "7z a",
-            generators: "Visual Studio 16 2019"
+            generators: "Visual Studio 16 2019",
             build_dir: 'build'
           }
 
