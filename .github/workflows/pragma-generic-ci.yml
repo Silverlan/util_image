@@ -65,6 +65,7 @@ jobs:
           cmake_definitions: ${{ env.cmake_definitions }}
           cmake_var: 'ZLIB_INCLUDE_DIR'
           cmake_var_lib: 'ZLIB_LIBRARY'
+          include_dir: '.'
       - name: Copy zconf.h
         run: |
           cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
