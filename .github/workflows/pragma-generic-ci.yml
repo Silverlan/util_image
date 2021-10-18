@@ -46,6 +46,30 @@ jobs:
         uses: Silverlan/common_actions/define_cmake_var@actions
         with:
           cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE=${{ env.GA_ROOT_DIR }}/third_party_libs/nvtt/src'
+          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/bc6h/${{ matrix.config.build_type }}/bc6h'
+          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/bc7/${{ matrix.config.build_type }}/bc7'
+          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvcore/${{ matrix.config.build_type }}/nvcore'
+          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvimage/${{ matrix.config.build_type }}/nvimage'
+          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvmath/${{ matrix.config.build_type }}/nvmath'
+          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/squish/${{ matrix.config.build_type }}/nvsquish'
+          
+      - name: Build nvtt
+        uses: Silverlan/common_actions/build_cmake@actions
+        with:
+          build_target: nvtt
+          lib_name: nvtt
+          build_dir: '${{ inputs.build_dir }}/${{ inputs.root_dir }}/${{ inputs.repo_name }}'
+          cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY'
+          cmake_script_location: '${{ inputs.root_dir }}/${{ inputs.repo_name }}/${{ inputs.cmake_script_location }}'
+          
+      - name: Build nvtt bc6h
+        uses: Silverlan/common_actions/build_cmake@actions
+        with:
+          build_target: bc6h
+          lib_name: bc6h
+          build_dir: '${{ inputs.build_dir }}/${{ inputs.root_dir }}/${{ inputs.repo_name }}'
+          cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY'
+          cmake_script_location: '${{ inputs.root_dir }}/${{ inputs.repo_name }}/${{ inputs.cmake_script_location }}'
           
       - name: Download common external libs
         uses: Silverlan/common_actions/get_common_external_libs@actions
