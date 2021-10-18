@@ -8,6 +8,7 @@ runs:
     - uses: actions/checkout@v2
 
     - name: Download submodules
+      shell: bash
       run: |
         git submodule update --init --recursive
 
@@ -148,6 +149,7 @@ runs:
         lib_name: '${{ matrix.config.build_type }}/libpng16'
         # cmake_definitions: -DZLIB_INCLUDE_DIR=$GA_ROOT_DIR/third_party_libs/zlib -DZLIB_LIBRARY_RELEASE=$GA_ROOT_DIR/build/third_party_libs/zlib/RelWithDebInfo/zlib.lib
     - name: Copy pnglibconf.h
+      shell: bash
       run: |
         cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
 
