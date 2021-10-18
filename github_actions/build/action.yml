@@ -1,162 +1,161 @@
 name: Build
 description: 'Build library'
 
-jobs:
-  build-windows:
-    name: Build-Windows-x64
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-  
-      - name: Download submodules
-        run: |
-          git submodule update --init --recursive
-          
-      - name: Initialize Env
-        id: init-env
-        uses: Silverlan/common_actions/set_common_env_vars@actions
-          
-      - name: Define nvtt CMake Variables
-        uses: Silverlan/common_actions/define_cmake_var@actions
-        with:
-          cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE=${{ env.GA_ROOT_DIR }}/third_party_libs/nvtt/src'
-          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/bc6h/${{ matrix.config.build_type }}/bc6h'
-          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/bc7/${{ matrix.config.build_type }}/bc7'
-          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvcore/${{ matrix.config.build_type }}/nvcore'
-          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvimage/${{ matrix.config.build_type }}/nvimage'
-          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvmath/${{ matrix.config.build_type }}/nvmath'
-          #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/squish/${{ matrix.config.build_type }}/nvsquish'
-          
-      - name: Build nvtt
-        uses: Silverlan/common_actions/build_cmake@actions
-        with:
-          build_target: nvtt
-          lib_name: src/nvtt/${{ matrix.config.build_type }}/nvtt
-          build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
-          cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY'
-          cmake_script_location: 'third_party_libs/nvtt'
-          
-      - name: Build nvtt - bc6h
-        uses: Silverlan/common_actions/build_cmake@actions
-        with:
-          build_target: bc6h
-          lib_name: src/bc6h/${{ matrix.config.build_type }}/bc6h
-          build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
-          cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY'
-          cmake_script_location: 'third_party_libs/nvtt'
-          configure: '0'
-          
-      - name: Build nvtt - bc7
-        uses: Silverlan/common_actions/build_cmake@actions
-        with:
-          build_target: bc7
-          lib_name: src/bc7/${{ matrix.config.build_type }}/bc7
-          build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
-          cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY'
-          cmake_script_location: 'third_party_libs/nvtt'
-          configure: '0'
-          
-      - name: Build nvtt - core
-        uses: Silverlan/common_actions/build_cmake@actions
-        with:
-          build_target: nvcore
-          lib_name: src/nvcore/${{ matrix.config.build_type }}/nvcore
-          build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
-          cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY'
-          cmake_script_location: 'third_party_libs/nvtt'
-          configure: '0'
-          
-      - name: Build nvtt - image
-        uses: Silverlan/common_actions/build_cmake@actions
-        with:
-          build_target: nvimage
-          lib_name: src/nvimage/${{ matrix.config.build_type }}/nvimage
-          build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
-          cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY'
-          cmake_script_location: 'third_party_libs/nvtt'
-          configure: '0'
-          
-      - name: Build nvtt - math
-        uses: Silverlan/common_actions/build_cmake@actions
-        with:
-          build_target: nvmath
-          lib_name: src/nvmath/${{ matrix.config.build_type }}/nvmath
-          build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
-          cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY'
-          cmake_script_location: 'third_party_libs/nvtt'
-          configure: '0'
-          
-      - name: Build nvtt - squish
-        uses: Silverlan/common_actions/build_cmake@actions
-        with:
-          build_target: nvsquish
-          lib_name: src/nvtt/squish/${{ matrix.config.build_type }}/nvsquish
-          build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
-          cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY'
-          cmake_script_location: 'third_party_libs/nvtt'
-          configure: '0'
-          
-      - name: Build nvtt - thread
-        uses: Silverlan/common_actions/build_cmake@actions
-        with:
-          build_target: nvthread
-          lib_name: src/nvthread/${{ matrix.config.build_type }}/nvthread
-          build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
-          cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY'
-          cmake_script_location: 'third_party_libs/nvtt'
-          configure: '0'
-          
-      - name: Download common external libs
-        uses: Silverlan/common_actions/get_common_external_libs@actions
+runs:
+  using: "composite"
+  steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
 
-      - name: Download submodule - squish
-        uses: Silverlan/common_actions/get_submodule@actions
-        with:
-          dir: 'third_party_libs'
-          repo: 'https://github.com/ivan-kulikov-dev/squish.git'
-          repo_name: 'squish'
-          repo_branch: 'master'
-          cmake_definitions: ${{ env.cmake_definitions }}
-        
-      - name: Build submodule - zlib
-        uses: Silverlan/common_actions/build_submodule@actions
-        with:
-          repo: 'https://github.com/madler/zlib.git'
-          repo_name: 'zlib'
-          repo_branch: 'master'
-          build_target: zlib
-          cmake_definitions: ${{ env.cmake_definitions }}
-          cmake_var: 'ZLIB_INCLUDE_DIR'
-          cmake_var_alias: 'DEPENDENCY_ZLIB_INCLUDE'
-          cmake_var_lib: 'ZLIB_LIBRARY'
-          cmake_var_lib_alias: 'DEPENDENCY_ZLIB_LIBRARY'
-          include_dir: '.'
-      - name: Copy zconf.h
-        run: |
-          cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
-          
-      - name: Build submodule - libpng
-        uses: Silverlan/common_actions/build_submodule@actions
-        with:
-          repo: 'https://github.com/glennrp/libpng.git'
-          repo_name: 'libpng'
-          repo_branch: 'libpng16'
-          build_target: png
-          cmake_var: 'DEPENDENCY_LPNG_INCLUDE'
-          cmake_var_lib: 'DEPENDENCY_LPNG_LIBRARY'
-          cmake_definitions: ${{ env.cmake_definitions }}
-          include_dir: '.'
-          lib_name: '${{ matrix.config.build_type }}/libpng16'
-          # cmake_definitions: -DZLIB_INCLUDE_DIR=$GA_ROOT_DIR/third_party_libs/zlib -DZLIB_LIBRARY_RELEASE=$GA_ROOT_DIR/build/third_party_libs/zlib/RelWithDebInfo/zlib.lib
-      - name: Copy pnglibconf.h
-        run: |
-          cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
-          
-      - name: CMake Build
-        uses: Silverlan/common_actions/build_cmake@actions
-        with:
-          build_type: ${{ matrix.config.build_type }}
-          build_generator: ${{ matrix.config.generators }}
-          cmake_definitions: ${{ env.cmake_definitions }}
-          build_target: util_image
-          
+    - name: Download submodules
+      run: |
+        git submodule update --init --recursive
+
+    - name: Initialize Env
+      id: init-env
+      uses: Silverlan/common_actions/set_common_env_vars@actions
+
+    - name: Define nvtt CMake Variables
+      uses: Silverlan/common_actions/define_cmake_var@actions
+      with:
+        cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE=${{ env.GA_ROOT_DIR }}/third_party_libs/nvtt/src'
+        #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/bc6h/${{ matrix.config.build_type }}/bc6h'
+        #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/bc7/${{ matrix.config.build_type }}/bc7'
+        #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvcore/${{ matrix.config.build_type }}/nvcore'
+        #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvimage/${{ matrix.config.build_type }}/nvimage'
+        #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvmath/${{ matrix.config.build_type }}/nvmath'
+        #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/squish/${{ matrix.config.build_type }}/nvsquish'
+
+    - name: Build nvtt
+      uses: Silverlan/common_actions/build_cmake@actions
+      with:
+        build_target: nvtt
+        lib_name: src/nvtt/${{ matrix.config.build_type }}/nvtt
+        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY'
+        cmake_script_location: 'third_party_libs/nvtt'
+
+    - name: Build nvtt - bc6h
+      uses: Silverlan/common_actions/build_cmake@actions
+      with:
+        build_target: bc6h
+        lib_name: src/bc6h/${{ matrix.config.build_type }}/bc6h
+        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY'
+        cmake_script_location: 'third_party_libs/nvtt'
+        configure: '0'
+
+    - name: Build nvtt - bc7
+      uses: Silverlan/common_actions/build_cmake@actions
+      with:
+        build_target: bc7
+        lib_name: src/bc7/${{ matrix.config.build_type }}/bc7
+        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY'
+        cmake_script_location: 'third_party_libs/nvtt'
+        configure: '0'
+
+    - name: Build nvtt - core
+      uses: Silverlan/common_actions/build_cmake@actions
+      with:
+        build_target: nvcore
+        lib_name: src/nvcore/${{ matrix.config.build_type }}/nvcore
+        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY'
+        cmake_script_location: 'third_party_libs/nvtt'
+        configure: '0'
+
+    - name: Build nvtt - image
+      uses: Silverlan/common_actions/build_cmake@actions
+      with:
+        build_target: nvimage
+        lib_name: src/nvimage/${{ matrix.config.build_type }}/nvimage
+        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY'
+        cmake_script_location: 'third_party_libs/nvtt'
+        configure: '0'
+
+    - name: Build nvtt - math
+      uses: Silverlan/common_actions/build_cmake@actions
+      with:
+        build_target: nvmath
+        lib_name: src/nvmath/${{ matrix.config.build_type }}/nvmath
+        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY'
+        cmake_script_location: 'third_party_libs/nvtt'
+        configure: '0'
+
+    - name: Build nvtt - squish
+      uses: Silverlan/common_actions/build_cmake@actions
+      with:
+        build_target: nvsquish
+        lib_name: src/nvtt/squish/${{ matrix.config.build_type }}/nvsquish
+        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY'
+        cmake_script_location: 'third_party_libs/nvtt'
+        configure: '0'
+
+    - name: Build nvtt - thread
+      uses: Silverlan/common_actions/build_cmake@actions
+      with:
+        build_target: nvthread
+        lib_name: src/nvthread/${{ matrix.config.build_type }}/nvthread
+        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY'
+        cmake_script_location: 'third_party_libs/nvtt'
+        configure: '0'
+
+    - name: Download common external libs
+      uses: Silverlan/common_actions/get_common_external_libs@actions
+
+    - name: Download submodule - squish
+      uses: Silverlan/common_actions/get_submodule@actions
+      with:
+        dir: 'third_party_libs'
+        repo: 'https://github.com/ivan-kulikov-dev/squish.git'
+        repo_name: 'squish'
+        repo_branch: 'master'
+        cmake_definitions: ${{ env.cmake_definitions }}
+
+    - name: Build submodule - zlib
+      uses: Silverlan/common_actions/build_submodule@actions
+      with:
+        repo: 'https://github.com/madler/zlib.git'
+        repo_name: 'zlib'
+        repo_branch: 'master'
+        build_target: zlib
+        cmake_definitions: ${{ env.cmake_definitions }}
+        cmake_var: 'ZLIB_INCLUDE_DIR'
+        cmake_var_alias: 'DEPENDENCY_ZLIB_INCLUDE'
+        cmake_var_lib: 'ZLIB_LIBRARY'
+        cmake_var_lib_alias: 'DEPENDENCY_ZLIB_LIBRARY'
+        include_dir: '.'
+    - name: Copy zconf.h
+      run: |
+        cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
+
+    - name: Build submodule - libpng
+      uses: Silverlan/common_actions/build_submodule@actions
+      with:
+        repo: 'https://github.com/glennrp/libpng.git'
+        repo_name: 'libpng'
+        repo_branch: 'libpng16'
+        build_target: png
+        cmake_var: 'DEPENDENCY_LPNG_INCLUDE'
+        cmake_var_lib: 'DEPENDENCY_LPNG_LIBRARY'
+        cmake_definitions: ${{ env.cmake_definitions }}
+        include_dir: '.'
+        lib_name: '${{ matrix.config.build_type }}/libpng16'
+        # cmake_definitions: -DZLIB_INCLUDE_DIR=$GA_ROOT_DIR/third_party_libs/zlib -DZLIB_LIBRARY_RELEASE=$GA_ROOT_DIR/build/third_party_libs/zlib/RelWithDebInfo/zlib.lib
+    - name: Copy pnglibconf.h
+      run: |
+        cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
+
+    - name: CMake Build
+      uses: Silverlan/common_actions/build_cmake@actions
+      with:
+        build_type: ${{ matrix.config.build_type }}
+        build_generator: ${{ matrix.config.generators }}
+        cmake_definitions: ${{ env.cmake_definitions }}
+        build_target: util_image
+
