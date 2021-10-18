@@ -37,6 +37,11 @@ jobs:
         run: |
           git submodule update --init --recursive
           
+      - name: Define nvtt CMake Variables
+        uses: Silverlan/common_actions/define_cmake_var@actions
+        with:
+          cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE=${{ env.GA_ROOT_DIR }}/third_party_libs/nvtt/src'
+          
       - name: Download common external libs
         uses: Silverlan/common_actions/get_common_external_libs@actions
 
@@ -76,6 +81,7 @@ jobs:
           cmake_var: 'DEPENDENCY_LPNG_INCLUDE'
           cmake_var_lib: 'DEPENDENCY_LPNG_LIBRARY'
           cmake_definitions: ${{ env.cmake_definitions }}
+          include_dir: '.'
           # cmake_definitions: -DZLIB_INCLUDE_DIR=$GA_ROOT_DIR/third_party_libs/zlib -DZLIB_LIBRARY_RELEASE=$GA_ROOT_DIR/build/third_party_libs/zlib/RelWithDebInfo/zlib.lib
 
       - name: CMake Build
