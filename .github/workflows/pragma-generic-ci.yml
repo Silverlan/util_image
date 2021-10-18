@@ -43,4 +43,5 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: upload-binary
-          path: "build/${{ matrix.config.build_type }}/util_image{{ env.GA_SHARED_LINK_LIBRARY_EXT }}"
+          path: "build/${{ matrix.config.build_type }}/util_image.dll"
+          #{{ env.GA_SHARED_LINK_LIBRARY_EXT }}"
