@@ -58,9 +58,9 @@ jobs:
           build_target: zlib
           cmake_definitions: ${{ env.cmake_definitions }}
           cmake_var: 'ZLIB_INCLUDE_DIR'
-          cmake_var_alias: 'DDEPENDENCY_ZLIB_INCLUDE'
+          cmake_var_alias: 'DEPENDENCY_ZLIB_INCLUDE'
           cmake_var_lib: 'ZLIB_LIBRARY'
-          cmake_var_lib_alias: 'DDEPENDENCY_ZLIB_LIBRARY'
+          cmake_var_lib_alias: 'DEPENDENCY_ZLIB_LIBRARY'
           include_dir: '.'
       - name: Copy zconf.h
         run: |
