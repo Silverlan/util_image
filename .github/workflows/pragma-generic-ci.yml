@@ -58,6 +58,7 @@ jobs:
         uses: Silverlan/common_actions/build_cmake@actions
         with:
           build_target: nvtt
+          lib_name: src/nvtt/${{ matrix.config.build_type }}/nvtt
           lib_name: nvtt
           build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
           cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY'
@@ -67,7 +68,7 @@ jobs:
         uses: Silverlan/common_actions/build_cmake@actions
         with:
           build_target: bc6h
-          lib_name: bc6h
+          lib_name: src/bc6h/${{ matrix.config.build_type }}/bc6h
           build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
           cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY'
           cmake_script_location: 'third_party_libs/nvtt'
