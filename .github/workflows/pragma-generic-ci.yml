@@ -9,11 +9,10 @@ jobs:
   # WINDOWS x64 MSVC
   build-windows:
     name: Build-Windows-x64
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
         config:
           - os: windows-latest
             name: "Windows x64 MSVC"
