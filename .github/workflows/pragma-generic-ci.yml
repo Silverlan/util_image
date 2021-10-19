@@ -1,11 +1,10 @@
 name: Build
-on: [push]
-
-#on:
-#  push:
-#    branches: [ master ]
-#  pull_request:
-#    branches: [ master ]
+#on: [push]
+on:
+  push:
+    branches: [ master, actions ]
+  pull_request:
+    branches: [ master, actions ]
 
 jobs:
   # WINDOWS x64 MSVC
