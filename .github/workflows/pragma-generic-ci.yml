@@ -90,5 +90,6 @@ jobs:
       - uses: actions/upload-artifact@v2.2.4
         with:
           name: upload-binary
-          path: "build"
-          #{{ env.GA_SHARED_LINK_LIBRARY_EXT }}"
+          path: |
+            ${{ matrix.config.build_dir }}/*${{ env.GA_SHARED_LINK_LIBRARY_EXT }}
+            ${{ matrix.config.build_dir }}/*${{ env.GA_SHARED_BINARY_LIBRARY_EXT }}
