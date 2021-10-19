@@ -4,8 +4,46 @@ description: 'Build library'
 runs:
   using: "composite"
   steps:
+    - name: Test
+      id: test
+      shell: bash
+      run: |
+        if [ -f "./build/third_party_libs/nvtt/src/bc6h/RelWithDebInfo/bc6h.lib" ]; then
+          echo "bc6h.lib exists!"
+        else
+          echo "bc6h.lib does not exist!"
+        fi
+        if [ -f "./build/third_party_libs/nvtt/src/nvtt/RelWithDebInfo/nvtt.lib" ]; then
+          echo "nvtt.lib exists!"
+        else
+          echo "nvtt.lib does not exist!"
+        fi
+
+        #cd "/"
+        echo $PWD
+        find ./build/ -name '*'
+  
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+    
+    - name: Test2
+      id: test2
+      shell: bash
+      run: |
+        if [ -f "./build/third_party_libs/nvtt/src/bc6h/RelWithDebInfo/bc6h.lib" ]; then
+          echo "bc6h.lib exists!"
+        else
+          echo "bc6h.lib does not exist!"
+        fi
+        if [ -f "./build/third_party_libs/nvtt/src/nvtt/RelWithDebInfo/nvtt.lib" ]; then
+          echo "nvtt.lib exists!"
+        else
+          echo "nvtt.lib does not exist!"
+        fi
+
+        #cd "/"
+        echo $PWD
+        find ./build/ -name '*'
 
     - name: Download submodules
       shell: bash
