@@ -77,14 +77,14 @@ jobs:
       #    check_artifacts:  false
       
       - name: Download binaries
-        uses: Silverlan/util_image/github_actions/download_build_binaries@actions
+        uses: Silverlan/common_actions/download_build_binaries@actions
           
       - name: Build
         id: build
         uses: Silverlan/util_image/github_actions/build@actions
           
       - name: Upload binaries
-        uses: Silverlan/util_image/github_actions/upload_build_binaries@actions
+        uses: Silverlan/common_actions/upload_build_binaries@actions
         
       #- uses: actions/upload-artifact@v2.2.4
       #  with:
