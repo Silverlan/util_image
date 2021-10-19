@@ -36,6 +36,13 @@ jobs:
         id: init-env
         uses: Silverlan/common_actions/set_common_env_vars@actions
 
+      - name: PrintMsg
+        shell: bash
+        run: |
+          cd "${{ env.GA_ROOT_DIR }}"
+          echo $PWD
+          mkdir ${{ matrix.config.build_dir }}
+
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v2
         with:
