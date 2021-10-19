@@ -1,6 +1,9 @@
 name: Build
 description: 'Build library'
-
+inputs:
+  root_dir:
+    description: 'Root directory'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -11,7 +14,7 @@ runs:
     - name: Define nvtt CMake Variables
       uses: Silverlan/common_actions/define_cmake_var@actions
       with:
-        cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE=${{ env.GA_ROOT_DIR }}/third_party_libs/nvtt/src'
+        cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE=${{ inputs.root_dir }}/third_party_libs/nvtt/src'
         #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/bc6h/${{ matrix.config.build_type }}/bc6h'
         #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/bc7/${{ matrix.config.build_type }}/bc7'
         #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvcore/${{ matrix.config.build_type }}/nvcore'
