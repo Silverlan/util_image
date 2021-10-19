@@ -76,14 +76,6 @@ jobs:
           # default false, just try to download from the last one
           check_artifacts:  false
 
-      #- uses: actions/download-artifact@v2.0.10
-      #  with:
-      #    name: upload-binary
-      #    path: "build"
-
-      - name: Display structure of downloaded files
-        run: ls -R
-
       - name: Build
         id: build
         uses: Silverlan/util_image/github_actions/build@actions
