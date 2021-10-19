@@ -30,6 +30,7 @@ runs:
         build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
+        root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - bc6h
       uses: Silverlan/common_actions/build_cmake@actions
@@ -40,6 +41,7 @@ runs:
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
+        root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - bc7
       uses: Silverlan/common_actions/build_cmake@actions
@@ -50,6 +52,7 @@ runs:
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
+        root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - core
       uses: Silverlan/common_actions/build_cmake@actions
@@ -60,6 +63,7 @@ runs:
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
+        root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - image
       uses: Silverlan/common_actions/build_cmake@actions
@@ -70,6 +74,7 @@ runs:
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
+        root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - math
       uses: Silverlan/common_actions/build_cmake@actions
@@ -80,6 +85,7 @@ runs:
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
+        root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - squish
       uses: Silverlan/common_actions/build_cmake@actions
@@ -90,6 +96,7 @@ runs:
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
+        root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - thread
       uses: Silverlan/common_actions/build_cmake@actions
@@ -100,6 +107,7 @@ runs:
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
+        root_dir: '${{ inputs.root_dir }}'
 
     - name: Download common external libs
       uses: Silverlan/common_actions/get_common_external_libs@actions
