@@ -67,7 +67,7 @@ jobs:
           # will download all artifacts if not specified
           # and extract them in respective subdirectories
           # https://github.com/actions/download-artifact#download-all-artifacts
-          name: upload-binary
+          name: build-binaries
           # Optional, directory where to extract artifact. Defaults to the artifact name (see `name` input)
           path: "./build"
           # Optional, defaults to current repo
