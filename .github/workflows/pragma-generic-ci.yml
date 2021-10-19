@@ -40,8 +40,8 @@ jobs:
         id: build
         uses: Silverlan/util_image/github_actions/build@actions
           
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v2.2.4
         with:
           name: upload-binary
-          path: "build/${{ matrix.config.build_type }}/util_image.dll"
+          path: "build/${{ matrix.config.build_type }}"
           #{{ env.GA_SHARED_LINK_LIBRARY_EXT }}"
