@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           echo "ARTIFACT DOWNLOAD COMPLETE!"
-          res="find /d -name mathutil.lib"
+          res="find /d -name '*'"
           echo "RES: $res"
           # cd "/d/a/util_image/util_image/"
           # third_party_libs/nvtt/src/bc6h/RelWithDebInfo/"
