@@ -77,6 +77,12 @@ jobs:
           # default false, just try to download from the last one
           check_artifacts:  false
 
+
+      - name: PrintMsg
+        shell: bash
+        run: |
+          echo "ARTIFACT DOWNLOAD COMPLETE!"
+
       - name: Build
         id: build
         uses: Silverlan/util_image/github_actions/build@actions
