@@ -76,6 +76,16 @@ jobs:
           # then will get the last available artifact from previous workflow
           # default false, just try to download from the last one
           check_artifacts:  false
+          
+      - name: TestDl
+        id: testdl
+        shell: bash
+        run: |
+          if [ -f "/d/a/util_image/util_image/build/third_party_libs/nvtt/src/nvtt/RelWithDebInfo/nvtt.lib" ]; then
+            echo "[1] nvtt.lib exists!"
+          else
+            echo "[1] nvtt.lib does not exist!"
+          fi
       
       #- name: Download binaries
       #  uses: Silverlan/common_actions/download_build_binaries@actions
