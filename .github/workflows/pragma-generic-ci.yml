@@ -82,6 +82,7 @@ jobs:
         run: |
           echo "ARTIFACT DOWNLOAD COMPLETE!"
           cd "${{ env.GA_ROOT_DIR }}"
+          echo $PWD
           find ./ -name '*'
           # cd "/d/a/util_image/util_image/"
           # third_party_libs/nvtt/src/bc6h/RelWithDebInfo/"
