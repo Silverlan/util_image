@@ -36,9 +36,10 @@ jobs:
         id: init-env
         uses: Silverlan/common_actions/set_common_env_vars@actions
 
-      #- uses: actions/download-artifact@v2
-      #  with:
-      #    name: upload-binary
+      - uses: actions/download-artifact@v2
+        with:
+          name: upload-binary
+          path: "build"
 
       - name: Display structure of downloaded files
         run: ls -R
