@@ -81,8 +81,8 @@ jobs:
         shell: bash
         run: |
           echo "ARTIFACT DOWNLOAD COMPLETE!"
+          cd "${{ env.GA_ROOT_DIR }}"
           find ./ -name '*'
-          echo "RES: $res"
           # cd "/d/a/util_image/util_image/"
           # third_party_libs/nvtt/src/bc6h/RelWithDebInfo/"
           # ls -l
