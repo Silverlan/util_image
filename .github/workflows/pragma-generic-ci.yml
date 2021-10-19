@@ -14,19 +14,22 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest]
-        config:
-        - os: windows-latest
-        - {
-            name: "Windows x64 MSVC",
-            artifact: "Windows-MSVC.tar.xz",
-            build_type: "RelWithDebInfo",
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
-            cc: "cl",
-            cxx: "cl",
-            archiver: "7z a",
-            generators: "Visual Studio 16 2019",
-            build_dir: 'build'
-          }
+        include:
+          - os: windows-latest
+            namex: "HellooOOoo"
+        #config:
+        #- os: windows-latest
+        #- {
+        #    name: "Windows x64 MSVC",
+        #    artifact: "Windows-MSVC.tar.xz",
+        #    build_type: "RelWithDebInfo",
+        #    environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
+        #    cc: "cl",
+        #    cxx: "cl",
+        #    archiver: "7z a",
+        #    generators: "Visual Studio 16 2019",
+        #    build_dir: 'build'
+        #  }
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -35,6 +38,7 @@ jobs:
       - name: TestX
         shell: bash
         run: |
+          echo "Matrix name: ${{matrix.namex}}"
           echo "Matrix name: ${{matrix.config.name}}"
       
       - uses: actions/checkout@v2
