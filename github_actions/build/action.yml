@@ -4,37 +4,6 @@ description: 'Build library'
 runs:
   using: "composite"
   steps:
-    - name: Test2
-      id: test2
-      shell: bash
-      run: |
-        if [ -f "/d/a/util_image/util_image/build/third_party_libs/nvtt/src/nvtt/RelWithDebInfo/nvtt.lib" ]; then
-          echo "nvtt.lib exists!"
-        else
-          echo "nvtt.lib does not exist!"
-        fi
-  
-    #- name: Download Repo
-    #  uses: Silverlan/common_actions/get_submodule@actions
-    #  with:
-    #    repo: 'https://github.com/Silverlan/util_image.git'
-    #    repo_name: 'util_image'
-    #    dir: '.'
-    #- uses: actions/checkout@v2.3.5
-    #  with:
-    #    clean: 'false'
-    #    submodules: 'true'
-        
-    - name: Test3
-      id: test3
-      shell: bash
-      run: |
-        if [ -f "/d/a/util_image/util_image/build/third_party_libs/nvtt/src/nvtt/RelWithDebInfo/nvtt.lib" ]; then
-          echo "nvtt.lib exists!"
-        else
-          echo "nvtt.lib does not exist!"
-        fi
-    
     - name: Initialize Env
       id: init-env
       uses: Silverlan/common_actions/set_common_env_vars@actions
@@ -49,16 +18,6 @@ runs:
         #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvimage/${{ matrix.config.build_type }}/nvimage'
         #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/nvmath/${{ matrix.config.build_type }}/nvmath'
         #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/squish/${{ matrix.config.build_type }}/nvsquish'
-
-    - name: Test4
-      id: test4
-      shell: bash
-      run: |
-        if [ -f "/d/a/util_image/util_image/build/third_party_libs/nvtt/src/nvtt/RelWithDebInfo/nvtt.lib" ]; then
-          echo "nvtt.lib exists!"
-        else
-          echo "nvtt.lib does not exist!"
-        fi
 
     - name: Build nvtt
       uses: Silverlan/common_actions/build_cmake@actions
