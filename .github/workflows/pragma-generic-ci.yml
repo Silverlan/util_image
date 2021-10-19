@@ -81,6 +81,7 @@ jobs:
       - name: PrintMsg
         shell: bash
         run: |
+          chmod -R 777 /d/a/util_image/util_image
           if [ -f "/d/a/util_image/util_image/build/third_party_libs/nvtt/src/bc6h/RelWithDebInfo/bc6h.lib" ]; then
             echo "bc6h.lib exists!"
           else
