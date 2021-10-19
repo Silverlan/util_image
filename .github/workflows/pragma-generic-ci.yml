@@ -81,9 +81,11 @@ jobs:
         shell: bash
         run: |
           echo "ARTIFACT DOWNLOAD COMPLETE!"
-          cd "/d/a/util_image/util_image/"
+          res=find "/d" -name "mathutil.lib"
+          echo "RES: $res"
+          # cd "/d/a/util_image/util_image/"
           # third_party_libs/nvtt/src/bc6h/RelWithDebInfo/"
-          ls -l
+          # ls -l
           if [ -f "/d/a/util_image/util_image/build/third_party_libs/nvtt/src/bc6h/RelWithDebInfo/bc6h.lib" ]; then
             echo "bc6h.lib exists!"
           else
