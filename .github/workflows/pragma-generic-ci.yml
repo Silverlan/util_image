@@ -43,6 +43,12 @@ jobs:
       - name: Setup
         id: setup
         uses: Silverlan/common_actions/setup@actions
+        
+      - name: Install GCC-11
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install gcc-11 g++-11
 
       - name: Download binaries
         uses: Silverlan/common_actions/download_build_binaries@actions
