@@ -14,10 +14,16 @@ runs:
           echo "nvtt.lib does not exist!"
         fi
   
-    - uses: actions/checkout@v2.3.5
+    - name: Download Repo
+      uses: Silverlan/common_actions/get_submodule@actions
       with:
-        clean: 'false'
-        submodules: 'true'
+        repo: 'https://github.com/Silverlan/util_image.git'
+        repo_name: 'util_image'
+        dir: '.'
+    #- uses: actions/checkout@v2.3.5
+    #  with:
+    #    clean: 'false'
+    #    submodules: 'true'
         
     - name: Test3
       id: test3
