@@ -88,7 +88,7 @@ jobs:
         shell: bash
         run: |
           echo "ARTIFACT DOWNLOAD COMPLETE!"
-          cd "${{ env.GA_ROOT_DIR }}"
+          cd "${{ env.GA_ROOT_DIR }}/build"
           echo $PWD
           find ./ -name '*'
           # cd "/d/a/util_image/util_image/"
