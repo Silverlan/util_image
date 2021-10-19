@@ -91,5 +91,5 @@ jobs:
         with:
           name: upload-binary
           path: |
-            ${{ matrix.config.build_dir }}/*${{ env.GA_SHARED_LINK_LIBRARY_EXT }}
-            ${{ matrix.config.build_dir }}/*${{ env.GA_SHARED_BINARY_LIBRARY_EXT }}
+            ${{ matrix.config.build_dir }}/**/*${{ env.GA_SHARED_LINK_LIBRARY_EXT }}
+            ${{ matrix.config.build_dir }}/**/*${{ env.GA_SHARED_BINARY_LIBRARY_EXT }}
