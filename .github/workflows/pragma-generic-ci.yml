@@ -36,13 +36,6 @@ jobs:
         id: init-env
         uses: Silverlan/common_actions/set_common_env_vars@actions
 
-      #- name: PrintMsg
-      #  shell: bash
-      #  run: |
-      #    cd "${{ env.GA_ROOT_DIR }}"
-      #    echo $PWD
-      #    mkdir ${{ matrix.config.build_dir }}
-
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -82,23 +75,6 @@ jobs:
           # then will get the last available artifact from previous workflow
           # default false, just try to download from the last one
           check_artifacts:  false
-
-
-      - name: PrintMsg
-        shell: bash
-        run: |
-          echo "ARTIFACT DOWNLOAD COMPLETE!"
-          #cd "${{ env.GA_ROOT_DIR }}/build"
-          #echo $PWD
-          #find ./ -name '*'
-          # cd "/d/a/util_image/util_image/"
-          # third_party_libs/nvtt/src/bc6h/RelWithDebInfo/"
-          # ls -l
-          if [ -f "/d/a/util_image/util_image/build/third_party_libs/nvtt/src/bc6h/RelWithDebInfo/bc6h.lib" ]; then
-            echo "bc6h.lib exists!"
-          else
-            echo "bc6h.lib does not exist!"
-          fi
 
       - name: Build
         id: build
