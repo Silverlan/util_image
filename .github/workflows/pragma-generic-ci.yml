@@ -79,9 +79,9 @@ jobs:
       
       - name: Download binaries
         uses: Silverlan/common_actions/download_build_binaries@actions
+        continue-on-error: true
           
       - name: Build
-        if: always()
         id: build
         uses: Silverlan/util_image/github_actions/build@actions
           
