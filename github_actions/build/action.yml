@@ -22,8 +22,8 @@ runs:
         step: |
           uses: Silverlan/common_actions/get_submodule@main
           with:
-            repo: '${{ github.repository }}'
-            repo_name: '${{ github.event.repository.name }}'
+            repo: 'Silverlan/util_image'
+            repo_name: 'util_image'
             cmake_var: 'DEPENDENCY_UTIL_IMAGE_INCLUDE'
             dir: 'external_libs'
 
@@ -173,10 +173,13 @@ runs:
       run: |
         cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
 
-    - uses: Silverlan/common_actions/build_cmake@main
+    - uses: Silverlan/common_actions/build_cmake@actions
       name: CMake Build
       with:
         build_type: ${{ matrix.config.build_type }}
         build_generator: ${{ matrix.config.generators }}
-        cmake_definitions: ${{ env.cmake_definitions }}
+        cmake_var: 'DEPENDENCY_UTIL_IMAGE_LIBRARY'
         build_target: util_image
+        build_dir: '${{ matrix.config.build_dir }}/external_libs/util_image'
+        cmake_script_location: 'external_libs/util_image'
+        
