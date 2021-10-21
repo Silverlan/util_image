@@ -4,8 +4,8 @@ inputs:
   root_dir:
     description: 'Root directory'
     required: true
-  should_build:
-    description: 'Build the library?'
+  should_checkout:
+    description: 'Checkout the core library?'
     required: true
     default: '1'
 runs:
@@ -14,6 +14,18 @@ runs:
     - name: Initialize Env
       id: init-env
       uses: Silverlan/common_actions/set_common_env_vars@actions
+      
+    - uses: ChristopherHX/conditional@b4a9649204f81002ec9a4ef7d4bf7d6b2ab7fa55
+      name: CMake Build
+      with:
+        if: ${{inputs.should_checkout == '1'}}
+        step: |
+          uses: Silverlan/common_actions/get_submodule@actions
+          with:
+            repo: '${{ github.repository }}'
+            repo_name: '${{ github.event.repository.name }}'
+            cmake_var: 'DEPENDENCY_UTIL_IMAGE_INCLUDE'
+            dir: 'external_libs'
 
     - name: Define nvtt CMake Variables
       uses: Silverlan/common_actions/define_cmake_var@actions
@@ -161,14 +173,10 @@ runs:
       run: |
         cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
 
-    - uses: ChristopherHX/conditional@b4a9649204f81002ec9a4ef7d4bf7d6b2ab7fa55
+    - uses: Silverlan/common_actions/build_cmake@actions
       name: CMake Build
       with:
-        if: ${{inputs.should_build == '1'}}
-        step: |
-          uses: Silverlan/common_actions/build_cmake@actions
-          with:
-            build_type: ${{ matrix.config.build_type }}
-            build_generator: ${{ matrix.config.generators }}
-            cmake_definitions: ${{ env.cmake_definitions }}
-            build_target: util_image
+        build_type: ${{ matrix.config.build_type }}
+        build_generator: ${{ matrix.config.generators }}
+        cmake_definitions: ${{ env.cmake_definitions }}
+        build_target: util_image
