@@ -11,7 +11,7 @@ inputs:
   dir:
     description: 'Library directory'
     required: true
-    default: 'external_libs/iglfw'
+    default: 'external_libs/util_image'
 runs:
   using: "composite"
   steps:
