@@ -4,6 +4,10 @@ inputs:
   root_dir:
     description: 'Root directory'
     required: true
+  should_build:
+    description: 'Build the library?'
+    required: true
+    default: '1'
 runs:
   using: "composite"
   steps:
@@ -157,11 +161,14 @@ runs:
       run: |
         cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
 
-    - name: CMake Build
-      uses: Silverlan/common_actions/build_cmake@actions
+    - uses: ChristopherHX/conditional@b4a9649204f81002ec9a4ef7d4bf7d6b2ab7fa55
+      name: CMake Build
       with:
-        build_type: ${{ matrix.config.build_type }}
-        build_generator: ${{ matrix.config.generators }}
-        cmake_definitions: ${{ env.cmake_definitions }}
-        build_target: util_image
-
+        if: ${{inputs.should_build == '1'}}
+        step: |
+          uses: Silverlan/common_actions/build_cmake@actions
+          with:
+            build_type: ${{ matrix.config.build_type }}
+            build_generator: ${{ matrix.config.generators }}
+            cmake_definitions: ${{ env.cmake_definitions }}
+            build_target: util_image
