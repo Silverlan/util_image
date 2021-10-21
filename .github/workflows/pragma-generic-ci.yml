@@ -47,7 +47,7 @@ jobs:
           
       - name: Build
         id: build
-        uses: ${{ github.repository }}/github_actions/build@main
+        uses: https://github.com/Silverlan/util_image/github_actions/build@main
         with:
           root_dir: "${{ env.GA_ROOT_DIR }}"
           should_checkout: "0"
