@@ -13,14 +13,14 @@ runs:
   steps:
     - name: Initialize Env
       id: init-env
-      uses: Silverlan/common_actions/set_common_env_vars@actions
+      uses: Silverlan/common_actions/set_common_env_vars@main
       
     - uses: ChristopherHX/conditional@b4a9649204f81002ec9a4ef7d4bf7d6b2ab7fa55
       name: CMake Build
       with:
         if: ${{inputs.should_checkout == '1'}}
         step: |
-          uses: Silverlan/common_actions/get_submodule@actions
+          uses: Silverlan/common_actions/get_submodule@main
           with:
             repo: '${{ github.repository }}'
             repo_name: '${{ github.event.repository.name }}'
@@ -28,7 +28,7 @@ runs:
             dir: 'external_libs'
 
     - name: Define nvtt CMake Variables
-      uses: Silverlan/common_actions/define_cmake_var@actions
+      uses: Silverlan/common_actions/define_cmake_var@main
       with:
         cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE=${{ inputs.root_dir }}/third_party_libs/nvtt/src'
         #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/bc6h/${{ matrix.config.build_type }}/bc6h'
@@ -39,7 +39,7 @@ runs:
         #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/squish/${{ matrix.config.build_type }}/nvsquish'
 
     - name: Build nvtt
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvtt
         lib_name: src/nvtt/${{ matrix.config.build_type }}/nvtt
@@ -49,7 +49,7 @@ runs:
         root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - bc6h
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: bc6h
         lib_name: src/bc6h/${{ matrix.config.build_type }}/bc6h
@@ -60,7 +60,7 @@ runs:
         root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - bc7
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: bc7
         lib_name: src/bc7/${{ matrix.config.build_type }}/bc7
@@ -71,7 +71,7 @@ runs:
         root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - core
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvcore
         lib_name: src/nvcore/${{ matrix.config.build_type }}/nvcore
@@ -82,7 +82,7 @@ runs:
         root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - image
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvimage
         lib_name: src/nvimage/${{ matrix.config.build_type }}/nvimage
@@ -93,7 +93,7 @@ runs:
         root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - math
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvmath
         lib_name: src/nvmath/${{ matrix.config.build_type }}/nvmath
@@ -104,7 +104,7 @@ runs:
         root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - squish
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvsquish
         lib_name: src/nvtt/squish/${{ matrix.config.build_type }}/nvsquish
@@ -115,7 +115,7 @@ runs:
         root_dir: '${{ inputs.root_dir }}'
 
     - name: Build nvtt - thread
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvthread
         lib_name: src/nvthread/${{ matrix.config.build_type }}/nvthread
@@ -126,10 +126,10 @@ runs:
         root_dir: '${{ inputs.root_dir }}'
 
     - name: Download common external libs
-      uses: Silverlan/common_actions/get_common_external_libs@actions
+      uses: Silverlan/common_actions/get_common_external_libs@main
 
     - name: Download submodule - squish
-      uses: Silverlan/common_actions/get_submodule@actions
+      uses: Silverlan/common_actions/get_submodule@main
       with:
         dir: 'third_party_libs'
         repo: 'https://github.com/ivan-kulikov-dev/squish.git'
@@ -138,7 +138,7 @@ runs:
         cmake_definitions: ${{ env.cmake_definitions }}
 
     - name: Build submodule - zlib
-      uses: Silverlan/common_actions/build_submodule@actions
+      uses: Silverlan/common_actions/build_submodule@main
       with:
         repo: 'https://github.com/madler/zlib.git'
         repo_name: 'zlib'
@@ -156,7 +156,7 @@ runs:
         cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
 
     - name: Build submodule - libpng
-      uses: Silverlan/common_actions/build_submodule@actions
+      uses: Silverlan/common_actions/build_submodule@main
       with:
         repo: 'https://github.com/glennrp/libpng.git'
         repo_name: 'libpng'
@@ -173,7 +173,7 @@ runs:
       run: |
         cp ./build/third_party_libs/libpng/pnglibconf.h ./third_party_libs/libpng/pnglibconf.h
 
-    - uses: Silverlan/common_actions/build_cmake@actions
+    - uses: Silverlan/common_actions/build_cmake@main
       name: CMake Build
       with:
         build_type: ${{ matrix.config.build_type }}
