@@ -34,7 +34,23 @@ jobs:
           #  generators: "Unix Makefiles"
           #  build_dir: 'build'
     steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Setup
+        id: setup
+        uses: Silverlan/common_actions/setup@actions
+
+      - name: Download binaries
+        uses: Silverlan/common_actions/download_build_binaries@actions
+        continue-on-error: true
+
       - name: Build
         id: build
-        uses: Silverlan/common_actions/generic_build_workflow@actions
-        
+        uses: ${{ inputs.build_action }}
+        with:
+          root_dir: "${{ env.GA_ROOT_DIR }}"
+
+      - name: Upload binaries
+        uses: Silverlan/common_actions/upload_build_binaries@actions
