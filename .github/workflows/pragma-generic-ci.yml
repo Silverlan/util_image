@@ -41,16 +41,16 @@ jobs:
       - name: Setup
         id: setup
         uses: Silverlan/common_actions/setup@actions
-
+          
       - name: Download binaries
         uses: Silverlan/common_actions/download_build_binaries@actions
         continue-on-error: true
-
+          
       - name: Build
         id: build
-        uses: ${{ inputs.build_action }}
+        uses: Silverlan/util_image/github_actions/build@actions
         with:
           root_dir: "${{ env.GA_ROOT_DIR }}"
-
+          
       - name: Upload binaries
         uses: Silverlan/common_actions/upload_build_binaries@actions
