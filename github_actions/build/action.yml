@@ -142,22 +142,7 @@ runs:
         cmake_definitions: ${{ env.cmake_definitions }}
 
     - name: Build submodule - zlib
-      uses: Silverlan/common_actions/build_submodule@main
-      with:
-        repo: 'https://github.com/madler/zlib.git'
-        repo_name: 'zlib'
-        repo_branch: 'master'
-        build_target: zlib
-        cmake_definitions: ${{ env.cmake_definitions }}
-        cmake_var: 'ZLIB_INCLUDE_DIR'
-        cmake_var_alias: 'DEPENDENCY_ZLIB_INCLUDE'
-        cmake_var_lib: 'ZLIB_LIBRARY'
-        cmake_var_lib_alias: 'DEPENDENCY_ZLIB_LIBRARY'
-        include_dir: '.'
-    - name: Copy zconf.h
-      shell: bash
-      run: |
-        cp ./build/third_party_libs/zlib/zconf.h ./third_party_libs/zlib/zconf.h
+      uses: Silverlan/common_actions/build_zlib@main
 
     - name: Build submodule - libpng
       uses: Silverlan/common_actions/build_submodule@main
