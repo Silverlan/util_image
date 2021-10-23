@@ -3,7 +3,6 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "util_image_buffer.hpp"
-#include <cmath>
 
 constexpr float GAMMA = 2.2;
 constexpr float INV_GAMMA = 1.0 / GAMMA;
@@ -122,7 +121,7 @@ void uimg::ImageBuffer::ApplyExposure(float exposure)
 {
 	if(exposure == 0.f)
 		return;
-	auto powExposure = std::powf(2.f,exposure);
+	auto powExposure = glm::pow(2.f,exposure);
 	auto numChannels = umath::min(GetChannelCount(),static_cast<uint8_t>(3));
 	for(auto &pxView : *this)
 	{
