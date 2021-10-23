@@ -46,7 +46,8 @@ runs:
       uses: Silverlan/common_actions/build_cmake@actions
       with:
         build_target: nvtt
-        lib_name: src/nvtt/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvtt
+        #lib_name: src/nvtt/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvtt
+        lib_name: src/nvtt/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvtt
         build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
