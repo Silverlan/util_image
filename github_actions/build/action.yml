@@ -17,7 +17,7 @@ runs:
   steps:
     - name: Initialize Env
       id: init-env
-      uses: Silverlan/common_actions/set_common_env_vars@actions
+      uses: Silverlan/common_actions/set_common_env_vars@main
       
     - uses: ChristopherHX/conditional@b4a9649204f81002ec9a4ef7d4bf7d6b2ab7fa55
       name: CMake Build
@@ -43,7 +43,7 @@ runs:
         #cmake_var: '-DDEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY=${{ env.GA_ROOT_DIR }}/build/third_party_libs/nvtt/src/squish/${{ matrix.config.build_type }}/nvsquish'
 
     - name: Build nvtt
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvtt
         lib_name_windows: src/nvtt/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvtt
@@ -55,7 +55,7 @@ runs:
         static_library: '1'
 
     - name: Build nvtt - bc6h
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: bc6h
         lib_name_windows: src/bc6h/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}bc6h
@@ -68,7 +68,7 @@ runs:
         static_library: '1'
 
     - name: Build nvtt - bc7
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: bc7
         lib_name_windows: src/bc7/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}bc7
@@ -81,7 +81,7 @@ runs:
         static_library: '1'
 
     - name: Build nvtt - core
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvcore
         lib_name_windows: src/nvcore/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvcore
@@ -94,7 +94,7 @@ runs:
         static_library: '1'
 
     - name: Build nvtt - image
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvimage
         lib_name_windows: src/nvimage/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvimage
@@ -107,7 +107,7 @@ runs:
         static_library: '1'
 
     - name: Build nvtt - math
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvmath
         lib_name_windows: src/nvmath/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvmath
@@ -120,7 +120,7 @@ runs:
         static_library: '1'
 
     - name: Build nvtt - squish
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvsquish
         lib_name_windows: src/nvtt/squish/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvsquish
@@ -133,7 +133,7 @@ runs:
         static_library: '1'
 
     - name: Build nvtt - thread
-      uses: Silverlan/common_actions/build_cmake@actions
+      uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvthread
         lib_name_windows: src/nvthread/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvthread
@@ -149,7 +149,7 @@ runs:
       uses: Silverlan/common_actions/get_common_external_libs@main
 
     - name: Download submodule - squish
-      uses: Silverlan/common_actions/get_submodule@actions
+      uses: Silverlan/common_actions/get_submodule@main
       with:
         dir: 'third_party_libs'
         repo: 'https://github.com/ivan-kulikov-dev/squish.git'
@@ -159,7 +159,7 @@ runs:
         static_library: '1'
 
     - name: Build submodule - zlib
-      uses: Silverlan/common_actions/build_zlib@actions
+      uses: Silverlan/common_actions/build_zlib@main
 
     - name: Build submodule - libpng
       uses: Silverlan/common_actions/build_submodule@main
