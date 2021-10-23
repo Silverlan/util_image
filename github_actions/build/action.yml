@@ -142,7 +142,7 @@ runs:
         cmake_definitions: ${{ env.cmake_definitions }}
 
     - name: Build submodule - zlib
-      uses: Silverlan/common_actions/build_zlib@main
+      uses: Silverlan/common_actions/build_zlib@actions
 
     - name: Build submodule - libpng
       uses: Silverlan/common_actions/build_submodule@main
