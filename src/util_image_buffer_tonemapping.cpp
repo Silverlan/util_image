@@ -3,6 +3,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "util_image_buffer.hpp"
+#include <cmath>
 
 constexpr float GAMMA = 2.2;
 constexpr float INV_GAMMA = 1.0 / GAMMA;
