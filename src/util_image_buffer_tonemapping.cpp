@@ -121,7 +121,7 @@ void uimg::ImageBuffer::ApplyExposure(float exposure)
 {
 	if(exposure == 0.f)
 		return;
-	auto powExposure = std::powf(2.f,exposure);
+	auto powExposure = glm::pow(2.f,exposure);
 	auto numChannels = umath::min(GetChannelCount(),static_cast<uint8_t>(3));
 	for(auto &pxView : *this)
 	{

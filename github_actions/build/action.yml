@@ -46,88 +46,104 @@ runs:
       uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvtt
-        lib_name: src/nvtt/${{ matrix.config.build_type }}/nvtt
+        lib_name_windows: src/nvtt/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvtt
+        lib_name_linux: src/nvtt/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvtt
         build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         root_dir: '${{ inputs.root_dir }}'
+        static_library: '1'
 
     - name: Build nvtt - bc6h
       uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: bc6h
-        lib_name: src/bc6h/${{ matrix.config.build_type }}/bc6h
+        lib_name_windows: src/bc6h/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}bc6h
+        lib_name_linux: src/bc6h/${{ env.GA_STATIC_LIBRARY_PREFIX }}bc6h
         build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
+        static_library: '1'
 
     - name: Build nvtt - bc7
       uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: bc7
-        lib_name: src/bc7/${{ matrix.config.build_type }}/bc7
+        lib_name_windows: src/bc7/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}bc7
+        lib_name_linux: src/bc7/${{ env.GA_STATIC_LIBRARY_PREFIX }}bc7
         build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
+        static_library: '1'
 
     - name: Build nvtt - core
       uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvcore
-        lib_name: src/nvcore/${{ matrix.config.build_type }}/nvcore
+        lib_name_windows: src/nvcore/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvcore
+        lib_name_linux: src/nvcore/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvcore
         build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
+        static_library: '1'
 
     - name: Build nvtt - image
       uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvimage
-        lib_name: src/nvimage/${{ matrix.config.build_type }}/nvimage
+        lib_name_windows: src/nvimage/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvimage
+        lib_name_linux: src/nvimage/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvimage
         build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
+        static_library: '1'
 
     - name: Build nvtt - math
       uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvmath
-        lib_name: src/nvmath/${{ matrix.config.build_type }}/nvmath
+        lib_name_windows: src/nvmath/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvmath
+        lib_name_linux: src/nvmath/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvmath
         build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
+        static_library: '1'
 
     - name: Build nvtt - squish
       uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvsquish
-        lib_name: src/nvtt/squish/${{ matrix.config.build_type }}/nvsquish
+        lib_name_windows: src/nvtt/squish/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvsquish
+        lib_name_linux: src/nvtt/squish/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvsquish
         build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
+        static_library: '1'
 
     - name: Build nvtt - thread
       uses: Silverlan/common_actions/build_cmake@main
       with:
         build_target: nvthread
-        lib_name: src/nvthread/${{ matrix.config.build_type }}/nvthread
+        lib_name_windows: src/nvthread/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvthread
+        lib_name_linux: src/nvthread/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvthread
         build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY'
         cmake_script_location: 'third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
+        static_library: '1'
 
     - name: Download common external libs
       uses: Silverlan/common_actions/get_common_external_libs@main
@@ -140,6 +156,7 @@ runs:
         repo_name: 'squish'
         repo_branch: 'master'
         cmake_definitions: ${{ env.cmake_definitions }}
+        static_library: '1'
 
     - name: Build submodule - zlib
       uses: Silverlan/common_actions/build_zlib@main

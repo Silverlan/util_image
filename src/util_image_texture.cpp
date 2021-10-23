@@ -12,6 +12,7 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/magic_enum.hpp>
 #include <variant>
+#include <cstring>
 
 #pragma optimize("",off)
 static nvtt::Format to_nvtt_enum(uimg::TextureInfo::OutputFormat format)
@@ -513,7 +514,7 @@ bool uimg::compress_texture(
 	outputHandler.writeData = [&outputData,&iLevel,&iMipmap](const void * data, int size) -> bool {
 		if(iLevel == std::numeric_limits<uint32_t>::max() || iMipmap == std::numeric_limits<uint32_t>::max())
 			return true;
-		memcpy(outputData[iLevel][iMipmap].data(),data,size);
+		std::memcpy(outputData[iLevel][iMipmap].data(),data,size);
 		return true;
 	};
 	outputHandler.endImage = [&iLevel,&iMipmap]() {
