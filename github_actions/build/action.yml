@@ -155,7 +155,6 @@ runs:
         repo: 'https://github.com/ivan-kulikov-dev/squish.git'
         repo_name: 'squish'
         repo_branch: 'master'
-        cmake_definitions: ${{ env.cmake_definitions }}
         static_library: '1'
 
     - name: Build submodule - zlib
@@ -170,7 +169,6 @@ runs:
         build_target: png
         cmake_var: 'DEPENDENCY_LPNG_INCLUDE'
         cmake_var_lib: 'DEPENDENCY_LPNG_LIBRARY'
-        cmake_definitions: ${{ env.cmake_definitions }}
         include_dir: '.'
         lib_name: '${{ matrix.config.build_type }}/libpng16'
         # cmake_definitions: -DZLIB_INCLUDE_DIR=$GA_ROOT_DIR/third_party_libs/zlib -DZLIB_LIBRARY_RELEASE=$GA_ROOT_DIR/build/third_party_libs/zlib/RelWithDebInfo/zlib.lib
