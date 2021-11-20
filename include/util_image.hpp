@@ -14,8 +14,7 @@
 #include <cinttypes>
 #include <optional>
 
-class VFilePtrInternal;
-class VFilePtrInternalReal;
+namespace ufile {struct IFile;};
 namespace uimg
 {
 	class ImageBuffer;
@@ -40,9 +39,9 @@ namespace uimg
 		Float
 	};
 	DLLUIMG std::string get_file_extension(ImageFormat format);
-	DLLUIMG std::shared_ptr<ImageBuffer> load_image(std::shared_ptr<VFilePtrInternal> f,PixelFormat pixelFormat=PixelFormat::LDR);
+	DLLUIMG std::shared_ptr<ImageBuffer> load_image(ufile::IFile &f,PixelFormat pixelFormat=PixelFormat::LDR);
 	DLLUIMG std::shared_ptr<ImageBuffer> load_image(const std::string &fileName,PixelFormat pixelFormat=PixelFormat::LDR);
-	DLLUIMG bool save_image(std::shared_ptr<VFilePtrInternalReal> f,ImageBuffer &imgBuffer,ImageFormat format,float quality=1.f);
+	DLLUIMG bool save_image(ufile::IFile &f,ImageBuffer &imgBuffer,ImageFormat format,float quality=1.f);
 #ifdef UIMG_ENABLE_NVTT
     struct DLLUIMG TextureOutputHandler
     {
@@ -79,7 +78,7 @@ namespace uimg
 		const std::function<void(const std::string&)> &errorHandler=nullptr,
 		bool absoluteFileName=false
 	);
-	DLLUIMG bool save_texture(std::shared_ptr<VFilePtrInternalReal> f,ImageBuffer &imgBuffer,const TextureSaveInfo &texInfo);
+	DLLUIMG bool save_texture(ufile::IFile &f,ImageBuffer &imgBuffer,const TextureSaveInfo &texInfo);
 	DLLUIMG bool save_texture(
 		const std::string &fileName,uimg::ImageBuffer &imgBuffer,const TextureSaveInfo &texInfo,const std::function<void(const std::string&)> &errorHandler=nullptr,bool absoluteFileName=false
 	);
