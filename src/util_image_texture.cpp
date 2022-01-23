@@ -284,6 +284,7 @@ static bool compress_texture(
 			switch(texSaveInfo.texInfo.inputFormat)
 			{
 			case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
+			case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
 				uimgFormat = uimg::Format::RGBA8;
 				break;
 			case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
