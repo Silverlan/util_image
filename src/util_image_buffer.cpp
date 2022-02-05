@@ -484,7 +484,7 @@ std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Copy() const
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Copy(Format format) const
 {
 	// Optimized copy that performs copy +format change in one go
-	auto cpy = uimg::ImageBuffer::Create(nullptr,m_width,m_height,m_format,true);
+	auto cpy = uimg::ImageBuffer::Create(m_width,m_height,m_format);
 	Convert(const_cast<ImageBuffer&>(*this),*cpy,format);
 	return cpy;
 }
