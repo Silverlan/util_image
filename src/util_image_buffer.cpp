@@ -488,8 +488,22 @@ std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Copy(Format format) const
 	Convert(const_cast<ImageBuffer&>(*this),*cpy,format);
 	return cpy;
 }
+bool uimg::ImageBuffer::Copy(ImageBuffer &dst) const
+{
+	auto w = GetWidth();
+	auto h = GetHeight();
+	if(w != dst.GetWidth() || h != dst.GetHeight())
+		return false;
+	Copy(dst,0,0,0,0,w,h);
+	return true;
+}
 void uimg::ImageBuffer::Copy(ImageBuffer &dst,uint32_t xSrc,uint32_t ySrc,uint32_t xDst,uint32_t yDst,uint32_t w,uint32_t h) const
 {
+	if(GetFormat() == dst.GetFormat() && xSrc == 0 && ySrc == 0 && xDst == 0 && yDst == 0 && w == GetWidth() && h == GetHeight())
+	{
+		memcpy(dst.GetData(),GetData(),GetSize());
+		return;
+	}
 	auto imgViewSrc = Create(const_cast<ImageBuffer&>(*this),xSrc,ySrc,w,h);
 	auto imgViewDst = Create(dst,xDst,yDst,w,h);
 	for(auto &px : *imgViewSrc)
