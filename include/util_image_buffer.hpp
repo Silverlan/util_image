@@ -131,6 +131,7 @@ namespace uimg
 		std::shared_ptr<ImageBuffer> ApplyToneMapping(const std::function<std::array<uint8_t,3>(const Vector3&)> &fToneMapper);
 		void ApplyExposure(float exposure);
 		void ApplyGammaCorrection(float gamma=2.2f);
+		void Reset(void *data,uint32_t width,uint32_t height,Format format);
 
 		Size GetSize() const;
 

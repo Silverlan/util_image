@@ -28,6 +28,13 @@ std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::CreateWithCustomDeleter(vo
 	auto ptrData = std::shared_ptr<void>{data,customDeleter};
 	return std::shared_ptr<ImageBuffer>{new ImageBuffer{ptrData,width,height,format}};
 }
+void uimg::ImageBuffer::Reset(void *data,uint32_t width,uint32_t height,Format format)
+{
+	m_data.reset(data,[](void*) {});
+	m_width = width;
+	m_height = height;
+	m_format = format;
+}
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(void *data,uint32_t width,uint32_t height,Format format,bool ownedExternally)
 {
 	if(ownedExternally == false)
