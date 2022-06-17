@@ -89,6 +89,8 @@ namespace uimg
 #endif
 	DLLUIMG std::optional<ImageFormat> string_to_image_output_format(const std::string &str);
 	DLLUIMG std::string get_image_output_format_extension(ImageFormat format);
+
+	DLLUIMG void bake_margin(ImageBuffer &imgBuffer,std::vector<uint8_t> &mask,const int margin);
 };
 
 #endif
