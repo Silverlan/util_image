@@ -187,6 +187,11 @@ namespace uimg
 		std::pair<uint64_t,uint64_t> m_offsetRelToParent = {};
 	};
 
+	struct DLLUIMG ImageLayerSet
+	{
+		std::unordered_map<std::string,std::shared_ptr<uimg::ImageBuffer>> images;
+	};
+
 	DLLUIMG std::optional<ToneMapping> string_to_tone_mapping(const std::string &str);
 };
 DLLUIMG std::ostream &operator<<(std::ostream &out,const uimg::ImageBuffer &o);
