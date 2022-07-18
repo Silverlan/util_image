@@ -193,7 +193,7 @@ private:
 std::string uimg::get_absolute_path(const std::string &fileName,uimg::TextureInfo::ContainerFormat containerFormat)
 {
 	auto path = ufile::get_path_from_filename(fileName);
-	FileManager::CreatePath(path.c_str());
+	filemanager::create_path(path);
 	auto fileNameWithExt = fileName;
 	ufile::remove_extension_from_filename(fileNameWithExt,std::array<std::string,2>{"dds","ktx"});
 	switch(containerFormat)
@@ -205,7 +205,7 @@ std::string uimg::get_absolute_path(const std::string &fileName,uimg::TextureInf
 		fileNameWithExt += ".ktx";
 		break;
 	}
-	return FileManager::GetProgramPath() +'/' +fileNameWithExt;
+	return filemanager::get_program_path() +'/' +fileNameWithExt;
 }
 
 static nvtt::InputFormat get_nvtt_format(uimg::TextureInfo::InputFormat format)
