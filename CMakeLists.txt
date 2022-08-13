@@ -61,6 +61,7 @@ link_external_library(mathutil)
 link_external_library(vfilesystem)
 link_external_library(lpng)
 link_external_library(zlib)
+
 link_external_library(nvidia_texture_tools)
 
 add_external_library(nvidia_texture_tools)
@@ -140,7 +141,7 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
 add_subdirectory("third_party_libs/nvtt")
 set(BUILD_SHARED_LIBS ON CACHE BOOL ON FORCE)
 
-set(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/src CACHE STRING "" FORCE)
+set(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/src CACHE PATH "" FORCE)
 set_target_properties(nvtt PROPERTIES FOLDER third_party_libs/nvtt)
 set_target_properties(bc6h PROPERTIES FOLDER third_party_libs/nvtt)
 set_target_properties(bc7 PROPERTIES FOLDER third_party_libs/nvtt)
@@ -169,4 +170,6 @@ set_target_properties(rg_etc1 PROPERTIES FOLDER third_party_libs/nvtt)
 set_target_properties(squish PROPERTIES FOLDER third_party_libs/nvtt)
 
 add_dependencies(${PROJ_NAME} nvtt)
+#HACK: Somehow this path was not included to util_image?
+target_include_directories(${PROJ_NAME} PRIVATE ${DEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE})
 add_dependencies(${PROJ_NAME} squish)

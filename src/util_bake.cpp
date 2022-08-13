@@ -1,6 +1,7 @@
 #include "util_image_buffer.hpp"
 #include "util_image.hpp"
 #include <sharedutils/util_baking.hpp>
+#include <cstring>
 
 struct ImBuf
 {
