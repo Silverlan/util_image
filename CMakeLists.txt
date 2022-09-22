@@ -62,7 +62,6 @@ link_external_library(vfilesystem)
 link_external_library(lpng)
 link_external_library(zlib)
 
-link_external_library(nvidia_texture_tools)
 
 add_external_library(nvidia_texture_tools)
 add_external_library(nvidia_texture_tools_image)
@@ -73,6 +72,17 @@ add_external_library(nvidia_texture_tools_bc6h)
 add_external_library(nvidia_texture_tools_thread)
 add_external_library(nvidia_texture_tools_squish)
 add_external_library(squish)
+
+
+link_external_library(nvidia_texture_tools)
+link_external_library(nvidia_texture_tools_image)
+link_external_library(nvidia_texture_tools_core)
+link_external_library(nvidia_texture_tools_math)
+link_external_library(nvidia_texture_tools_bc7)
+link_external_library(nvidia_texture_tools_bc6h)
+link_external_library(nvidia_texture_tools_thread)
+link_external_library(nvidia_texture_tools_squish)
+link_external_library(squish)
 
 add_definitions(-DUIMG_ENABLE_NVTT)
 add_definitions(-DUIMG_DLL)
