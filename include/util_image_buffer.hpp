@@ -11,6 +11,7 @@
 #include <cinttypes>
 #include <functional>
 #include <optional>
+#include <unordered_map>
 #include <array>
 #include <memory>
 
