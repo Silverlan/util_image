@@ -48,9 +48,9 @@ runs:
         build_target: nvtt
         lib_name_windows: src/nvtt/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvtt
         lib_name_linux: src/nvtt/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvtt
-        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        build_dir: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY'
-        cmake_script_location: 'third_party_libs/nvtt'
+        cmake_script_location: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         root_dir: '${{ inputs.root_dir }}'
         static_library: '1'
 
@@ -60,9 +60,9 @@ runs:
         build_target: bc6h
         lib_name_windows: src/bc6h/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}bc6h
         lib_name_linux: src/bc6h/${{ env.GA_STATIC_LIBRARY_PREFIX }}bc6h
-        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        build_dir: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY'
-        cmake_script_location: 'third_party_libs/nvtt'
+        cmake_script_location: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
         static_library: '1'
@@ -73,9 +73,9 @@ runs:
         build_target: bc7
         lib_name_windows: src/bc7/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}bc7
         lib_name_linux: src/bc7/${{ env.GA_STATIC_LIBRARY_PREFIX }}bc7
-        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        build_dir: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY'
-        cmake_script_location: 'third_party_libs/nvtt'
+        cmake_script_location: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
         static_library: '1'
@@ -86,9 +86,9 @@ runs:
         build_target: nvcore
         lib_name_windows: src/nvcore/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvcore
         lib_name_linux: src/nvcore/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvcore
-        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        build_dir: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY'
-        cmake_script_location: 'third_party_libs/nvtt'
+        cmake_script_location: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
         static_library: '1'
@@ -99,9 +99,9 @@ runs:
         build_target: nvimage
         lib_name_windows: src/nvimage/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvimage
         lib_name_linux: src/nvimage/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvimage
-        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        build_dir: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY'
-        cmake_script_location: 'third_party_libs/nvtt'
+        cmake_script_location: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
         static_library: '1'
@@ -112,9 +112,9 @@ runs:
         build_target: nvmath
         lib_name_windows: src/nvmath/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvmath
         lib_name_linux: src/nvmath/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvmath
-        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        build_dir: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY'
-        cmake_script_location: 'third_party_libs/nvtt'
+        cmake_script_location: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
         static_library: '1'
@@ -125,9 +125,9 @@ runs:
         build_target: nvsquish
         lib_name_windows: src/nvtt/squish/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvsquish
         lib_name_linux: src/nvtt/squish/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvsquish
-        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        build_dir: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY'
-        cmake_script_location: 'third_party_libs/nvtt'
+        cmake_script_location: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
         static_library: '1'
@@ -138,9 +138,9 @@ runs:
         build_target: nvthread
         lib_name_windows: src/nvthread/${{ matrix.config.build_type }}/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvthread
         lib_name_linux: src/nvthread/${{ env.GA_STATIC_LIBRARY_PREFIX }}nvthread
-        build_dir: '${{ matrix.config.build_dir }}/third_party_libs/nvtt'
+        build_dir: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         cmake_var: 'DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY'
-        cmake_script_location: 'third_party_libs/nvtt'
+        cmake_script_location: '${{ inputs.root_dir }}/third_party_libs/nvtt'
         configure: '0'
         root_dir: '${{ inputs.root_dir }}'
         static_library: '1'
