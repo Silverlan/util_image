@@ -41,7 +41,7 @@ jobs:
           
       - name: Build
         id: build
-        uses: Silverlan/tmp_util_image_ci/github_actions/build@master
+        uses: Silverlan/util_image/github_actions/build@master
         with:
           root_dir: "."
           should_checkout: "0"
