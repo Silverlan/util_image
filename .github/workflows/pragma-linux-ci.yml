@@ -43,9 +43,23 @@ jobs:
         id: build
         uses: Silverlan/util_image/github_actions/build@master
         with:
-          root_dir: "."
-          should_checkout: "0"
-          dir: '.'
+          repo-directory: '.'
           
-      - name: Upload binaries
-        uses: Silverlan/common_actions/upload_build_binaries@main
+      - name: Create Release Files
+        shell: bash
+        run: |
+          mkdir release
+          mkdir release/lib
+          rsync build/libutil_image.so release/lib/libutil_image.so
+          
+      - name: Release Binaries
+        uses: Silverlan/common_actions/release_nightly_binaries@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit: ${{ github.ref_name }}
+
+      - uses: Silverlan/common_actions/action_end@main
+      
+      - name: Handle Error
+        uses: Silverlan/common_actions/action_handle_error@main
+        if: failure()
