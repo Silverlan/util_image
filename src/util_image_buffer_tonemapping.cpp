@@ -9,21 +9,11 @@ constexpr float INV_GAMMA = 1.0 / GAMMA;
 
 // linear to sRGB approximation
 // see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-static Vector3 linear_to_srgb(const Vector3 &color)
-{
-	return {
-		glm::pow(color.r,INV_GAMMA),
-		glm::pow(color.g,INV_GAMMA),
-		glm::pow(color.b,INV_GAMMA)
-	};
-}
+static Vector3 linear_to_srgb(const Vector3 &color) { return {glm::pow(color.r, INV_GAMMA), glm::pow(color.g, INV_GAMMA), glm::pow(color.b, INV_GAMMA)}; }
 
 // sRGB to linear approximation
 // see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-static Vector4 srgb_to_linear(const Vector4 &srgbIn)
-{
-	return Vector4(pow(uvec::xyz(srgbIn), uvec::vec3(GAMMA)), srgbIn.w);
-}
+static Vector4 srgb_to_linear(const Vector4 &srgbIn) { return Vector4(pow(uvec::xyz(srgbIn), uvec::vec3(GAMMA)), srgbIn.w); }
 
 // Uncharted 2 tone map
 // see: http://filmicworlds.com/blog/filmic-tonemapping-operators/
@@ -35,7 +25,7 @@ static Vector3 tone_mapping_uncharted2_impl(const Vector3 &color)
 	const float D = 0.20;
 	const float E = 0.02;
 	const float F = 0.30;
-	return ((color*(A*color+C*B)+D*E)/(color*(A*color+B)+D*F))-E/F;
+	return ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
 }
 
 static Vector3 tone_mapping_uncharted(const Vector3 &color)
@@ -51,7 +41,7 @@ static Vector3 tone_mapping_uncharted(const Vector3 &color)
 static Vector3 tone_mapping_hejil_richard(const Vector3 &color)
 {
 	auto toneMappedColor = max(uvec::vec3(0.0), color - uvec::vec3(0.004));
-	return (toneMappedColor*(6.2f*toneMappedColor+.5))/(toneMappedColor*(6.2f*toneMappedColor+1.7)+0.06);
+	return (toneMappedColor * (6.2f * toneMappedColor + .5)) / (toneMappedColor * (6.2f * toneMappedColor + 1.7) + 0.06);
 }
 
 // ACES tone map
@@ -70,7 +60,7 @@ static Vector3 tone_mapping_reinhard(const Vector3 &color)
 {
 	// reinhard tone mapping
 	auto mapped = color / (color + uvec::vec3(1.0));
-	// gamma correction 
+	// gamma correction
 	mapped = glm::pow(mapped, uvec::vec3(1.0 / GAMMA));
 	return mapped;
 }
@@ -108,28 +98,23 @@ static Vector3 tone_mapping_gran_turismo(const Vector3 &x)
 	return linear_to_srgb(uchimura(x, P, a, m, l, c, b));
 }
 
-static std::array<uint8_t,3> to_ldr_color(const Vector3 &col)
+static std::array<uint8_t, 3> to_ldr_color(const Vector3 &col)
 {
-	return {
-		static_cast<uint8_t>(umath::min(col.r *std::numeric_limits<uint8_t>::max(),static_cast<float>(std::numeric_limits<uint8_t>::max()))),
-		static_cast<uint8_t>(umath::min(col.g *std::numeric_limits<uint8_t>::max(),static_cast<float>(std::numeric_limits<uint8_t>::max()))),
-		static_cast<uint8_t>(umath::min(col.b *std::numeric_limits<uint8_t>::max(),static_cast<float>(std::numeric_limits<uint8_t>::max())))
-	};
+	return {static_cast<uint8_t>(umath::min(col.r * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max()))), static_cast<uint8_t>(umath::min(col.g * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max()))),
+	  static_cast<uint8_t>(umath::min(col.b * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max())))};
 }
 
 void uimg::ImageBuffer::ApplyExposure(float exposure)
 {
 	if(exposure == 0.f)
 		return;
-	auto powExposure = glm::pow(2.f,exposure);
-	auto numChannels = umath::min(GetChannelCount(),static_cast<uint8_t>(3));
-	for(auto &pxView : *this)
-	{
-		for(auto i=decltype(numChannels){0u};i<numChannels;++i)
-		{
+	auto powExposure = glm::pow(2.f, exposure);
+	auto numChannels = umath::min(GetChannelCount(), static_cast<uint8_t>(3));
+	for(auto &pxView : *this) {
+		for(auto i = decltype(numChannels) {0u}; i < numChannels; ++i) {
 			auto val = pxView.GetFloatValue(static_cast<uimg::Channel>(i));
 			val *= powExposure;
-			pxView.SetValue(static_cast<uimg::Channel>(i),val);
+			pxView.SetValue(static_cast<uimg::Channel>(i), val);
 		}
 	}
 }
@@ -138,81 +123,61 @@ void uimg::ImageBuffer::ApplyGammaCorrection(float gamma)
 {
 	if(gamma == 1.f)
 		return;
-	auto INV_GAMMA = 1.0 /gamma;
-	auto numChannels = umath::min(GetChannelCount(),static_cast<uint8_t>(3));
-	for(auto &pxView : *this)
-	{
-		for(auto i=decltype(numChannels){0u};i<numChannels;++i)
-		{
+	auto INV_GAMMA = 1.0 / gamma;
+	auto numChannels = umath::min(GetChannelCount(), static_cast<uint8_t>(3));
+	for(auto &pxView : *this) {
+		for(auto i = decltype(numChannels) {0u}; i < numChannels; ++i) {
 			auto channel = static_cast<uimg::Channel>(i);
-			pxView.SetValue(channel,static_cast<float>(glm::pow(pxView.GetFloatValue(channel),INV_GAMMA)));
+			pxView.SetValue(channel, static_cast<float>(glm::pow(pxView.GetFloatValue(channel), INV_GAMMA)));
 		}
 	}
 }
 
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::ApplyToneMapping(ToneMapping toneMappingMethod)
 {
-	std::function<std::array<uint8_t,3>(const Vector3&)> fToneMapper = nullptr;
-	switch(toneMappingMethod)
-	{
+	std::function<std::array<uint8_t, 3>(const Vector3 &)> fToneMapper = nullptr;
+	switch(toneMappingMethod) {
 	case ToneMapping::GammaCorrection:
-		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t,3> {
-			return to_ldr_color(linear_to_srgb(hdrCol));
-		};
+		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t, 3> { return to_ldr_color(linear_to_srgb(hdrCol)); };
 		break;
 	case ToneMapping::Reinhard:
-		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t,3> {
-			return to_ldr_color(tone_mapping_reinhard(hdrCol));
-		};
+		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t, 3> { return to_ldr_color(tone_mapping_reinhard(hdrCol)); };
 		break;
 	case ToneMapping::HejilRichard:
-		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t,3> {
-			return to_ldr_color(tone_mapping_hejil_richard(hdrCol));
-		};
+		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t, 3> { return to_ldr_color(tone_mapping_hejil_richard(hdrCol)); };
 		break;
 	case ToneMapping::Uncharted:
-		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t,3> {
-			return to_ldr_color(tone_mapping_uncharted(hdrCol));
-		};
+		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t, 3> { return to_ldr_color(tone_mapping_uncharted(hdrCol)); };
 		break;
 	case ToneMapping::Aces:
-		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t,3> {
-			return to_ldr_color(tone_mapping_aces(hdrCol));
-		};
+		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t, 3> { return to_ldr_color(tone_mapping_aces(hdrCol)); };
 		break;
 	case ToneMapping::GranTurismo:
-		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t,3> {
-			return to_ldr_color(tone_mapping_gran_turismo(hdrCol));
-		};
+		fToneMapper = [](const Vector3 &hdrCol) -> std::array<uint8_t, 3> { return to_ldr_color(tone_mapping_gran_turismo(hdrCol)); };
 		break;
 	}
 	return ApplyToneMapping(fToneMapper);
 }
-std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::ApplyToneMapping(const std::function<std::array<uint8_t,3>(const Vector3&)> &fToneMapper)
+std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::ApplyToneMapping(const std::function<std::array<uint8_t, 3>(const Vector3 &)> &fToneMapper)
 {
 	if(IsHDRFormat() == false && IsFloatFormat() == false)
 		return shared_from_this();
 	auto origFormat = GetFormat();
 	auto newFormat = ToLDRFormat(origFormat);
 	auto &srcImg = *this;
-	auto dstImg = Create(GetWidth(),GetHeight(),newFormat);
+	auto dstImg = Create(GetWidth(), GetHeight(), newFormat);
 
 	auto itSrc = srcImg.begin();
 	auto itDst = dstImg->begin();
-	while(itSrc != srcImg.end())
-	{
+	while(itSrc != srcImg.end()) {
 		auto &srcPixel = *itSrc;
 		auto &dstPixel = *itDst;
-		Vector3 color {
-			srcPixel.GetFloatValue(Channel::Red),
-			srcPixel.GetFloatValue(Channel::Green),
-			srcPixel.GetFloatValue(Channel::Blue)
-		};
+		Vector3 color {srcPixel.GetFloatValue(Channel::Red), srcPixel.GetFloatValue(Channel::Green), srcPixel.GetFloatValue(Channel::Blue)};
 		auto toneMappedColor = fToneMapper(color);
-		dstPixel.SetValue(Channel::Red,toneMappedColor.at(0));
-		dstPixel.SetValue(Channel::Green,toneMappedColor.at(1));
-		dstPixel.SetValue(Channel::Blue,toneMappedColor.at(2));
-		dstPixel.SetValue(Channel::Alpha,umath::min(srcPixel.GetFloatValue(Channel::Alpha),static_cast<float>(std::numeric_limits<uint8_t>::max())));
+		dstPixel.SetValue(Channel::Red, toneMappedColor.at(0));
+		dstPixel.SetValue(Channel::Green, toneMappedColor.at(1));
+		dstPixel.SetValue(Channel::Blue, toneMappedColor.at(2));
+		dstPixel.SetValue(Channel::Alpha, umath::min(srcPixel.GetFloatValue(Channel::Alpha), static_cast<float>(std::numeric_limits<uint8_t>::max())));
 
 		++itSrc;
 		++itDst;

@@ -15,11 +15,10 @@
 #include <variant>
 #include <cstring>
 
-#pragma optimize("",off)
+#pragma optimize("", off)
 static nvtt::Format to_nvtt_enum(uimg::TextureInfo::OutputFormat format)
 {
-	switch(format)
-	{
+	switch(format) {
 	case uimg::TextureInfo::OutputFormat::RGB:
 		return nvtt::Format_RGB;
 	case uimg::TextureInfo::OutputFormat::RGBA:
@@ -79,16 +78,15 @@ static nvtt::Format to_nvtt_enum(uimg::TextureInfo::OutputFormat format)
 	return {};
 }
 
-static nvtt::Container to_nvtt_enum(uimg::TextureInfo::ContainerFormat format,uimg::TextureInfo::OutputFormat imgFormat)
+static nvtt::Container to_nvtt_enum(uimg::TextureInfo::ContainerFormat format, uimg::TextureInfo::OutputFormat imgFormat)
 {
-	switch(format)
-	{
+	switch(format) {
 	case uimg::TextureInfo::ContainerFormat::DDS:
-	{
-		if(imgFormat == uimg::TextureInfo::OutputFormat::BC6 || imgFormat == uimg::TextureInfo::OutputFormat::BC7)
-			return nvtt::Container_DDS10; // These formats are only supported by DDS10
-		return nvtt::Container_DDS;
-	}
+		{
+			if(imgFormat == uimg::TextureInfo::OutputFormat::BC6 || imgFormat == uimg::TextureInfo::OutputFormat::BC7)
+				return nvtt::Container_DDS10; // These formats are only supported by DDS10
+			return nvtt::Container_DDS;
+		}
 	case uimg::TextureInfo::ContainerFormat::KTX:
 		return nvtt::Container_KTX;
 	}
@@ -98,8 +96,7 @@ static nvtt::Container to_nvtt_enum(uimg::TextureInfo::ContainerFormat format,ui
 
 static nvtt::MipmapFilter to_nvtt_enum(uimg::TextureInfo::MipmapFilter filter)
 {
-	switch(filter)
-	{
+	switch(filter) {
 	case uimg::TextureInfo::MipmapFilter::Box:
 		return nvtt::MipmapFilter_Box;
 	case uimg::TextureInfo::MipmapFilter::Kaiser:
@@ -111,8 +108,7 @@ static nvtt::MipmapFilter to_nvtt_enum(uimg::TextureInfo::MipmapFilter filter)
 
 static nvtt::WrapMode to_nvtt_enum(uimg::TextureInfo::WrapMode wrapMode)
 {
-	switch(wrapMode)
-	{
+	switch(wrapMode) {
 	case uimg::TextureInfo::WrapMode::Clamp:
 		return nvtt::WrapMode_Clamp;
 	case uimg::TextureInfo::WrapMode::Repeat:
@@ -124,36 +120,24 @@ static nvtt::WrapMode to_nvtt_enum(uimg::TextureInfo::WrapMode wrapMode)
 	return {};
 }
 
-struct OutputHandler
-	: public nvtt::OutputHandler
-{
-	OutputHandler(VFilePtrReal f)
-		: m_file{f}
-	{}
+struct OutputHandler : public nvtt::OutputHandler {
+	OutputHandler(VFilePtrReal f) : m_file {f} {}
 	virtual ~OutputHandler() override {}
 
 	// Indicate the start of a new compressed image that's part of the final texture.
 	virtual void beginImage(int size, int width, int height, int depth, int face, int miplevel) override {}
 
 	// Output data. Compressed data is output as soon as it's generated to minimize memory allocations.
-	virtual bool writeData(const void * data, int size) override
-	{
-		return m_file->Write(data,size) == size;
-	}
+	virtual bool writeData(const void *data, int size) override { return m_file->Write(data, size) == size; }
 
 	// Indicate the end of the compressed image. (New in NVTT 2.1)
 	virtual void endImage() override {}
-
-private:
+  private:
 	VFilePtrReal m_file = nullptr;
 };
 
-struct ErrorHandler
-	: public nvtt::ErrorHandler
-{
-	ErrorHandler(const std::function<void(const std::string&)> &errorHandler)
-		: m_errorHandler{errorHandler}
-	{}
+struct ErrorHandler : public nvtt::ErrorHandler {
+	ErrorHandler(const std::function<void(const std::string &)> &errorHandler) : m_errorHandler {errorHandler} {}
 	virtual ~ErrorHandler() override {};
 
 	// Signal error.
@@ -161,8 +145,7 @@ struct ErrorHandler
 	{
 		if(m_errorHandler == nullptr)
 			return;
-		switch(e)
-		{
+		switch(e) {
 		case nvtt::Error_Unknown:
 			m_errorHandler("Unknown error");
 			break;
@@ -186,18 +169,17 @@ struct ErrorHandler
 			break;
 		}
 	}
-private:
-	std::function<void(const std::string&)> m_errorHandler = nullptr;
+  private:
+	std::function<void(const std::string &)> m_errorHandler = nullptr;
 };
 
-std::string uimg::get_absolute_path(const std::string &fileName,uimg::TextureInfo::ContainerFormat containerFormat)
+std::string uimg::get_absolute_path(const std::string &fileName, uimg::TextureInfo::ContainerFormat containerFormat)
 {
 	auto path = ufile::get_path_from_filename(fileName);
 	filemanager::create_path(path);
 	auto fileNameWithExt = fileName;
-	ufile::remove_extension_from_filename(fileNameWithExt,std::array<std::string,2>{"dds","ktx"});
-	switch(containerFormat)
-	{
+	ufile::remove_extension_from_filename(fileNameWithExt, std::array<std::string, 2> {"dds", "ktx"});
+	switch(containerFormat) {
 	case uimg::TextureInfo::ContainerFormat::DDS:
 		fileNameWithExt += ".dds";
 		break;
@@ -205,14 +187,13 @@ std::string uimg::get_absolute_path(const std::string &fileName,uimg::TextureInf
 		fileNameWithExt += ".ktx";
 		break;
 	}
-	return filemanager::get_program_path() +'/' +fileNameWithExt;
+	return filemanager::get_program_path() + '/' + fileNameWithExt;
 }
 
 static nvtt::InputFormat get_nvtt_format(uimg::TextureInfo::InputFormat format)
 {
 	nvtt::InputFormat nvttFormat;
-	switch(format)
-	{
+	switch(format) {
 	case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
 	case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
 		nvttFormat = nvtt::InputFormat_BGRA_8UB;
@@ -233,21 +214,18 @@ static nvtt::InputFormat get_nvtt_format(uimg::TextureInfo::InputFormat format)
 	return nvttFormat;
 }
 
-static uint32_t calculate_mipmap_size(uint32_t v,uint32_t level)
+static uint32_t calculate_mipmap_size(uint32_t v, uint32_t level)
 {
 	auto r = v;
-	auto scale = static_cast<int>(std::pow(2,level));
+	auto scale = static_cast<int>(std::pow(2, level));
 	r /= scale;
 	if(r == 0)
 		r = 1;
 	return r;
 }
 
-static bool compress_texture(
-	const std::variant<uimg::TextureOutputHandler,std::string> &outputHandler,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &pfGetImgData,
-	const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler=nullptr,
-	bool absoluteFileName=false
-)
+static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std::string> &outputHandler, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &pfGetImgData, const uimg::TextureSaveInfo &texSaveInfo,
+  const std::function<void(const std::string &)> &errorHandler = nullptr, bool absoluteFileName = false)
 {
 	std::function<void()> updateFileCache = nullptr;
 	auto r = false;
@@ -257,17 +235,16 @@ static bool compress_texture(
 		if(texSaveInfo.channelMask.has_value())
 			channelMask = *texSaveInfo.channelMask;
 		else if(texInfo.inputFormat == uimg::TextureInfo::InputFormat::R8G8B8A8_UInt)
-			channelMask.SwapChannels(uimg::Channel::Red,uimg::Channel::Blue);
+			channelMask.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
 
 		auto nvttFormat = get_nvtt_format(texInfo.inputFormat);
-		switch(nvttFormat)
-		{
+		switch(nvttFormat) {
 		case nvtt::InputFormat_BGRA_8UB:
-			channelMask.SwapChannels(uimg::Channel::Red,uimg::Channel::Blue);
+			channelMask.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
 			break;
 		}
 
-		auto numMipmaps = umath::max(texSaveInfo.numMipmaps,static_cast<uint32_t>(1));
+		auto numMipmaps = umath::max(texSaveInfo.numMipmaps, static_cast<uint32_t>(1));
 		auto numLayers = texSaveInfo.numLayers;
 		auto width = texSaveInfo.width;
 		auto height = texSaveInfo.height;
@@ -275,14 +252,12 @@ static bool compress_texture(
 		auto cubemap = texSaveInfo.cubemap;
 		std::vector<std::shared_ptr<uimg::ImageBuffer>> imgBuffers;
 		auto fGetImgData = pfGetImgData;
-		if(channelMask != uimg::ChannelMask{})
-		{
-			imgBuffers.resize(numLayers *numMipmaps);
+		if(channelMask != uimg::ChannelMask {}) {
+			imgBuffers.resize(numLayers * numMipmaps);
 			uint32_t idx = 0;
 
 			uimg::Format uimgFormat;
-			switch(texSaveInfo.texInfo.inputFormat)
-			{
+			switch(texSaveInfo.texInfo.inputFormat) {
 			case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
 			case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
 				uimgFormat = uimg::Format::RGBA8;
@@ -297,84 +272,76 @@ static bool compress_texture(
 				uimgFormat = uimg::Format::R32;
 				break;
 			default:
-				throw std::runtime_error{"Texture compression error: Unsupported format " +std::string{magic_enum::enum_name(texSaveInfo.texInfo.inputFormat)}};
+				throw std::runtime_error {"Texture compression error: Unsupported format " + std::string {magic_enum::enum_name(texSaveInfo.texInfo.inputFormat)}};
 			}
 
-			for(auto i=decltype(numLayers){0u};i<numLayers;++i)
-			{
-				for(auto m=decltype(numMipmaps){0u};m<numMipmaps;++m)
-				{
+			for(auto i = decltype(numLayers) {0u}; i < numLayers; ++i) {
+				for(auto m = decltype(numMipmaps) {0u}; m < numMipmaps; ++m) {
 					std::function<void()> deleter = nullptr;
-					auto *data = fGetImgData(i,m,deleter);
-					auto &imgBuf = imgBuffers[idx++] = uimg::ImageBuffer::Create(data,calculate_mipmap_size(width,m),calculate_mipmap_size(height,m),uimgFormat);
-				
+					auto *data = fGetImgData(i, m, deleter);
+					auto &imgBuf = imgBuffers[idx++] = uimg::ImageBuffer::Create(data, calculate_mipmap_size(width, m), calculate_mipmap_size(height, m), uimgFormat);
+
 					imgBuf->SwapChannels(channelMask);
 					if(deleter)
 						deleter();
 				}
 			}
-			fGetImgData = [&imgBuffers,numMipmaps](uint32_t layer,uint32_t mip,std::function<void()> &deleter) -> const uint8_t* {
+			fGetImgData = [&imgBuffers, numMipmaps](uint32_t layer, uint32_t mip, std::function<void()> &deleter) -> const uint8_t * {
 				deleter = nullptr;
-				auto idx = layer *numMipmaps +mip;
+				auto idx = layer * numMipmaps + mip;
 				auto &imgBuf = imgBuffers[idx];
-				return imgBuf ? static_cast<uint8_t*>(imgBuf->GetData()) : nullptr;
+				return imgBuf ? static_cast<uint8_t *>(imgBuf->GetData()) : nullptr;
 			};
 		}
 
-		auto size = width *height *szPerPixel;
+		auto size = width * height * szPerPixel;
 
 		nvtt::InputOptions inputOptions {};
 		inputOptions.reset();
-		inputOptions.setTextureLayout(nvtt::TextureType_2D,width,height);
+		inputOptions.setTextureLayout(nvtt::TextureType_2D, width, height);
 		inputOptions.setFormat(nvttFormat);
 		inputOptions.setWrapMode(to_nvtt_enum(texInfo.wrapMode));
 		inputOptions.setMipmapFilter(to_nvtt_enum(texInfo.mipMapFilter));
 
-		if(umath::is_flag_set(texInfo.flags,uimg::TextureInfo::Flags::GenerateMipmaps))
+		if(umath::is_flag_set(texInfo.flags, uimg::TextureInfo::Flags::GenerateMipmaps))
 			inputOptions.setMipmapGeneration(true);
 		else
-			inputOptions.setMipmapGeneration(numMipmaps > 1,numMipmaps -1u);
+			inputOptions.setMipmapGeneration(numMipmaps > 1, numMipmaps - 1u);
 
 		auto texType = cubemap ? nvtt::TextureType_Cube : nvtt::TextureType_2D;
 		auto alphaMode = texInfo.alphaMode;
 		if(texInfo.outputFormat == uimg::TextureInfo::OutputFormat::BC6)
 			alphaMode = uimg::TextureInfo::AlphaMode::Transparency;
-		inputOptions.setTextureLayout(texType,width,height);
-		for(auto iLayer=decltype(numLayers){0u};iLayer<numLayers;++iLayer)
-		{
-			for(auto iMipmap=decltype(numMipmaps){0u};iMipmap<numMipmaps;++iMipmap)
-			{
+		inputOptions.setTextureLayout(texType, width, height);
+		for(auto iLayer = decltype(numLayers) {0u}; iLayer < numLayers; ++iLayer) {
+			for(auto iMipmap = decltype(numMipmaps) {0u}; iMipmap < numMipmaps; ++iMipmap) {
 				std::function<void(void)> deleter = nullptr;
-				auto *data = fGetImgData(iLayer,iMipmap,deleter);
+				auto *data = fGetImgData(iLayer, iMipmap, deleter);
 				if(data == nullptr)
 					continue;
-				uint32_t wMipmap,hMipmap;
-				uimg::calculate_mipmap_size(width,height,wMipmap,hMipmap,iMipmap);
-				inputOptions.setMipmapData(data,wMipmap,hMipmap,1,iLayer,iMipmap);
+				uint32_t wMipmap, hMipmap;
+				uimg::calculate_mipmap_size(width, height, wMipmap, hMipmap, iMipmap);
+				inputOptions.setMipmapData(data, wMipmap, hMipmap, 1, iLayer, iMipmap);
 
-				if(alphaMode == uimg::TextureInfo::AlphaMode::Auto)
-				{
+				if(alphaMode == uimg::TextureInfo::AlphaMode::Auto) {
 					// Determine whether there are any alpha values < 1
-					auto numPixels = wMipmap *hMipmap;
-					for(auto i=decltype(numPixels){0u};i<numPixels;++i)
-					{
+					auto numPixels = wMipmap * hMipmap;
+					for(auto i = decltype(numPixels) {0u}; i < numPixels; ++i) {
 						float alpha = 1.f;
-						switch(nvttFormat)
-						{
+						switch(nvttFormat) {
 						case nvtt::InputFormat_BGRA_8UB:
-							alpha = (data +i *4)[3] /static_cast<float>(std::numeric_limits<uint8_t>::max());
+							alpha = (data + i * 4)[3] / static_cast<float>(std::numeric_limits<uint8_t>::max());
 							break;
 						case nvtt::InputFormat_RGBA_16F:
-							alpha = umath::float16_to_float32_glm((reinterpret_cast<const uint16_t*>(data) +i *4)[3]);
+							alpha = umath::float16_to_float32_glm((reinterpret_cast<const uint16_t *>(data) + i * 4)[3]);
 							break;
 						case nvtt::InputFormat_RGBA_32F:
-							alpha = (reinterpret_cast<const float*>(data) +i *4)[3];
+							alpha = (reinterpret_cast<const float *>(data) + i * 4)[3];
 							break;
 						case nvtt::InputFormat_R_32F:
 							break;
 						}
-						if(alpha < 0.999f)
-						{
+						if(alpha < 0.999f) {
 							alphaMode = uimg::TextureInfo::AlphaMode::Transparency;
 							break;
 						}
@@ -398,48 +365,31 @@ static bool compress_texture(
 		ErrorHandler errHandler {errorHandler};
 		//OutputHandler outputHandler {f};
 
-		struct NvttOutputHandler
-			: public nvtt::OutputHandler
-		{
-			NvttOutputHandler(uimg::TextureOutputHandler &handler)
-				: m_outputHandler{handler}
-			{}
-			virtual void beginImage(int size, int width, int height, int depth, int face, int miplevel) override
-			{
-				m_outputHandler.beginImage(size,width,height,depth,face,miplevel);
-			}
-			virtual bool writeData(const void * data, int size) override
-			{
-				return m_outputHandler.writeData(data,size);
-			}
-			virtual void endImage() override
-			{
-				m_outputHandler.endImage();
-			}
-		private:
+		struct NvttOutputHandler : public nvtt::OutputHandler {
+			NvttOutputHandler(uimg::TextureOutputHandler &handler) : m_outputHandler {handler} {}
+			virtual void beginImage(int size, int width, int height, int depth, int face, int miplevel) override { m_outputHandler.beginImage(size, width, height, depth, face, miplevel); }
+			virtual bool writeData(const void *data, int size) override { return m_outputHandler.writeData(data, size); }
+			virtual void endImage() override { m_outputHandler.endImage(); }
+		  private:
 			uimg::TextureOutputHandler &m_outputHandler;
 		};
 
 		std::unique_ptr<NvttOutputHandler> nvttOutputHandler = nullptr;
 		nvtt::OutputOptions outputOptions {};
 		outputOptions.reset();
-		outputOptions.setContainer(to_nvtt_enum(texInfo.containerFormat,texInfo.outputFormat));
-		outputOptions.setSrgbFlag(umath::is_flag_set(texInfo.flags,uimg::TextureInfo::Flags::SRGB));
-		if(outputHandler.index() == 0)
-		{
+		outputOptions.setContainer(to_nvtt_enum(texInfo.containerFormat, texInfo.outputFormat));
+		outputOptions.setSrgbFlag(umath::is_flag_set(texInfo.flags, uimg::TextureInfo::Flags::SRGB));
+		if(outputHandler.index() == 0) {
 			auto &texOutputHandler = std::get<uimg::TextureOutputHandler>(outputHandler);
-			auto &r = const_cast<uimg::TextureOutputHandler&>(texOutputHandler);
-			nvttOutputHandler = std::unique_ptr<NvttOutputHandler>{new NvttOutputHandler{r}};
+			auto &r = const_cast<uimg::TextureOutputHandler &>(texOutputHandler);
+			nvttOutputHandler = std::unique_ptr<NvttOutputHandler> {new NvttOutputHandler {r}};
 			outputOptions.setOutputHandler(nvttOutputHandler.get());
 		}
-		else
-		{
+		else {
 			auto &fileName = std::get<std::string>(outputHandler);
-			std::string outputFilePath = absoluteFileName ? fileName.c_str() : get_absolute_path(fileName,texInfo.containerFormat).c_str();
+			std::string outputFilePath = absoluteFileName ? fileName.c_str() : get_absolute_path(fileName, texInfo.containerFormat).c_str();
 			outputOptions.setFileName(outputFilePath.c_str());
-			updateFileCache = [outputFilePath]() {
-				filemanager::update_file_index_cache(outputFilePath,true);
-			};
+			updateFileCache = [outputFilePath]() { filemanager::update_file_index_cache(outputFilePath, true); };
 		}
 		outputOptions.setErrorHandler(&errHandler);
 
@@ -450,15 +400,14 @@ static bool compress_texture(
 		compressionOptions.setQuality(nvtt::Quality_Production);
 
 		// These settings are from the standalone nvtt nvcompress application
-		switch(nvttOutputFormat)
-		{
+		switch(nvttOutputFormat) {
 		case nvtt::Format_BC2:
 			// Dither alpha when using BC2.
-			compressionOptions.setQuantization(/*color dithering*/false, /*alpha dithering*/true, /*binary alpha*/false);
+			compressionOptions.setQuantization(/*color dithering*/ false, /*alpha dithering*/ true, /*binary alpha*/ false);
 			break;
 		case nvtt::Format_BC1a:
 			// Binary alpha when using BC1a.
-			compressionOptions.setQuantization(/*color dithering*/false, /*alpha dithering*/true, /*binary alpha*/true, 127);
+			compressionOptions.setQuantization(/*color dithering*/ false, /*alpha dithering*/ true, /*binary alpha*/ true, 127);
 			break;
 		case nvtt::Format_BC6:
 			compressionOptions.setPixelType(nvtt::PixelType_UnsignedFloat);
@@ -468,25 +417,22 @@ static bool compress_texture(
 			break;
 		}
 
-		if(texInfo.IsNormalMap())
-		{
+		if(texInfo.IsNormalMap()) {
 			inputOptions.setNormalMap(true);
 			inputOptions.setConvertToNormalMap(false);
 			inputOptions.setGamma(1.0f, 1.0f);
 			inputOptions.setNormalizeMipmaps(true);
 		}
-		else if(umath::is_flag_set(texInfo.flags,uimg::TextureInfo::Flags::ConvertToNormalMap))
-		{
+		else if(umath::is_flag_set(texInfo.flags, uimg::TextureInfo::Flags::ConvertToNormalMap)) {
 			inputOptions.setNormalMap(false);
 			inputOptions.setConvertToNormalMap(true);
-			inputOptions.setHeightEvaluation(1.0f/3.0f, 1.0f/3.0f, 1.0f/3.0f, 0.0f);
+			inputOptions.setHeightEvaluation(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f, 0.0f);
 			//inputOptions.setNormalFilter(1.0f, 0, 0, 0);
 			//inputOptions.setNormalFilter(0.0f, 0, 0, 1);
 			inputOptions.setGamma(1.0f, 1.0f);
 			inputOptions.setNormalizeMipmaps(true);
 		}
-		else
-		{
+		else {
 			inputOptions.setNormalMap(false);
 			inputOptions.setConvertToNormalMap(false);
 			inputOptions.setGamma(2.2f, 2.2f);
@@ -495,68 +441,56 @@ static bool compress_texture(
 
 		nvtt::Compressor compressor {};
 		compressor.enableCudaAcceleration(true);
-		r = compressor.process(inputOptions,compressionOptions,outputOptions);
+		r = compressor.process(inputOptions, compressionOptions, outputOptions);
 	}
 	if(r && updateFileCache)
 		updateFileCache();
 	return r;
 }
 
-bool uimg::compress_texture(
-	const TextureOutputHandler &outputHandler,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,
-	const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler
-)
+bool uimg::compress_texture(const TextureOutputHandler &outputHandler, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const uimg::TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler)
 {
-	return ::compress_texture(outputHandler,fGetImgData,texSaveInfo,errorHandler);
+	return ::compress_texture(outputHandler, fGetImgData, texSaveInfo, errorHandler);
 }
 
-bool uimg::compress_texture(
-	std::vector<std::vector<std::vector<uint8_t>>> &outputData,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,
-	const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler
-)
+bool uimg::compress_texture(std::vector<std::vector<std::vector<uint8_t>>> &outputData, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const uimg::TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler)
 {
-	outputData.resize(texSaveInfo.numLayers,std::vector<std::vector<uint8_t>>(texSaveInfo.numMipmaps,std::vector<uint8_t>{}));
+	outputData.resize(texSaveInfo.numLayers, std::vector<std::vector<uint8_t>>(texSaveInfo.numMipmaps, std::vector<uint8_t> {}));
 	auto iLevel = std::numeric_limits<uint32_t>::max();
 	auto iMipmap = std::numeric_limits<uint32_t>::max();
 	uimg::TextureOutputHandler outputHandler {};
-	outputHandler.beginImage = [&outputData,&iLevel,&iMipmap](int size, int width, int height, int depth, int face, int miplevel) {
+	outputHandler.beginImage = [&outputData, &iLevel, &iMipmap](int size, int width, int height, int depth, int face, int miplevel) {
 		iLevel = face;
 		iMipmap = miplevel;
 		outputData[iLevel][iMipmap].resize(size);
 	};
-	outputHandler.writeData = [&outputData,&iLevel,&iMipmap](const void * data, int size) -> bool {
+	outputHandler.writeData = [&outputData, &iLevel, &iMipmap](const void *data, int size) -> bool {
 		if(iLevel == std::numeric_limits<uint32_t>::max() || iMipmap == std::numeric_limits<uint32_t>::max())
 			return true;
-		std::memcpy(outputData[iLevel][iMipmap].data(),data,size);
+		std::memcpy(outputData[iLevel][iMipmap].data(), data, size);
 		return true;
 	};
-	outputHandler.endImage = [&iLevel,&iMipmap]() {
+	outputHandler.endImage = [&iLevel, &iMipmap]() {
 		iLevel = std::numeric_limits<uint32_t>::max();
 		iMipmap = std::numeric_limits<uint32_t>::max();
 	};
-	return ::compress_texture(outputHandler,fGetImgData,texSaveInfo,errorHandler);
+	return ::compress_texture(outputHandler, fGetImgData, texSaveInfo, errorHandler);
 }
 
-bool uimg::save_texture(
-	const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,
-	const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
-)
+bool uimg::save_texture(const std::string &fileName, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const uimg::TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName)
 {
-	return ::compress_texture(fileName,fGetImgData,texSaveInfo,errorHandler,absoluteFileName);
+	return ::compress_texture(fileName, fGetImgData, texSaveInfo, errorHandler, absoluteFileName);
 }
 
-bool uimg::save_texture(
-	const std::string &fileName,uimg::ImageBuffer &imgBuffer,const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
-)
+bool uimg::save_texture(const std::string &fileName, uimg::ImageBuffer &imgBuffer, const uimg::TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName)
 {
 	constexpr auto numLayers = 1u;
 	constexpr auto numMipmaps = 1u;
 
 	auto newTexSaveInfo = texSaveInfo;
 	auto swapRedBlue = (texSaveInfo.texInfo.inputFormat == uimg::TextureInfo::InputFormat::R8G8B8A8_UInt);
-	if(swapRedBlue)
-	{
-		imgBuffer.SwapChannels(uimg::Channel::Red,uimg::Channel::Blue);
+	if(swapRedBlue) {
+		imgBuffer.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
 		newTexSaveInfo.texInfo.inputFormat = uimg::TextureInfo::InputFormat::B8G8R8A8_UInt;
 	}
 	newTexSaveInfo.width = imgBuffer.GetWidth();
@@ -564,32 +498,31 @@ bool uimg::save_texture(
 	newTexSaveInfo.szPerPixel = imgBuffer.GetPixelSize();
 	newTexSaveInfo.numLayers = numLayers;
 	newTexSaveInfo.numMipmaps = numMipmaps;
-	auto success = save_texture(fileName,[&imgBuffer](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
-		return static_cast<uint8_t*>(imgBuffer.GetData());
-	},newTexSaveInfo,errorHandler,absoluteFileName);
+	auto success = save_texture(
+	  fileName, [&imgBuffer](uint32_t iLayer, uint32_t iMipmap, std::function<void(void)> &outDeleter) -> const uint8_t * { return static_cast<uint8_t *>(imgBuffer.GetData()); }, newTexSaveInfo, errorHandler, absoluteFileName);
 	if(swapRedBlue)
-		imgBuffer.SwapChannels(uimg::Channel::Red,uimg::Channel::Blue);
+		imgBuffer.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
 	return success;
 }
 
-bool uimg::save_texture(
-	const std::string &fileName,const std::vector<std::vector<const void*>> &imgLayerMipmapData,
-	const uimg::TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler,bool absoluteFileName
-)
+bool uimg::save_texture(const std::string &fileName, const std::vector<std::vector<const void *>> &imgLayerMipmapData, const uimg::TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName)
 {
 	auto numLayers = imgLayerMipmapData.size();
 	auto numMipmaps = imgLayerMipmapData.empty() ? 1 : imgLayerMipmapData.front().size();
 	auto ltexSaveInfo = texSaveInfo;
 	ltexSaveInfo.numLayers = numLayers;
 	ltexSaveInfo.numMipmaps = numMipmaps;
-	return save_texture(fileName,[&imgLayerMipmapData](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
-		if(iLayer >= imgLayerMipmapData.size())
-			return nullptr;
-		auto &mipmapData = imgLayerMipmapData.at(iLayer);
-		if(iMipmap >= mipmapData.size())
-			return nullptr;
-		return static_cast<const uint8_t*>(mipmapData.at(iMipmap));
-	},ltexSaveInfo,errorHandler,absoluteFileName);
+	return save_texture(
+	  fileName,
+	  [&imgLayerMipmapData](uint32_t iLayer, uint32_t iMipmap, std::function<void(void)> &outDeleter) -> const uint8_t * {
+		  if(iLayer >= imgLayerMipmapData.size())
+			  return nullptr;
+		  auto &mipmapData = imgLayerMipmapData.at(iLayer);
+		  if(iMipmap >= mipmapData.size())
+			  return nullptr;
+		  return static_cast<const uint8_t *>(mipmapData.at(iMipmap));
+	  },
+	  ltexSaveInfo, errorHandler, absoluteFileName);
 }
 #endif
-#pragma optimize("",on)
+#pragma optimize("", on)

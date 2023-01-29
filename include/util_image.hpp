@@ -14,43 +14,29 @@
 #include <cinttypes>
 #include <optional>
 
-namespace ufile {struct IFile;};
-namespace uimg
-{
+namespace ufile {
+	struct IFile;
+};
+namespace uimg {
 	class ImageBuffer;
 	struct TextureInfo;
 
-	DLLUIMG bool read_image_size(const std::string &file,uint32_t &pixelWidth,uint32_t &pixelHeight);
-	DLLUIMG void calculate_mipmap_size(uint32_t w,uint32_t h,uint32_t &outWMipmap,uint32_t &outHMipmap,uint32_t level);
+	DLLUIMG bool read_image_size(const std::string &file, uint32_t &pixelWidth, uint32_t &pixelHeight);
+	DLLUIMG void calculate_mipmap_size(uint32_t w, uint32_t h, uint32_t &outWMipmap, uint32_t &outHMipmap, uint32_t level);
 
-	enum class ImageFormat : uint8_t
-	{
-		PNG = 0,
-		BMP,
-		TGA,
-		JPG,
-		HDR,
-		Count
-	};
-	enum class PixelFormat : uint8_t
-	{
-		LDR = 0,
-		HDR,
-		Float
-	};
+	enum class ImageFormat : uint8_t { PNG = 0, BMP, TGA, JPG, HDR, Count };
+	enum class PixelFormat : uint8_t { LDR = 0, HDR, Float };
 	DLLUIMG std::string get_file_extension(ImageFormat format);
-	DLLUIMG std::shared_ptr<ImageBuffer> load_image(ufile::IFile &f,PixelFormat pixelFormat=PixelFormat::LDR);
-	DLLUIMG std::shared_ptr<ImageBuffer> load_image(const std::string &fileName,PixelFormat pixelFormat=PixelFormat::LDR);
-	DLLUIMG bool save_image(ufile::IFile &f,ImageBuffer &imgBuffer,ImageFormat format,float quality=1.f);
+	DLLUIMG std::shared_ptr<ImageBuffer> load_image(ufile::IFile &f, PixelFormat pixelFormat = PixelFormat::LDR);
+	DLLUIMG std::shared_ptr<ImageBuffer> load_image(const std::string &fileName, PixelFormat pixelFormat = PixelFormat::LDR);
+	DLLUIMG bool save_image(ufile::IFile &f, ImageBuffer &imgBuffer, ImageFormat format, float quality = 1.f);
 #ifdef UIMG_ENABLE_NVTT
-    struct DLLUIMG TextureOutputHandler
-    {
-        std::function<void(int size, int width, int height, int depth, int face, int miplevel)> beginImage = nullptr;
-        std::function<bool(const void * data, int size)> writeData = nullptr;
-        std::function<void()> endImage = nullptr;
-    };
-	struct DLLUIMG TextureSaveInfo
-	{
+	struct DLLUIMG TextureOutputHandler {
+		std::function<void(int size, int width, int height, int depth, int face, int miplevel)> beginImage = nullptr;
+		std::function<bool(const void *data, int size)> writeData = nullptr;
+		std::function<void()> endImage = nullptr;
+	};
+	struct DLLUIMG TextureSaveInfo {
 		uimg::TextureInfo texInfo {};
 
 		// Only needed if no image buffer was specified
@@ -65,32 +51,19 @@ namespace uimg
 		bool cubemap = false;
 		std::optional<uimg::ChannelMask> channelMask {};
 	};
-	DLLUIMG bool compress_texture(
-		const TextureOutputHandler &outputHandler,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,const TextureSaveInfo &texSaveInfo,
-		const std::function<void(const std::string&)> &errorHandler=nullptr
-	);
-	DLLUIMG bool compress_texture(
-		std::vector<std::vector<std::vector<uint8_t>>> &outputData,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,const TextureSaveInfo &texSaveInfo,
-		const std::function<void(const std::string&)> &errorHandler=nullptr
-	);
-	DLLUIMG bool save_texture(
-		const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t,std::function<void()>&)> &fGetImgData,const TextureSaveInfo &texSaveInfo,
-		const std::function<void(const std::string&)> &errorHandler=nullptr,
-		bool absoluteFileName=false
-	);
-	DLLUIMG bool save_texture(ufile::IFile &f,ImageBuffer &imgBuffer,const TextureSaveInfo &texInfo);
-	DLLUIMG bool save_texture(
-		const std::string &fileName,uimg::ImageBuffer &imgBuffer,const TextureSaveInfo &texInfo,const std::function<void(const std::string&)> &errorHandler=nullptr,bool absoluteFileName=false
-	);
-	DLLUIMG bool save_texture(
-		const std::string &fileName,const std::vector<std::vector<const void*>> &imgLayerMipmapData,
-		const TextureSaveInfo &texSaveInfo,const std::function<void(const std::string&)> &errorHandler=nullptr,bool absoluteFileName=false
-	);
+	DLLUIMG bool compress_texture(const TextureOutputHandler &outputHandler, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler = nullptr);
+	DLLUIMG bool compress_texture(std::vector<std::vector<std::vector<uint8_t>>> &outputData, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo,
+	  const std::function<void(const std::string &)> &errorHandler = nullptr);
+	DLLUIMG bool save_texture(const std::string &fileName, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler = nullptr,
+	  bool absoluteFileName = false);
+	DLLUIMG bool save_texture(ufile::IFile &f, ImageBuffer &imgBuffer, const TextureSaveInfo &texInfo);
+	DLLUIMG bool save_texture(const std::string &fileName, uimg::ImageBuffer &imgBuffer, const TextureSaveInfo &texInfo, const std::function<void(const std::string &)> &errorHandler = nullptr, bool absoluteFileName = false);
+	DLLUIMG bool save_texture(const std::string &fileName, const std::vector<std::vector<const void *>> &imgLayerMipmapData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler = nullptr, bool absoluteFileName = false);
 #endif
 	DLLUIMG std::optional<ImageFormat> string_to_image_output_format(const std::string &str);
 	DLLUIMG std::string get_image_output_format_extension(ImageFormat format);
 
-	DLLUIMG void bake_margin(ImageBuffer &imgBuffer,std::vector<uint8_t> &mask,const int margin);
+	DLLUIMG void bake_margin(ImageBuffer &imgBuffer, std::vector<uint8_t> &mask, const int margin);
 };
 
 #endif

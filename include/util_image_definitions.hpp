@@ -6,19 +6,19 @@
 #define __UTIL_IMAGE_DEFINITIONS_HPP__
 
 #ifdef UIMG_STATIC
-	#define DLLUIMG
+#define DLLUIMG
 #elif UIMG_DLL
-	#ifdef __linux__
-		#define DLLUIMG __attribute__((visibility("default")))
-	#else
-		#define DLLUIMG __declspec(dllexport)
-	#endif
+#ifdef __linux__
+#define DLLUIMG __attribute__((visibility("default")))
 #else
-	#ifdef __linux__
-		#define DLLUIMG
-	#else
-		#define DLLUIMG __declspec(dllimport)
-	#endif
+#define DLLUIMG __declspec(dllexport)
+#endif
+#else
+#ifdef __linux__
+#define DLLUIMG
+#else
+#define DLLUIMG __declspec(dllimport)
+#endif
 #endif
 
 #endif

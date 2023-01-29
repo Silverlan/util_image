@@ -8,11 +8,9 @@
 #include <memory>
 
 class VFilePtrInternal;
-namespace uimg
-{
+namespace uimg {
 	class ImageBuffer;
-	namespace impl
-	{
+	namespace impl {
 		std::shared_ptr<ImageBuffer> load_tga_image(std::shared_ptr<VFilePtrInternal> &file);
 	};
 };
