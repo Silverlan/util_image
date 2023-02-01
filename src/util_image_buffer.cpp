@@ -419,6 +419,23 @@ std::pair<uint32_t, uint32_t> uimg::ImageBuffer::GetPixelCoordinates(Offset offs
 	auto y = offset / GetWidth();
 	return {x, y};
 }
+void uimg::ImageBuffer::Insert(const ImageBuffer &other, uint32_t x, uint32_t y, uint32_t xOther, uint32_t yOther, uint32_t wOther, uint32_t hOther)
+{
+	other.ClampBounds(xOther, yOther, wOther, hOther);
+	ClampPixelCoordinatesToBounds(x, y);
+	auto w = GetWidth();
+	auto h = GetHeight();
+	if(x + wOther > w)
+		wOther = w - x;
+	if(y + hOther > h)
+		hOther = h - y;
+	for(auto i = xOther; i < (xOther + wOther); ++i) {
+		for(auto j = yOther; j < (yOther + hOther); ++j) {
+			GetPixelView(x + (i - xOther), y + (j - yOther)).CopyValues(const_cast<ImageBuffer &>(other).GetPixelView(i, j));
+		}
+	}
+}
+void uimg::ImageBuffer::Insert(const ImageBuffer &other, uint32_t x, uint32_t y) { Insert(other, x, y, 0, 0, other.GetWidth(), other.GetHeight()); }
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Copy() const { return uimg::ImageBuffer::Create(m_data.get(), m_width, m_height, m_format, false); }
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Copy(Format format) const
 {
@@ -496,6 +513,21 @@ uint8_t uimg::ImageBuffer::GetChannelSize() const { return GetChannelSize(GetFor
 uimg::ImageBuffer::PixelIndex uimg::ImageBuffer::GetPixelIndex(uint32_t x, uint32_t y) const { return y * GetWidth() + x; }
 uimg::ImageBuffer::Offset uimg::ImageBuffer::GetPixelOffset(uint32_t x, uint32_t y) const { return GetPixelOffset(GetPixelIndex(x, y)); }
 uimg::ImageBuffer::Offset uimg::ImageBuffer::GetPixelOffset(PixelIndex index) const { return index * GetPixelSize(); }
+void uimg::ImageBuffer::ClampPixelCoordinatesToBounds(uint32_t &inOutX, uint32_t &inOutY) const
+{
+	inOutX = umath::clamp(inOutX, 0u, GetWidth() - 1);
+	inOutY = umath::clamp(inOutY, 0u, GetHeight() - 1);
+}
+void uimg::ImageBuffer::ClampBounds(uint32_t &inOutX, uint32_t &inOutY, uint32_t &inOutW, uint32_t &inOutH) const
+{
+	ClampPixelCoordinatesToBounds(inOutX, inOutY);
+	auto w = GetWidth();
+	auto h = GetHeight();
+	if(inOutX + inOutW > w)
+		inOutW = w - inOutX;
+	if(inOutY + inOutH > h)
+		inOutH = h - inOutY;
+}
 const void *uimg::ImageBuffer::GetData() const { return const_cast<ImageBuffer *>(this)->GetData(); }
 void *uimg::ImageBuffer::GetData() { return m_data.get(); }
 void uimg::ImageBuffer::Reallocate()

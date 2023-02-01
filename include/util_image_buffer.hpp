@@ -112,6 +112,8 @@ namespace uimg {
 		bool IsFloatFormat() const;
 		const void *GetData() const;
 		void *GetData();
+		void Insert(const ImageBuffer &other, uint32_t x, uint32_t y, uint32_t xOther, uint32_t yOther, uint32_t wOther, uint32_t hOther);
+		void Insert(const ImageBuffer &other, uint32_t x, uint32_t y);
 		std::shared_ptr<ImageBuffer> Copy() const;
 		std::shared_ptr<ImageBuffer> Copy(Format format) const;
 		void Copy(ImageBuffer &dst, uint32_t xSrc, uint32_t ySrc, uint32_t xDst, uint32_t yDst, uint32_t w, uint32_t h) const;
@@ -138,6 +140,8 @@ namespace uimg {
 		PixelIndex GetPixelIndex(uint32_t x, uint32_t y) const;
 		Offset GetPixelOffset(uint32_t x, uint32_t y) const;
 		Offset GetPixelOffset(PixelIndex index) const;
+		void ClampPixelCoordinatesToBounds(uint32_t &inOutX, uint32_t &inOutY) const;
+		void ClampBounds(uint32_t &inOutX, uint32_t &inOutY, uint32_t &inOutW, uint32_t &inOutH) const;
 
 		void Read(Offset offset, Size size, void *outData);
 		void Write(Offset offset, Size size, const void *inData);
