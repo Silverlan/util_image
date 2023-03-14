@@ -8,6 +8,7 @@
 #include "util_image_definitions.hpp"
 #include "util_image_types.hpp"
 #include "util_texture_info.hpp"
+#include <mathutil/uvec.h>
 #include <string>
 #include <memory>
 #include <functional>
@@ -64,6 +65,8 @@ namespace uimg {
 	DLLUIMG std::string get_image_output_format_extension(ImageFormat format);
 
 	DLLUIMG void bake_margin(ImageBuffer &imgBuffer, std::vector<uint8_t> &mask, const int margin);
+	DLLUIMG Vector3 linear_to_srgb(const Vector3 &color);
+	DLLUIMG Vector3 srgb_to_linear(const Vector3 &srgbIn);
 };
 
 #endif

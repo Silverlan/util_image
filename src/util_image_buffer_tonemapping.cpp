@@ -3,17 +3,21 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "util_image_buffer.hpp"
+#include "util_image.hpp"
 
 constexpr float GAMMA = 2.2;
 constexpr float INV_GAMMA = 1.0 / GAMMA;
 
+constexpr Vector3 VGAMMA {GAMMA};
+constexpr Vector3 VINV_GAMMA {INV_GAMMA};
+
 // linear to sRGB approximation
 // see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-static Vector3 linear_to_srgb(const Vector3 &color) { return {glm::pow(color.r, INV_GAMMA), glm::pow(color.g, INV_GAMMA), glm::pow(color.b, INV_GAMMA)}; }
+Vector3 uimg::linear_to_srgb(const Vector3 &color) { return glm::pow(color, VINV_GAMMA); }
 
 // sRGB to linear approximation
 // see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-static Vector4 srgb_to_linear(const Vector4 &srgbIn) { return Vector4(pow(uvec::xyz(srgbIn), uvec::vec3(GAMMA)), srgbIn.w); }
+Vector3 uimg::srgb_to_linear(const Vector3 &srgbIn) { return glm::pow(srgbIn, VGAMMA); }
 
 // Uncharted 2 tone map
 // see: http://filmicworlds.com/blog/filmic-tonemapping-operators/
@@ -33,7 +37,7 @@ static Vector3 tone_mapping_uncharted(const Vector3 &color)
 	const float W = 11.2;
 	auto toneMappedColor = tone_mapping_uncharted2_impl(color * 2.f);
 	auto whiteScale = 1.0 / tone_mapping_uncharted2_impl(uvec::vec3(W));
-	return linear_to_srgb(toneMappedColor * whiteScale);
+	return uimg::linear_to_srgb(toneMappedColor * whiteScale);
 }
 
 // Hejl Richard tone map
@@ -53,7 +57,7 @@ static Vector3 tone_mapping_aces(const Vector3 &color)
 	const float C = 2.43;
 	const float D = 0.59;
 	const float E = 0.14;
-	return linear_to_srgb(glm::clamp((color * (A * color + B)) / (color * (C * color + D) + E), 0.f, 1.f));
+	return uimg::linear_to_srgb(glm::clamp((color * (A * color + B)) / (color * (C * color + D) + E), 0.f, 1.f));
 }
 
 static Vector3 tone_mapping_reinhard(const Vector3 &color)
@@ -95,7 +99,7 @@ static Vector3 tone_mapping_gran_turismo(const Vector3 &x)
 	const float c = 1.33; // black
 	const float b = 0.0;  // pedestal
 
-	return linear_to_srgb(uchimura(x, P, a, m, l, c, b));
+	return uimg::linear_to_srgb(uchimura(x, P, a, m, l, c, b));
 }
 
 static std::array<uint8_t, 3> to_ldr_color(const Vector3 &col)
