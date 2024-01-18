@@ -61,6 +61,7 @@ link_external_library(mathutil)
 link_external_library(vfilesystem)
 link_external_library(lpng)
 link_external_library(zlib)
+link_external_library(compressonator)
 
 
 add_external_library(nvidia_texture_tools)
@@ -149,6 +150,10 @@ set_target_properties(${PROJ_NAME} PROPERTIES ${TARGET_PROPERTIES})
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
 add_subdirectory("third_party_libs/nvtt")
+
+set(OPTION_ENABLE_ALL_APPS OFF CACHE BOOL "Enable all apps" FORCE)
+set(OPTION_BUILD_CMP_SDK ON CACHE BOOL "Build Compressonator SDK" FORCE)
+#add_subdirectory("third_party_libs/compressonator")
 set(BUILD_SHARED_LIBS ON CACHE BOOL ON FORCE)
 
 set(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/src CACHE PATH "" FORCE)
