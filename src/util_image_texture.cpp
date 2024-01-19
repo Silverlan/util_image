@@ -637,18 +637,34 @@ class TextureCompressorCompressonator : public TextureCompressor {
 					compressInfo.errorHandler("Failed to retrieve mipmap data for mipmap " + std::to_string(m) + " of layer " + std::to_string(l) + "!");
 					return {};
 				}
+				auto success = cmips.AllocateMipLevelData(cmips.GetMipLevel(&ms, m, l), ms.m_nWidth, ms.m_nHeight, *channelFormat, *texDataType);
+				if(!success) {
+					compressInfo.errorHandler("Failed to allocate memory for mipmap " + std::to_string(m) + " of layer " + std::to_string(l) + "!");
+					return {};
+				}
 				auto *pMipLv = cmips.GetMipLevel(&ms, m, l);
 				CMP_BYTE *pData = pMipLv->m_pbData;
 
-				CMP_DWORD dwSize = ms.m_nWidth * ms.m_nHeight * (*pixelSize);
-
-				// TODO: Verify source size
+				auto expectedSize = ms.m_nWidth * ms.m_nHeight * (*pixelSize);
+				CMP_DWORD dwSize = pMipLv->m_dwLinearSize;
+				if(dwSize != expectedSize) {
+					compressInfo.errorHandler("Size mismatch for mipmap " + std::to_string(m) + " of layer " + std::to_string(l) + ": Expected " + std::to_string(expectedSize) + ", got " + std::to_string(dwSize) + "!");
+					return {};
+				}
 				memcpy(pData, data, dwSize);
+				++ms.m_nMipLevels;
 
-				ms.pData = pData;
-				ms.dwDataSize = dwSize;
+				if(deleter)
+					deleter();
+			}
+		}
 
-				deleter();
+		if(umath::is_flag_set(texInfo.flags, uimg::TextureInfo::Flags::GenerateMipmaps)) {
+			auto resMip = CMP_GenerateMIPLevels(&ms, 1);
+			if(resMip != CMP_OK) {
+				// CMP_GenerateMIPLevels returns a CMP_INT, even though the return values are CMP_ERROR. Reason unclear.
+				compressInfo.errorHandler(cmp_result_to_string(static_cast<CMP_ERROR>(resMip)));
+				return {};
 			}
 		}
 
@@ -684,6 +700,7 @@ class TextureCompressorCompressonator : public TextureCompressor {
 			auto &fileName = std::get<std::string>(outputHandler);
 			std::string outputFilePath = compressInfo.absoluteFileName ? fileName.c_str() : get_absolute_path(fileName, texInfo.containerFormat).c_str();
 
+			// TODO: This does not work with KTX
 			err = CMP_SaveTexture(outputFilePath.c_str(), &msProcessed);
 			if(err != CMP_OK) {
 				compressInfo.errorHandler(cmp_result_to_string(err));
