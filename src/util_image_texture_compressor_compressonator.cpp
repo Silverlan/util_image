@@ -232,6 +232,7 @@ namespace uimg {
 
 			KernelOptions kernel_options;
 			memset(&kernel_options, 0, sizeof(KernelOptions));
+			kernel_options.encodeWith = CMP_GPU_OCL;
 			kernel_options.format = *cmpFormat; // Set the format to process
 			kernel_options.fquality = 1.f;      // Set the quality of the result
 			kernel_options.threads = 0;         // Auto setting
