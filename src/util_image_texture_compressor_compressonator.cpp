@@ -269,12 +269,12 @@ namespace uimg {
 						return {};
 					}
 					memcpy(pData, data, dwSize);
-					++ms.m_nMipLevels;
 
 					if(deleter)
 						deleter();
 				}
 			}
+			ms.m_nMipLevels = compressInfo.numMipmaps;
 
 			if(umath::is_flag_set(texInfo.flags, uimg::TextureInfo::Flags::GenerateMipmaps)) {
 				auto resMip = CMP_GenerateMIPLevels(&ms, 1);
