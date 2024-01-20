@@ -62,42 +62,10 @@ link_external_library(vfilesystem)
 link_external_library(lpng)
 link_external_library(zlib)
 
-
-add_external_library(nvidia_texture_tools)
-add_external_library(nvidia_texture_tools_image)
-add_external_library(nvidia_texture_tools_core)
-add_external_library(nvidia_texture_tools_math)
-add_external_library(nvidia_texture_tools_bc7)
-add_external_library(nvidia_texture_tools_bc6h)
-add_external_library(nvidia_texture_tools_thread)
-add_external_library(nvidia_texture_tools_squish)
-add_external_library(squish)
-
 set(COMPRESSONATOR_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party_libs/compressonator")
 
 set(DEPENDENCY_COMPRESSONATOR_INCLUDE "${COMPRESSONATOR_BASE_PATH}/cmp_compressonatorlib" CACHE PATH "Path to compressonator include directory.")
 set(DEPENDENCY_COMPRESSONATOR_OPENEXR_HALF_INCLUDE "${COMPRESSONATOR_BASE_PATH}/common/lib/ext/openexr/ilmbase-2.2.0/Half" CACHE PATH "Path to compressonator_openexr_half include directory.")
-
-if(WIN32)
-	set(COMPRESSONATOR_BIN_PATH "${COMPRESSONATOR_BASE_PATH}/build/sdk/bin/64/bin")
-
-	set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core.lib" CACHE FILEPATH "Path to compressonator_core library.")
-	set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Framework.lib" CACHE FILEPATH "Path to compressonator_framework library.")
-else()
-	# TODO: Link these with Windows as well
-	link_external_library(compressonator_core)
-	link_external_library(compressonator_framework)
-endif()
-
-link_external_library(nvidia_texture_tools)
-link_external_library(nvidia_texture_tools_image)
-link_external_library(nvidia_texture_tools_core)
-link_external_library(nvidia_texture_tools_math)
-link_external_library(nvidia_texture_tools_bc7)
-link_external_library(nvidia_texture_tools_bc6h)
-link_external_library(nvidia_texture_tools_thread)
-link_external_library(nvidia_texture_tools_squish)
-link_external_library(squish)
 
 add_definitions(-DUIMG_ENABLE_NVTT)
 add_definitions(-DUIMG_DLL)
@@ -113,10 +81,33 @@ else()
 endif()
 add_definitions(-DTEX_COMPRESSION_LIBRARY=${TEX_COMPRESSION_LIBRARY})
 
+if(${TEX_COMPRESSION_LIBRARY} EQUAL ${TEX_COMPRESSION_LIBRARY_NVTT})
+	link_external_library(nvidia_texture_tools)
+	link_external_library(nvidia_texture_tools_image)
+	link_external_library(nvidia_texture_tools_core)
+	link_external_library(nvidia_texture_tools_math)
+	link_external_library(nvidia_texture_tools_bc7)
+	link_external_library(nvidia_texture_tools_bc6h)
+	link_external_library(nvidia_texture_tools_thread)
+	link_external_library(nvidia_texture_tools_squish)
+	link_external_library(squish)
+else()
+	if(WIN32)
+		set(COMPRESSONATOR_BIN_PATH "${COMPRESSONATOR_BASE_PATH}/build/sdk/bin/64/bin")
+
+		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core.lib" CACHE FILEPATH "Path to compressonator_core library.")
+		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Framework.lib" CACHE FILEPATH "Path to compressonator_framework library.")
+	endif()
+
+	link_external_library(compressonator_core)
+	link_external_library(compressonator_framework)
+	
+	add_include_dir(compressonator)
+	add_include_dir(compressonator_openexr_half)
+endif()
+
 add_include_dir(glm)
 add_include_dir(lpng_build)
-add_include_dir(compressonator)
-add_include_dir(compressonator_openexr_half)
 
 set(DEFINITIONS)
 
