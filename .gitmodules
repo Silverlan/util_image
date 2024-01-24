@@ -3,4 +3,4 @@
 	url = https://github.com/Silverlan/nvidia-texture-tools.git
 [submodule "third_party_libs/compressonator"]
 	path = third_party_libs/compressonator
-	url = https://github.com/GPUOpen-Tools/compressonator.git
+	url = https://github.com/Slaweknowy/compressonator.git

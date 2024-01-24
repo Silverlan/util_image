@@ -101,6 +101,10 @@ else()
 
 		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core.lib" CACHE FILEPATH "Path to compressonator_core library.")
 		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Framework.lib" CACHE FILEPATH "Path to compressonator_framework library.")
+	else()
+		set(COMPRESSONATOR_BIN_PATH "${COMPRESSONATOR_BASE_PATH}/lib")
+		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Core.a" CACHE FILEPATH "Path to compressonator_core library.")
+		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Framework.a" CACHE FILEPATH "Path to compressonator_framework library.")
 	endif()
 
 	link_external_library(compressonator_core)
@@ -211,6 +215,7 @@ if(${TEX_COMPRESSION_LIBRARY} EQUAL ${TEX_COMPRESSION_LIBRARY_NVTT})
 else()
 	set(OPTION_ENABLE_ALL_APPS OFF CACHE BOOL "Enable all apps" FORCE)
 	set(OPTION_BUILD_CMP_SDK ON CACHE BOOL "Build Compressonator SDK" FORCE)
+	set(OPTION_BUILD_APPS_CMP_CLI ON CACHE BOOL "Build Application: CLI" FORCE)
 
 	add_subdirectory("third_party_libs/compressonator")
 endif()
