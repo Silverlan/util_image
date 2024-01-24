@@ -101,14 +101,18 @@ else()
 
 		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core.lib" CACHE FILEPATH "Path to compressonator_core library.")
 		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Framework.lib" CACHE FILEPATH "Path to compressonator_framework library.")
+		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Compressonator.lib" CACHE FILEPATH "Path to compressonator_framework library.")
 	else()
 		set(COMPRESSONATOR_BIN_PATH "${COMPRESSONATOR_BASE_PATH}/lib")
 		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Core.a" CACHE FILEPATH "Path to compressonator_core library.")
 		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Framework.a" CACHE FILEPATH "Path to compressonator_framework library.")
+		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Compressonator.a" CACHE FILEPATH "Path to compressonator library.")
 	endif()
 
 	link_external_library(compressonator_core)
 	link_external_library(compressonator_framework)
+	#Texture codecs here
+	link_external_library(compressonator)
 	
 	add_include_dir(compressonator)
 	add_include_dir(compressonator_openexr_half)
