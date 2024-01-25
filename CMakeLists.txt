@@ -222,7 +222,7 @@ else()
 	set(OPTION_BUILD_APPS_CMP_CLI ON CACHE BOOL "Build Application: CLI" FORCE)
 
 	add_subdirectory("third_party_libs/compressonator")
-	add_dependencies(${PROJ_NAME} CMP_Core CMP_Framework CMP_Compressonator)
+	add_dependencies(${PROJ_NAME} CMP_Compressonator CMP_Framework CMP_Core)
 
 	set_property(TARGET CMP_Core PROPERTY COMPILE_WARNING_AS_ERROR OFF)
 	set_property(TARGET CMP_Framework PROPERTY COMPILE_WARNING_AS_ERROR OFF)
