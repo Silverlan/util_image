@@ -101,18 +101,21 @@ else()
 
 		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core.lib" CACHE FILEPATH "Path to compressonator_core library.")
 		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Framework.lib" CACHE FILEPATH "Path to compressonator_framework library.")
-		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Compressonator.lib" CACHE FILEPATH "Path to compressonator_framework library.")
+		set(DEPENDENCY_COMPRESSONATOR_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Compressonator.lib" CACHE FILEPATH "Path to compressonator_framework library.")
+		set(DEPENDENCY_COMPRESSONATOR_COMMON_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Compressonator.lib" CACHE FILEPATH "Path to compressonator_framework library.")
 	else()
 		set(COMPRESSONATOR_BIN_PATH "${CMAKE_BINARY_DIR}/lib")
 		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Core.a" CACHE FILEPATH "Path to compressonator_core library.")
 		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Framework.a" CACHE FILEPATH "Path to compressonator_framework library.")
-		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Compressonator.a" CACHE FILEPATH "Path to compressonator library.")
+		set(DEPENDENCY_COMPRESSONATOR_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Compressonator.a" CACHE FILEPATH "Path to compressonator library.")
+		set(DEPENDENCY_COMPRESSONATOR_COMMON_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Common.a" CACHE FILEPATH "Path to compressonator library.")
 	endif()
 
 	link_external_library(compressonator_core)
 	link_external_library(compressonator_framework)
 	#Texture codecs here
 	link_external_library(compressonator)
+	link_external_library(compressonator_common)
 	
 	add_include_dir(compressonator)
 	add_include_dir(compressonator_openexr_half)
@@ -222,11 +225,10 @@ else()
 	set(OPTION_BUILD_APPS_CMP_CLI ON CACHE BOOL "Build Application: CLI" FORCE)
 
 	add_subdirectory("third_party_libs/compressonator")
-	add_dependencies(${PROJ_NAME} CMP_Compressonator CMP_Framework CMP_Core)
+	add_dependencies(${PROJ_NAME} CMP_Compressonator CMP_Framework CMP_Core CMP_Common)
+	#FIXME: This might change without warning.
 
-	set_property(TARGET CMP_Core PROPERTY COMPILE_WARNING_AS_ERROR OFF)
-	set_property(TARGET CMP_Framework PROPERTY COMPILE_WARNING_AS_ERROR OFF)
-	set_property(TARGET CMP_Compressonator PROPERTY COMPILE_WARNING_AS_ERROR OFF)
+	#I Hate this\
 
 	target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/compressonator/cmp_framework/common/half/)
 endif()
