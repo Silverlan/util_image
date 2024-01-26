@@ -102,23 +102,50 @@ else()
 		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core.lib" CACHE FILEPATH "Path to compressonator_core library.")
 		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Framework.lib" CACHE FILEPATH "Path to compressonator_framework library.")
 		set(DEPENDENCY_COMPRESSONATOR_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Compressonator.lib" CACHE FILEPATH "Path to compressonator_framework library.")
-		set(DEPENDENCY_COMPRESSONATOR_COMMON_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Compressonator.lib" CACHE FILEPATH "Path to compressonator_framework library.")
+		set(DEPENDENCY_COMPRESSONATOR_COMMON_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Common.lib" CACHE FILEPATH "Path to compressonator_framework library.")
+		set(DEPENDENCY_COMPRESSONATOR_IMAGE_DDS_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/Image_DDS.lib" CACHE FILEPATH "Path to compressonator library.")
+		set(DEPENDENCY_COMPRESSONATOR_IMAGE_EXR_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/Image_EXR.lib" CACHE FILEPATH "Path to compressonator library.")
+		set(DEPENDENCY_COMPRESSONATOR_IMAGE_TGA_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/Image_TGA.lib" CACHE FILEPATH "Path to compressonator library.")
+		set(DEPENDENCY_COMPRESSONATOR_IMAGE_KTX_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/Image_KTX.lib" CACHE FILEPATH "Path to compressonator library.")
+		set(DEPENDENCY_COMPRESSONATOR_CORE_AVX512_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core_AVX512.lib" CACHE FILEPATH "Path to compressonator_core library.")
+		set(DEPENDENCY_COMPRESSONATOR_CORE_SSE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core_SSE.lib" CACHE FILEPATH "Path to compressonator_core library.")
+		set(DEPENDENCY_COMPRESSONATOR_CORE_AVX_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core_AVX.lib" CACHE FILEPATH "Path to compressonator_core library.")
+		set(DEPENDENCY_COMPRESSONATOR_GPU_DECODE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_GpuDecode.lib" CACHE FILEPATH "Path to cmp_gpudecode library.")
 	else()
 		set(COMPRESSONATOR_BIN_PATH "${CMAKE_BINARY_DIR}/lib")
 		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Core.a" CACHE FILEPATH "Path to compressonator_core library.")
 		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Framework.a" CACHE FILEPATH "Path to compressonator_framework library.")
 		set(DEPENDENCY_COMPRESSONATOR_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Compressonator.a" CACHE FILEPATH "Path to compressonator library.")
 		set(DEPENDENCY_COMPRESSONATOR_COMMON_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Common.a" CACHE FILEPATH "Path to compressonator library.")
+		set(DEPENDENCY_COMPRESSONATOR_IMAGE_DDS_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libImage_DDS.a" CACHE FILEPATH "Path to compressonator library.")
+		set(DEPENDENCY_COMPRESSONATOR_IMAGE_EXR_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libImage_EXR.a" CACHE FILEPATH "Path to compressonator library.")
+		set(DEPENDENCY_COMPRESSONATOR_IMAGE_TGA_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libImage_TGA.a" CACHE FILEPATH "Path to compressonator library.")
+		set(DEPENDENCY_COMPRESSONATOR_IMAGE_KTX_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libImage_KTX.a" CACHE FILEPATH "Path to compressonator library.")
+		set(DEPENDENCY_COMPRESSONATOR_CORE_AVX512_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Core_AVX512.a" CACHE FILEPATH "Path to compressonator_core library.")
+		set(DEPENDENCY_COMPRESSONATOR_CORE_SSE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Core_SSE.a" CACHE FILEPATH "Path to compressonator_core library.")
+		set(DEPENDENCY_COMPRESSONATOR_CORE_AVX_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_Core_AVX.a" CACHE FILEPATH "Path to compressonator_core library.")
+		set(DEPENDENCY_COMPRESSONATOR_GPU_DECODE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/libCMP_GpuDecode.a" CACHE FILEPATH "Path to cmp_gpudecode library.")
 	endif()
 
-	link_external_library(compressonator_core)
-	link_external_library(compressonator_framework)
-	#Texture codecs here
-	link_external_library(compressonator)
-	link_external_library(compressonator_common)
-	
 	add_include_dir(compressonator)
-	add_include_dir(compressonator_openexr_half)
+
+
+	link_external_library(compressonator_common)
+
+	link_external_library(compressonator)
+	link_external_library(compressonator_framework)
+	link_external_library(compressonator_core)
+
+	link_external_library(compressonator_core_avx512)
+	link_external_library(compressonator_core_sse)
+	link_external_library(compressonator_core_avx)
+
+	link_external_library(compressonator_image_dds)
+	link_external_library(compressonator_image_exr)
+	link_external_library(compressonator_image_tga)
+	link_external_library(compressonator_image_ktx)
+	
+
 endif()
 
 add_include_dir(glm)
@@ -226,8 +253,8 @@ else()
 
 	add_subdirectory("third_party_libs/compressonator")
 
-	#add_dependencies(${PROJ_NAME} Image_DDS Image_EXR Image_KTX Image_TGA CMP_Compressonator CMP_Framework CMP_Common CMP_Core )
-	add_dependencies(${PROJ_NAME} "$<LINK_GROUP:RESCAN,Image_DDS,Image_EXR,Image_KTX,Image_TGA,CMP_Compressonator,CMP_Framework,CMP_Common CMP_Core,CMP_Core_SSE,CMP_Core_AVX,CMP_Core_AVX512>" )
+	add_dependencies(${PROJ_NAME} Image_DDS Image_EXR Image_KTX Image_TGA CMP_Compressonator CMP_Framework CMP_Common CMP_Core )
+
 
 	#FIXME: This might change without warning.
 
