@@ -225,7 +225,7 @@ else()
 	set(OPTION_BUILD_APPS_CMP_CLI ON CACHE BOOL "Build Application: CLI" FORCE)
 
 	add_subdirectory("third_party_libs/compressonator")
-	add_dependencies(${PROJ_NAME} CMP_Compressonator  CMP_Common CMP_Core Image_DDS Image_EXR Image_KTX Image_TGA)
+	add_dependencies(${PROJ_NAME} CMP_Compressonator CMP_Framework CMP_Common CMP_Core Image_DDS Image_EXR Image_KTX Image_TGA)
 
 	#FIXME: This might change without warning.
 
