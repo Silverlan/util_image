@@ -117,7 +117,7 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 
 		uimg::TextureCompressor::CompressInfo compressInfo {};
 		compressInfo.getImageData = fGetImgData;
-		compressInfo.errorHandler = errorHandler;
+        compressInfo.errorHandler = (errorHandler != nullptr) ? errorHandler : [](const std::string &err) {std::cout<<"Compression failure: "<<err<<std::endl;};
 		compressInfo.textureSaveInfo = texSaveInfo;
 		compressInfo.outputHandler = outputHandler;
 		compressInfo.width = width;
