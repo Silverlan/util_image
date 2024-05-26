@@ -14,11 +14,8 @@ pr_add_external_dependency(${PROJ_NAME} lpng_build HEADER_ONLY)
 pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")
 
-pr_add_compile_definitions(
-	${PROJ_NAME}
-		-DUIMG_ENABLE_NVTT
-		-DUIMG_DLL
-)
+pr_add_compile_definitions(${PROJ_NAME} -DUIMG_ENABLE_NVTT PUBLIC)
+pr_add_compile_definitions(${PROJ_NAME} -DUIMG_DLL)
 
 set(COMPRESSONATOR_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party_libs/compressonator")
 
@@ -34,7 +31,7 @@ else()
 	set(TEX_COMPRESSION_LIBRARY TEX_COMPRESSION_LIBRARY_NVTT)
 endif()
 
-pr_add_compile_definitions(${PROJ_NAME} -DTEX_COMPRESSION_LIBRARY=${TEX_COMPRESSION_LIBRARY})
+pr_add_compile_definitions(${PROJ_NAME} -DTEX_COMPRESSION_LIBRARY=${TEX_COMPRESSION_LIBRARY} PUBLIC)
 
 if(${TEX_COMPRESSION_LIBRARY} EQUAL ${TEX_COMPRESSION_LIBRARY_NVTT})
 	pr_add_external_dependency(${PROJ_NAME} nvidia_texture_tools LIBRARY LINK_ONLY)
