@@ -6,6 +6,7 @@
 #include "util_image_tga.hpp"
 #include <fsys/filesystem.h>
 #include <cstring>
+#include <cassert>
 
 struct TGAInfo {
 	uint8_t header[6];
