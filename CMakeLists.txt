@@ -7,9 +7,8 @@ set(PROJ_NAME util_image)
 pr_add_library(${PROJ_NAME} SHARED)
 
 pr_add_dependency(${PROJ_NAME} vfilesystem TARGET PUBLIC)
-pr_add_external_dependency(${PROJ_NAME} zlib LIBRARY)
-pr_add_external_dependency(${PROJ_NAME} lpng LIBRARY)
-pr_add_external_dependency(${PROJ_NAME} lpng_build HEADER_ONLY)
+pr_add_dependency(${PROJ_NAME} zlib TARGET)
+pr_add_dependency(${PROJ_NAME} png_static TARGET)
 
 pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")
@@ -33,36 +32,8 @@ endif()
 
 pr_add_compile_definitions(${PROJ_NAME} -DTEX_COMPRESSION_LIBRARY=${TEX_COMPRESSION_LIBRARY} PUBLIC)
 
-if(${TEX_COMPRESSION_LIBRARY} EQUAL ${TEX_COMPRESSION_LIBRARY_NVTT})
-	pr_add_external_dependency(${PROJ_NAME} nvidia_texture_tools LIBRARY LINK_ONLY)
-	pr_add_external_dependency(${PROJ_NAME} nvidia_texture_tools_squish LIBRARY LINK_ONLY)
-	pr_add_external_dependency(${PROJ_NAME} nvidia_texture_tools_thread LIBRARY LINK_ONLY)
-	pr_add_external_dependency(${PROJ_NAME} nvidia_texture_tools_image LIBRARY LINK_ONLY)
-	pr_add_external_dependency(${PROJ_NAME} nvidia_texture_tools_bc7 LIBRARY LINK_ONLY)
-	pr_add_external_dependency(${PROJ_NAME} nvidia_texture_tools_bc6h LIBRARY LINK_ONLY)
-	pr_add_external_dependency(${PROJ_NAME} nvidia_texture_tools_math LIBRARY LINK_ONLY)
-	pr_add_external_dependency(${PROJ_NAME} nvidia_texture_tools_core LIBRARY LINK_ONLY)
-	pr_add_external_dependency(${PROJ_NAME} squish LIBRARY LINK_ONLY)
-else()
-	if(WIN32)
-		set(COMPRESSONATOR_BIN_PATH "${COMPRESSONATOR_BASE_PATH}/build/sdk/bin/64/bin")
-
-		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core.lib" CACHE FILEPATH "Path to compressonator_core library.")
-		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Framework.lib" CACHE FILEPATH "Path to compressonator_framework library.")
-	endif()
-	
-	pr_add_external_dependency(${PROJ_NAME} compressonator_core LIBRARY LINK_ONLY)
-	pr_add_external_dependency(${PROJ_NAME} compressonator_framework LIBRARY LINK_ONLY)
-	
-	pr_add_external_dependency(${PROJ_NAME} compressonator HEADER_ONLY)
-	pr_add_external_dependency(${PROJ_NAME} compressonator_openexr_half HEADER_ONLY)
-endif()
-
-pr_finalize(${PROJ_NAME})
-
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
-
 if(${TEX_COMPRESSION_LIBRARY} EQUAL ${TEX_COMPRESSION_LIBRARY_NVTT})
 	add_subdirectory("third_party_libs/nvtt")
 
@@ -93,17 +64,41 @@ if(${TEX_COMPRESSION_LIBRARY} EQUAL ${TEX_COMPRESSION_LIBRARY_NVTT})
 	set_target_properties(process_alpha_map PROPERTIES FOLDER third_party_libs/nvtt)
 	set_target_properties(rg_etc1 PROPERTIES FOLDER third_party_libs/nvtt)
 	set_target_properties(squish PROPERTIES FOLDER third_party_libs/nvtt)
-	
+
 	add_dependencies(${PROJ_NAME} nvtt)
 
 	#HACK: Somehow this path was not included to util_image?
 	target_include_directories(${PROJ_NAME} PRIVATE ${DEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE})
 	add_dependencies(${PROJ_NAME} squish)
+
+	pr_add_dependency(${PROJ_NAME} nvtt TARGET PRIVATE)
+	pr_add_dependency(${PROJ_NAME} nvsquish TARGET PRIVATE)
+	pr_add_dependency(${PROJ_NAME} nvthread TARGET PRIVATE)
+	pr_add_dependency(${PROJ_NAME} nvimage TARGET PRIVATE)
+	pr_add_dependency(${PROJ_NAME} bc7 TARGET PRIVATE)
+	pr_add_dependency(${PROJ_NAME} bc6h TARGET PRIVATE)
+	pr_add_dependency(${PROJ_NAME} nvmath TARGET PRIVATE)
+	pr_add_dependency(${PROJ_NAME} nvcore TARGET PRIVATE)
+	pr_add_dependency(${PROJ_NAME} squish TARGET PRIVATE)
 else()
 	set(OPTION_ENABLE_ALL_APPS OFF CACHE BOOL "Enable all apps" FORCE)
 	set(OPTION_BUILD_CMP_SDK ON CACHE BOOL "Build Compressonator SDK" FORCE)
 
 	add_subdirectory("third_party_libs/compressonator")
-endif()
 
+	if(WIN32)
+		set(COMPRESSONATOR_BIN_PATH "${COMPRESSONATOR_BASE_PATH}/build/sdk/bin/64/bin")
+
+		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core.lib" CACHE FILEPATH "Path to compressonator_core library.")
+		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Framework.lib" CACHE FILEPATH "Path to compressonator_framework library.")
+	endif()
+	
+	pr_add_dependency(${PROJ_NAME} compressonator_core TARGET LINK_ONLY PRIVATE)
+	pr_add_dependency(${PROJ_NAME} compressonator_framework TARGET LINK_ONLY PRIVATE)
+	
+	pr_add_dependency(${PROJ_NAME} compressonator TARGET PRIVATE)
+	pr_add_dependency(${PROJ_NAME} compressonator_openexr_half TARGET PRIVATE)
+endif()
 set(BUILD_SHARED_LIBS ON CACHE BOOL ON FORCE)
+
+pr_finalize(${PROJ_NAME})
