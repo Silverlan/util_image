@@ -90,13 +90,6 @@ else()
 	add_dependencies(${PROJ_NAME} Image_DDS Image_EXR Image_KTX Image_TGA CMP_Compressonator CMP_Framework CMP_Common CMP_Core )
 
 
-	#FIXME: This might change without warning.
-
-	#I Hate this\
-
-	target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/compressonator/cmp_framework/common/half/)
-endif()
-
 	if(WIN32)
 		set(COMPRESSONATOR_BIN_PATH "${COMPRESSONATOR_BASE_PATH}/build/sdk/bin/64/bin")
 
@@ -109,6 +102,12 @@ endif()
 	
 	pr_add_dependency(${PROJ_NAME} compressonator TARGET PRIVATE)
 	pr_add_dependency(${PROJ_NAME} compressonator_openexr_half TARGET PRIVATE)
+
+	#FIXME: This might change without warning.
+
+	#I Hate this\
+
+	target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/compressonator/cmp_framework/common/half/)
 endif()
 set(BUILD_SHARED_LIBS ON CACHE BOOL ON FORCE)
 
