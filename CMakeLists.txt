@@ -79,6 +79,7 @@ if(${TEX_COMPRESSION_LIBRARY} EQUAL ${TEX_COMPRESSION_LIBRARY_NVTT})
 	pr_add_dependency(${PROJ_NAME} bc6h TARGET PRIVATE)
 	pr_add_dependency(${PROJ_NAME} nvmath TARGET PRIVATE)
 	pr_add_dependency(${PROJ_NAME} nvcore TARGET PRIVATE)
+	#TODO: This would get shoved in. If TEX_COMPRESSION_LIBRARY would change to compressonator, this dep would be lost.
 	pr_add_dependency(${PROJ_NAME} squish TARGET PRIVATE)
 else()
 	set(OPTION_ENABLE_ALL_APPS OFF CACHE BOOL "Enable all apps" FORCE)
@@ -97,17 +98,17 @@ else()
 		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Framework.lib" CACHE FILEPATH "Path to compressonator_framework library.")
 	endif()
 	
-	pr_add_dependency(${PROJ_NAME} compressonator_core TARGET LINK_ONLY PRIVATE)
-	pr_add_dependency(${PROJ_NAME} compressonator_framework TARGET LINK_ONLY PRIVATE)
+	pr_add_dependency(${PROJ_NAME} CMP_Core TARGET LINK_ONLY PRIVATE)
+	pr_add_dependency(${PROJ_NAME} CMP_Framework TARGET LINK_ONLY PRIVATE)
 	
-	pr_add_dependency(${PROJ_NAME} compressonator TARGET PRIVATE)
-	pr_add_dependency(${PROJ_NAME} compressonator_openexr_half TARGET PRIVATE)
+	pr_add_dependency(${PROJ_NAME} CMP_Compressonator TARGET PRIVATE)
+	#pr_add_dependency(${PROJ_NAME} compressonator_openexr_half TARGET PRIVATE)
 
 	#FIXME: This might change without warning.
 
-	#I Hate this\
+	#I Hate this
 
-	target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/compressonator/cmp_framework/common/half/)
+	#target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/compressonator/cmp_framework/common/half/)
 endif()
 set(BUILD_SHARED_LIBS ON CACHE BOOL ON FORCE)
 
