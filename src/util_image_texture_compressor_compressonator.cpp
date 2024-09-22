@@ -10,6 +10,13 @@
 #include <common.h>
 #include <sharedutils/magic_enum.hpp>
 #include <sharedutils/scope_guard.h>
+#ifdef _WIN32
+#include <fileapi.h>
+
+#include <sharedutils/util_string.h>
+#include <sharedutils/util.h>
+#include <filesystem>
+#endif
 
 static std::optional<CMP_FORMAT> to_cmp_enum(uimg::TextureInfo::OutputFormat format)
 {
@@ -274,7 +281,7 @@ namespace uimg {
 #else
             //until we have support for opencl in linux use CPU.
             opts.bUseCGCompress = false;
-            opts.nEncodeWith = CMP_GPU_OCL;
+            opts.nEncodeWith = CMP_CPU_OCL;
 #endif
             opts.DestFormat = *cmpFormat;
             opts.SourceFormat = *origFormat;
@@ -371,13 +378,28 @@ namespace uimg {
 			else {
 				auto &fileName = std::get<std::string>(outputHandler);
 				std::string outputFilePath = compressInfo.absoluteFileName ? fileName.c_str() : get_absolute_path(fileName, texInfo.containerFormat).c_str();
-
+				#ifdef _WIN32
+				//due to CMP_SaveTexture using only narrow (non-UTF-8 of course) strings, I have to do this.
+				std::string wRealOutputFilePath = outputFilePath;
+				wchar_t wtmpPath[MAX_PATH + 1];
+				GetTempPathW(MAX_PATH + 1, wtmpPath);
+				// MSDN recommends GUIDS as written in GetTempFileName so we oblige.
+				//we need to name this .dds since CMP_SaveTexture depends on the file extension. Sorry MSDN.
+				outputFilePath = ustring::wstring_to_string(wtmpPath) + util::uuid_to_string(util::generate_uuid_v4()) + ".tmp.dds"; 
+				#endif
 				// TODO: This does not work with KTX
 				err = CMP_SaveTexture(outputFilePath.c_str(), &msProcessed);
 				if(err != CMP_OK) {
 					compressInfo.errorHandler(cmp_result_to_string(err));
 					return {};
 				}
+				#ifdef _WIN32 
+				using std::filesystem::path;
+				path inFile(outputFilePath), outFile(wRealOutputFilePath);
+				std::filesystem::copy(inFile, outFile, std::filesystem::copy_options::overwrite_existing);
+				std::filesystem::remove(inFile);
+				outputFilePath = wRealOutputFilePath;
+#endif
 
 				resultData.outputFilePath = outputFilePath;
             }
