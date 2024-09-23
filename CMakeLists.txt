@@ -19,7 +19,7 @@ pr_add_compile_definitions(${PROJ_NAME} -DUIMG_DLL)
 set(COMPRESSONATOR_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party_libs/compressonator")
 
 set(DEPENDENCY_COMPRESSONATOR_INCLUDE "${COMPRESSONATOR_BASE_PATH}/cmp_compressonatorlib" CACHE PATH "Path to compressonator include directory.")
-set(DEPENDENCY_COMPRESSONATOR_OPENEXR_HALF_INCLUDE "${COMPRESSONATOR_BASE_PATH}/common/lib/ext/openexr/ilmbase-2.2.0/Half" CACHE PATH "Path to compressonator_openexr_half include directory.")
+set(DEPENDENCY_COMPRESSONATOR_OPENEXR_HALF_INCLUDE "${COMPRESSONATOR_BASE_PATH}/../common/lib/ext/openexr/ilmbase-2.2.0/Half" CACHE PATH "Path to compressonator_openexr_half include directory.")
 
 set(TEX_COMPRESSION_LIBRARY_NVTT 0)
 set(TEX_COMPRESSION_LIBRARY_COMPRESSONATOR 1)
@@ -92,10 +92,12 @@ else()
 
 
 	if(WIN32)
-		set(COMPRESSONATOR_BIN_PATH "${COMPRESSONATOR_BASE_PATH}/build/sdk/bin/64/bin")
-
-		set(DEPENDENCY_COMPRESSONATOR_CORE_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Core.lib" CACHE FILEPATH "Path to compressonator_core library.")
-		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${COMPRESSONATOR_BIN_PATH}/Release_MD_DLL/CMP_Framework.lib" CACHE FILEPATH "Path to compressonator_framework library.")
+		#We need to copy dxcompiler.dll and dxil.dll to bin directory. Otherwise pragma with compressonator will fail.
+		install(FILES 
+		"${COMPRESSONATOR_BASE_PATH}/../common/lib/ext/dxc/bin/x64/dxcompiler.dll"
+		"${COMPRESSONATOR_BASE_PATH}/../common/lib/ext/dxc/bin/x64/dxil.dll"
+		DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
+		COMPONENT "${PRAGMA_INSTALL_COMPONENT}")
 	endif()
 	
 	pr_add_dependency(${PROJ_NAME} CMP_Core TARGET LINK_ONLY PRIVATE)
@@ -104,10 +106,7 @@ else()
 	pr_add_dependency(${PROJ_NAME} CMP_Compressonator TARGET PRIVATE)
 	#pr_add_dependency(${PROJ_NAME} compressonator_openexr_half TARGET PRIVATE)
 
-	#FIXME: This might change without warning.
-
-	#I Hate this
-
+	
 	#target_include_directories(${PROJ_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/compressonator/cmp_framework/common/half/)
 endif()
 set(BUILD_SHARED_LIBS ON CACHE BOOL ON FORCE)
