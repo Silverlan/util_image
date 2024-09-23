@@ -380,12 +380,11 @@ namespace uimg {
 				std::string outputFilePath = compressInfo.absoluteFileName ? fileName.c_str() : get_absolute_path(fileName, texInfo.containerFormat).c_str();
 				#ifdef _WIN32
 				//due to CMP_SaveTexture using only narrow (non-UTF-8 of course) strings, I have to do this.
-				std::string wRealOutputFilePath = outputFilePath;
-				wchar_t wtmpPath[MAX_PATH + 1];
-				GetTempPathW(MAX_PATH + 1, wtmpPath);
+				std::wstring wRealOutputFilePath = ustring::string_to_wstring(outputFilePath);
+				std::string tmpPath = ustring::wstring_to_string(std::filesystem::temp_directory_path().native());
 				// MSDN recommends GUIDS as written in GetTempFileName so we oblige.
 				//we need to name this .dds since CMP_SaveTexture depends on the file extension. Sorry MSDN.
-				outputFilePath = ustring::wstring_to_string(wtmpPath) + util::uuid_to_string(util::generate_uuid_v4()) + ".tmp.dds"; 
+				outputFilePath = tmpPath + util::uuid_to_string(util::generate_uuid_v4()) + ".tmp.dds"; 
 				#endif
 				// TODO: This does not work with KTX
 				err = CMP_SaveTexture(outputFilePath.c_str(), &msProcessed);
@@ -398,7 +397,7 @@ namespace uimg {
 				path inFile(outputFilePath), outFile(wRealOutputFilePath);
 				std::filesystem::copy(inFile, outFile, std::filesystem::copy_options::overwrite_existing);
 				std::filesystem::remove(inFile);
-				outputFilePath = wRealOutputFilePath;
+				outputFilePath = ustring::wstring_to_string(wRealOutputFilePath);
 #endif
 
 				resultData.outputFilePath = outputFilePath;
