@@ -8,6 +8,7 @@
 
 #include <nvtt/nvtt.h>
 #include <fsys/filesystem.h>
+#include <sharedutils/util_string.h>
 
 struct OutputHandler : public nvtt::OutputHandler {
 	OutputHandler(VFilePtrReal f) : m_file {f} {}
@@ -284,6 +285,10 @@ namespace uimg {
 
 			ResultData resultData {};
 
+			#ifdef _WIN32
+			FILE *fileHandle;
+			#endif
+
 			auto &outputHandler = compressInfo.outputHandler;
 			if(outputHandler.index() == 0) {
 				auto &texOutputHandler = std::get<uimg::TextureOutputHandler>(outputHandler);
@@ -294,7 +299,13 @@ namespace uimg {
 			else {
 				auto &fileName = std::get<std::string>(outputHandler);
 				std::string outputFilePath = compressInfo.absoluteFileName ? fileName.c_str() : get_absolute_path(fileName, texInfo.containerFormat).c_str();
+				#ifdef _WIN32
+				std::wstring wideOutputFilePath = ustring::string_to_wstring(outputFilePath);
+				_wfopen_s(&fileHandle, wideOutputFilePath.c_str(), L"wb");
+				outputOptions.setFileHandle(fileHandle);
+				#else
 				outputOptions.setFileName(outputFilePath.c_str());
+				#endif
 				resultData.outputFilePath = outputFilePath;
 			}
 			outputOptions.setErrorHandler(&errHandler);
@@ -348,6 +359,10 @@ namespace uimg {
 			nvtt::Compressor compressor {};
 			compressor.enableCudaAcceleration(true);
 			auto res = compressor.process(inputOptions, compressionOptions, outputOptions);
+			#ifdef _WIN32
+			//NVTT does not close the handle. We need to close this ourselves.
+			fclose(fileHandle);
+			#endif
 			return res ? resultData : std::optional<ResultData> {};
 		}
 	};

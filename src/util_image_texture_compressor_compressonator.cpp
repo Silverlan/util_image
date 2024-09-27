@@ -10,6 +10,13 @@
 #include <common.h>
 #include <sharedutils/magic_enum.hpp>
 #include <sharedutils/scope_guard.h>
+#ifdef _WIN32
+#include <fileapi.h>
+
+#include <sharedutils/util_string.h>
+#include <sharedutils/util.h>
+#include <filesystem>
+#endif
 
 static std::optional<CMP_FORMAT> to_cmp_enum(uimg::TextureInfo::OutputFormat format)
 {
@@ -19,15 +26,15 @@ static std::optional<CMP_FORMAT> to_cmp_enum(uimg::TextureInfo::OutputFormat for
 	case uimg::TextureInfo::OutputFormat::RGBA:
 		return CMP_FORMAT_RGBA_8888;
 	case uimg::TextureInfo::OutputFormat::DXT1:
-		return CMP_FORMAT_DXT1;
+        return CMP_FORMAT_DXT1;
 	case uimg::TextureInfo::OutputFormat::DXT1a:
-		return CMP_FORMAT_DXT1;
+        return CMP_FORMAT_DXT1;
 	case uimg::TextureInfo::OutputFormat::DXT3:
-		return CMP_FORMAT_DXT3;
+        return CMP_FORMAT_DXT3;
 	case uimg::TextureInfo::OutputFormat::DXT5:
-		return CMP_FORMAT_DXT5;
+        return CMP_FORMAT_DXT5;
 	case uimg::TextureInfo::OutputFormat::DXT5n:
-		return CMP_FORMAT_DXT5;
+        return CMP_FORMAT_DXT5;
 	case uimg::TextureInfo::OutputFormat::BC1:
 		return CMP_FORMAT_BC1;
 	case uimg::TextureInfo::OutputFormat::BC1a:
@@ -72,6 +79,25 @@ static std::optional<CMP_FORMAT> to_cmp_enum(uimg::TextureInfo::OutputFormat for
 
 	// Default case, returning an invalid format
 	return {};
+}
+
+static std::optional<CMP_FORMAT> to_cmp_enum(uimg::TextureInfo::InputFormat format)
+{
+    switch (format){
+        case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
+            return CMP_FORMAT_BGRA_8888;
+        case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
+            return CMP_FORMAT_RGBA_8888;
+        case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
+            return CMP_FORMAT_RGBA_16F;
+        case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
+            return CMP_FORMAT_RGBA_32F;
+        case uimg::TextureInfo::InputFormat::R32_Float:
+            return CMP_FORMAT_R_32F;
+        case uimg::TextureInfo::InputFormat::KeepInputImageFormat:
+            break;
+    }
+    return{};
 }
 
 static std::string cmp_result_to_string(CMP_ERROR err)
@@ -193,21 +219,34 @@ static std::optional<CMP_TextureType> get_cmp_texture_type(const uimg::TextureSa
 		return CMP_TextureType::TT_CubeMap;
 	return CMP_TextureType::TT_2D;
 }
+#if 0
+static std::string cmpReason;
 
+//this is a callback for PrintStatusLine.
+static void PrintDetails(char* data) {
+
+}
+#endif
 namespace uimg {
-	class TextureCompressorCompressonator : public TextureCompressor {
+    class TextureCompressorCompressonator : public TextureCompressor {
 	  public:
 		virtual std::optional<ResultData> Compress(const CompressInfo &compressInfo) override
-		{
+        {
 			CMP_InitFramework();
 
 			auto &textureSaveInfo = compressInfo.textureSaveInfo;
 			auto &texInfo = compressInfo.textureSaveInfo.texInfo;
 			auto cmpFormat = to_cmp_enum(texInfo.outputFormat);
-			if(!cmpFormat) {
-				compressInfo.errorHandler("Failed to determine compressonator format for output format " + std::string {magic_enum::enum_name(texInfo.outputFormat)} + "!");
-				return {};
-			}
+            auto origFormat = to_cmp_enum(texInfo.inputFormat);
+            if(!cmpFormat) {
+                compressInfo.errorHandler("Failed to determine compressonator format for output format " + std::string {magic_enum::enum_name(texInfo.outputFormat)} + "!");
+                return {};
+            }
+
+            if(!origFormat) {
+                compressInfo.errorHandler("Failed to determine compressonator format for input format " + std::string {magic_enum::enum_name(texInfo.inputFormat)} + "!");
+                return {};
+            }
 
 			auto channelFormat = get_cmp_channel_format(texInfo.inputFormat);
 			if(!channelFormat) {
@@ -230,22 +269,45 @@ namespace uimg {
 				return {};
 			}
 
-			KernelOptions kernel_options;
-			memset(&kernel_options, 0, sizeof(KernelOptions));
-			kernel_options.encodeWith = CMP_GPU_OCL;
-			kernel_options.format = *cmpFormat; // Set the format to process
-			kernel_options.fquality = 1.f;      // Set the quality of the result
-			kernel_options.threads = 0;         // Auto setting
-			CMIPS cmips {};
 
-			MipSet ms {};
-			auto res = cmips.AllocateMipSet(&ms, *channelFormat, *texDataType, *texType, compressInfo.width, compressInfo.height, compressInfo.numLayers);
-			if(!res) {
-				compressInfo.errorHandler("Failed to allocate mip set with " + std::to_string(compressInfo.numMipmaps) + " mipmaps and " + std::to_string(compressInfo.numLayers) + " layers!");
-				return {};
-			}
-			util::ScopeGuard sgMs {[&cmips, &ms]() { cmips.FreeMipSet(&ms); }};
+            //		enum class InputFormat : uint8_t { KeepInputImageFormat = 0u, R8G8B8A8_UInt, R16G16B16A16_Float, R32G32B32A32_Float, R32_Float, B8G8R8A8_UInt, Count };
 
+            CMP_CompressOptions opts;
+            memset(&opts, 0, sizeof(CMP_CompressOptions));
+            opts.dwSize = sizeof(CMP_CompressOptions);
+#ifdef WIN32
+            opts.bUseCGCompress = true;
+            opts.nEncodeWith = CMP_GPU_OCL;
+#else
+            //until we have support for opencl in linux use CPU.
+            opts.bUseCGCompress = false;
+            opts.nEncodeWith = CMP_CPU_OCL;
+#endif
+            opts.DestFormat = *cmpFormat;
+            opts.SourceFormat = *origFormat;
+            opts.fquality = 1;
+            opts.dwnumThreads=0;
+            /*
+            opts.CmdSet[0].strCommand   = "NumThreads";
+            opts.CmdSet[0].strParameter = "1";
+            opts.CmdSet[1].strCommand   = "Quality";
+            opts.CmdSet[1].strParameter = "1.0";
+            */
+            std::strncpy(opts.CmdSet[0].strCommand,"NumThreads",AMD_MAX_CMD_STR);
+            std::strncpy(opts.CmdSet[0].strParameter,"0",AMD_MAX_CMD_PARAM);
+            std::strncpy(opts.CmdSet[1].strCommand,"Quality",AMD_MAX_CMD_STR);
+            std::strncpy(opts.CmdSet[1].strParameter,"1.0",AMD_MAX_CMD_PARAM);
+            opts.NumCmds = 2;
+            CMIPS cmips {};
+
+            MipSet ms {};
+                        auto res = cmips.AllocateMipSet(&ms, *channelFormat, *texDataType, *texType, compressInfo.width, compressInfo.height, compressInfo.numLayers);
+                        if(!res) {
+                            compressInfo.errorHandler("Failed to allocate mip set with " + std::to_string(compressInfo.numMipmaps) + " mipmaps and " + std::to_string(compressInfo.numLayers) + " layers!");
+                            return {};
+                        }
+                        ms.m_format = *origFormat;
+                        util::ScopeGuard sgMs {[&cmips, &ms]() { cmips.FreeMipSet(&ms); }};
 			for(auto l = decltype(compressInfo.numLayers) {0u}; l < compressInfo.numLayers; ++l) {
 				for(auto m = decltype(compressInfo.numMipmaps) {0u}; m < compressInfo.numMipmaps; ++m) {
 					std::function<void(void)> deleter = nullptr;
@@ -268,7 +330,7 @@ namespace uimg {
 						compressInfo.errorHandler("Size mismatch for mipmap " + std::to_string(m) + " of layer " + std::to_string(l) + ": Expected " + std::to_string(expectedSize) + ", got " + std::to_string(dwSize) + "!");
 						return {};
 					}
-					memcpy(pData, data, dwSize);
+                    std::memcpy(pData, data, dwSize);
 
 					if(deleter)
 						deleter();
@@ -287,8 +349,8 @@ namespace uimg {
 
 			MipSet msProcessed {};
 			memset(&msProcessed, 0, sizeof(msProcessed));
-			auto err = CMP_ProcessTexture(
-			  &ms, &msProcessed, kernel_options, +[](CMP_FLOAT fProgress, CMP_DWORD_PTR pUser1, CMP_DWORD_PTR pUser2) -> bool {
+            auto err = CMP_ConvertMipTexture(
+              &ms, &msProcessed, &opts, +[](CMP_FLOAT fProgress, CMP_DWORD_PTR pUser1, CMP_DWORD_PTR pUser2) -> bool {
 				  auto abort = false;
 				  return abort;
 			  });
@@ -316,21 +378,34 @@ namespace uimg {
 			else {
 				auto &fileName = std::get<std::string>(outputHandler);
 				std::string outputFilePath = compressInfo.absoluteFileName ? fileName.c_str() : get_absolute_path(fileName, texInfo.containerFormat).c_str();
-
+				#ifdef _WIN32
+				//due to CMP_SaveTexture using only narrow (non-UTF-8 of course) strings, I have to do this.
+				std::wstring wRealOutputFilePath = ustring::string_to_wstring(outputFilePath);
+				std::string tmpPath = ustring::wstring_to_string(std::filesystem::temp_directory_path().native());
+				// MSDN recommends GUIDS as written in GetTempFileName so we oblige.
+				//we need to name this .dds since CMP_SaveTexture depends on the file extension. Sorry MSDN.
+				outputFilePath = tmpPath + util::uuid_to_string(util::generate_uuid_v4()) + ".tmp.dds"; 
+				#endif
 				// TODO: This does not work with KTX
 				err = CMP_SaveTexture(outputFilePath.c_str(), &msProcessed);
 				if(err != CMP_OK) {
 					compressInfo.errorHandler(cmp_result_to_string(err));
 					return {};
 				}
+				#ifdef _WIN32 
+				using std::filesystem::path;
+				path inFile(outputFilePath), outFile(wRealOutputFilePath);
+				std::filesystem::copy(inFile, outFile, std::filesystem::copy_options::overwrite_existing);
+				std::filesystem::remove(inFile);
+				outputFilePath = ustring::wstring_to_string(wRealOutputFilePath);
+#endif
 
 				resultData.outputFilePath = outputFilePath;
-			}
+            }
 			return resultData;
-		}
-	};
+        }
 };
-
+}
 std::unique_ptr<uimg::TextureCompressor> uimg::TextureCompressor::Create() { return std::make_unique<TextureCompressorCompressonator>(); }
 
 #endif

@@ -31,3 +31,5 @@ x64/Debug/test.png
 util_image/x64/Release/util_image.tlog/Lib.command.1.tlog
 .vs/util_image/v15/ipch/AutoPCH/488bbc5987b18be2/MAIN.ipch
 build_winx64/
+
+third_party_libs/common
