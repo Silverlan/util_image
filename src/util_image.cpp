@@ -118,16 +118,16 @@ std::string uimg::get_file_extension(ImageFormat format)
 	return "";
 }
 
-std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(const std::string &fileName, PixelFormat pixelFormat)
+std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(const std::string &fileName, PixelFormat pixelFormat, bool flipVertically)
 {
 	auto fp = FileManager::OpenFile(fileName.c_str(), "rb");
 	if(fp == nullptr)
 		return nullptr;
 	fsys::File f {fp};
-	return load_image(f, pixelFormat);
+	return load_image(f, pixelFormat, flipVertically);
 }
 
-std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(ufile::IFile &f, PixelFormat pixelFormat)
+std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(ufile::IFile &f, PixelFormat pixelFormat, bool flipVertically)
 {
 	int width, height, nrComponents;
 	stbi_io_callbacks ioCallbacks {};
@@ -137,6 +137,7 @@ std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(ufile::IFile &f, PixelForm
 		f->Seek(f->Tell() + n);
 	};
 	ioCallbacks.eof = [](void *user) -> int { return static_cast<ufile::IFile *>(user)->Eof(); };
+	stbi_set_flip_vertically_on_load(flipVertically);
 	std::shared_ptr<::uimg::ImageBuffer> imgBuffer = nullptr;
 	switch(pixelFormat) {
 	case PixelFormat::LDR:
@@ -158,10 +159,11 @@ std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(ufile::IFile &f, PixelForm
 			break;
 		}
 	}
+	stbi_set_flip_vertically_on_load(false); // Reset
 	return imgBuffer;
 }
 
-bool uimg::save_image(ufile::IFile &f, ::uimg::ImageBuffer &imgBuffer, ImageFormat format, float quality)
+bool uimg::save_image(ufile::IFile &f, ::uimg::ImageBuffer &imgBuffer, ImageFormat format, float quality, bool flipVertically)
 {
 	auto *fptr = &f;
 
@@ -177,6 +179,7 @@ bool uimg::save_image(ufile::IFile &f, ::uimg::ImageBuffer &imgBuffer, ImageForm
 	auto *data = imgBuffer.GetData();
 	auto numChannels = imgBuffer.GetChannelCount();
 	int result = 0;
+	stbi_flip_vertically_on_write(flipVertically);
 	switch(format) {
 	case ImageFormat::PNG:
 		if(quality >= 0.9f)
@@ -204,6 +207,7 @@ bool uimg::save_image(ufile::IFile &f, ::uimg::ImageBuffer &imgBuffer, ImageForm
 		result = stbi_write_hdr_to_func([](void *context, void *data, int size) { static_cast<ufile::IFile *>(context)->Write(data, size); }, fptr, w, h, numChannels, reinterpret_cast<float *>(data));
 		break;
 	}
+	stbi_flip_vertically_on_write(false); // Reset
 	return result != 0;
 }
 #pragma optimize("", on)

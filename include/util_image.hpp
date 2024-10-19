@@ -28,9 +28,9 @@ namespace uimg {
 	enum class ImageFormat : uint8_t { PNG = 0, BMP, TGA, JPG, HDR, Count };
 	enum class PixelFormat : uint8_t { LDR = 0, HDR, Float };
 	DLLUIMG std::string get_file_extension(ImageFormat format);
-	DLLUIMG std::shared_ptr<ImageBuffer> load_image(ufile::IFile &f, PixelFormat pixelFormat = PixelFormat::LDR);
-	DLLUIMG std::shared_ptr<ImageBuffer> load_image(const std::string &fileName, PixelFormat pixelFormat = PixelFormat::LDR);
-	DLLUIMG bool save_image(ufile::IFile &f, ImageBuffer &imgBuffer, ImageFormat format, float quality = 1.f);
+	DLLUIMG std::shared_ptr<ImageBuffer> load_image(ufile::IFile &f, PixelFormat pixelFormat = PixelFormat::LDR, bool flipVertically = false);
+	DLLUIMG std::shared_ptr<ImageBuffer> load_image(const std::string &fileName, PixelFormat pixelFormat = PixelFormat::LDR, bool flipVertically = false);
+	DLLUIMG bool save_image(ufile::IFile &f, ImageBuffer &imgBuffer, ImageFormat format, float quality = 1.f, bool flipVertically = false);
 #ifdef UIMG_ENABLE_NVTT
 	struct DLLUIMG TextureOutputHandler {
 		std::function<void(int size, int width, int height, int depth, int face, int miplevel)> beginImage = nullptr;
