@@ -2,26 +2,25 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef __UTIL_IMAGE_TEXTURE_COMPRESSOR_HPP__
-#define __UTIL_IMAGE_TEXTURE_COMPRESSOR_HPP__
+module;
+
+#include "definitions.hpp"
 
 #ifdef UIMG_ENABLE_NVTT
 
-#define TEX_COMPRESSION_LIBRARY_NVTT 0
-#define TEX_COMPRESSION_LIBRARY_COMPRESSONATOR 1
-
-#ifndef TEX_COMPRESSION_LIBRARY
-
-#define TEX_COMPRESSION_LIBRARY TEX_COMPRESSION_LIBRARY_NVTT
-
-#endif
-
-#include "util_image.hpp"
-#include "util_texture_info.hpp"
 #include <functional>
 #include <string>
 #include <variant>
 #include <optional>
+#include <memory>
+
+#endif
+
+export module pragma.image:texture_compressor;
+
+#ifdef UIMG_ENABLE_NVTT
+
+import :image;
 
 namespace uimg {
 	class TextureCompressor {
@@ -44,7 +43,5 @@ namespace uimg {
 		virtual std::optional<ResultData> Compress(const CompressInfo &compressInfo) = 0;
 	};
 };
-
-#endif
 
 #endif

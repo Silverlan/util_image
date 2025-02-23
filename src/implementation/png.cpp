@@ -41,8 +41,8 @@ Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image_png.hpp"
-#include "util_image_buffer.hpp"
+module;
+
 #include <fsys/filesystem.h>
 #include <sharedutils/scope_guard.h>
 #include <stdio.h>
@@ -69,6 +69,11 @@ Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #else
 #  define Trace(x)  ;
 #endif
+
+module pragma.image;
+
+import :image;
+import :png;
 
 typedef unsigned char   uch;
 typedef unsigned short  ush;

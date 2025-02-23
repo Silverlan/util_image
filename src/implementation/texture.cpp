@@ -4,10 +4,9 @@
 
 
 #ifdef UIMG_ENABLE_NVTT
-#include "util_image.hpp"
-#include "util_image_buffer.hpp"
-#include "util_texture_info.hpp"
-#include "util_image_texture_compressor.hpp"
+
+module;
+
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
@@ -16,6 +15,11 @@
 #include <sharedutils/scope_guard.h>
 #include <variant>
 #include <cstring>
+
+module pragma.image;
+
+import :image;
+import :texture_compressor;
 
 std::string uimg::get_absolute_path(const std::string &fileName, uimg::TextureInfo::ContainerFormat containerFormat)
 {

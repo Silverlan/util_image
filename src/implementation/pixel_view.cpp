@@ -2,8 +2,13 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image_buffer.hpp"
+module;
+
 #include <mathutil/umath.h>
+
+module pragma.image;
+
+import :image;
 
 uimg::ImageBuffer::PixelView::PixelView(ImageBuffer &imgBuffer, Offset offset) : m_imageBuffer {imgBuffer}, m_offset {offset} {}
 uimg::ImageBuffer::Offset uimg::ImageBuffer::PixelView::GetOffset() const { return m_offset; }

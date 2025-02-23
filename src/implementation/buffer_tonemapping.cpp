@@ -2,8 +2,13 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image_buffer.hpp"
-#include "util_image.hpp"
+module;
+
+#include <mathutil/uvec.h>
+
+module pragma.image;
+
+import :image;
 
 constexpr float GAMMA = 2.2;
 constexpr float INV_GAMMA = 1.0 / GAMMA;

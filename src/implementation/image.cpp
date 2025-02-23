@@ -2,14 +2,18 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image.hpp"
-#include "util_image_buffer.hpp"
+module;
+
 #include "stb_image_write.h"
 #include "stb_image.h"
 #include <sharedutils/util_string.h>
 #include <fsys/filesystem.h>
 #include <fsys/ifile.hpp>
 #include <cmath>
+
+module pragma.image;
+
+import :image;
 
 #pragma optimize("", off)
 void uimg::ChannelMask::Reverse() { *this = GetReverse(); }

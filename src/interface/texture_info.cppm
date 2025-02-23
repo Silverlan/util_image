@@ -2,16 +2,16 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef __UTIL_TEXTURE_INFO_HPP__
-#define __UTIL_TEXTURE_INFO_HPP__
+module;
 
+#include "definitions.hpp"
 #include <cinttypes>
 #include <mathutil/umath.h>
 #include <string>
-#include "util_image_definitions.hpp"
-#include "util_image_types.hpp"
 
-namespace uimg {
+export module pragma.image:texture_info;
+
+export namespace uimg {
 	struct DLLUIMG TextureInfo {
 		enum class InputFormat : uint8_t { KeepInputImageFormat = 0u, R8G8B8A8_UInt, R16G16B16A16_Float, R32G32B32A32_Float, R32_Float, B8G8R8A8_UInt, Count };
 		enum class OutputFormat : uint8_t {
@@ -83,6 +83,4 @@ namespace uimg {
 	};
 	DLLUIMG std::string get_absolute_path(const std::string &fileName, uimg::TextureInfo::ContainerFormat containerFormat);
 };
-REGISTER_BASIC_BITWISE_OPERATORS(uimg::TextureInfo::Flags)
-
-#endif
+export {REGISTER_BASIC_BITWISE_OPERATORS(uimg::TextureInfo::Flags)};

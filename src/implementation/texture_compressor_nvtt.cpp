@@ -2,13 +2,18 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image_texture_compressor.hpp"
+module;
+
+#include "texture_compressor_nvtt.hpp"
+#include <string>
+#include <variant>
+
+module pragma.image;
+
+import :texture_compressor;
+import :image;
 
 #if UIMG_ENABLE_NVTT && TEX_COMPRESSION_LIBRARY == TEX_COMPRESSION_LIBRARY_NVTT
-
-#include <nvtt/nvtt.h>
-#include <fsys/filesystem.h>
-#include <sharedutils/util_string.h>
 
 struct OutputHandler : public nvtt::OutputHandler {
 	OutputHandler(VFilePtrReal f) : m_file {f} {}

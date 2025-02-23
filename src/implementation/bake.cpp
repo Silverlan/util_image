@@ -1,7 +1,18 @@
-#include "util_image_buffer.hpp"
-#include "util_image.hpp"
+/* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this
+* file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+module;
+
 #include <sharedutils/util_baking.hpp>
 #include <cstring>
+#include <string>
+#include <memory>
+
+module pragma.image;
+
+import :buffer;
+import :image;
 
 struct ImBuf {
 	int x, y;

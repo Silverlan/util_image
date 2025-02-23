@@ -2,12 +2,11 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef __UTIL_IMAGE_BUFFER_HPP__
-#define __UTIL_IMAGE_BUFFER_HPP__
+module;
 
-#include "util_image_definitions.hpp"
-#include "util_image_types.hpp"
+#include "definitions.hpp"
 #include <mathutil/uvec.h>
+#include <mathutil/color.h>
 #include <cinttypes>
 #include <functional>
 #include <optional>
@@ -15,8 +14,11 @@
 #include <array>
 #include <memory>
 
-struct Color;
-namespace uimg {
+export module pragma.image:buffer;
+
+import :types;
+
+export namespace uimg {
 	DLLUIMG float calc_luminance(const Vector3 &color);
 
 	class DLLUIMG ImageBuffer : public std::enable_shared_from_this<ImageBuffer> {
@@ -193,6 +195,4 @@ namespace uimg {
 
 	DLLUIMG std::optional<ToneMapping> string_to_tone_mapping(const std::string &str);
 };
-DLLUIMG std::ostream &operator<<(std::ostream &out, const uimg::ImageBuffer &o);
-
-#endif
+export { DLLUIMG std::ostream &operator<<(std::ostream &out, const uimg::ImageBuffer &o); };

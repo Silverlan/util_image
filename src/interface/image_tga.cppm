@@ -2,17 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef __UTIL_IMAGE_PNG_HPP__
-#define __UTIL_IMAGE_PNG_HPP__
+module;
 
 #include <memory>
+#include <fsys/filesystem.h>
 
-class VFilePtrInternal;
-namespace uimg {
-	class ImageBuffer;
+export module pragma.image:tga;
+
+import :buffer;
+
+export namespace uimg {
 	namespace impl {
-		std::shared_ptr<ImageBuffer> load_png_image(std::shared_ptr<VFilePtrInternal> &file);
+		std::shared_ptr<ImageBuffer> load_tga_image(std::shared_ptr<VFilePtrInternal> &file);
 	};
 };
-
-#endif

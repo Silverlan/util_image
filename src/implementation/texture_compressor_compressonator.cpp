@@ -2,21 +2,15 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image_texture_compressor.hpp"
+module;
+
+#include "texture_compressor_compressonator.hpp"
+
+module pragma.image;
+
+import :texture_compressor;
 
 #if UIMG_ENABLE_NVTT && TEX_COMPRESSION_LIBRARY == TEX_COMPRESSION_LIBRARY_COMPRESSONATOR
-
-#include <compressonator.h>
-#include <common.h>
-#include <sharedutils/magic_enum.hpp>
-#include <sharedutils/scope_guard.h>
-#ifdef _WIN32
-#include <fileapi.h>
-
-#include <sharedutils/util_string.h>
-#include <sharedutils/util.h>
-#include <filesystem>
-#endif
 
 static std::optional<CMP_FORMAT> to_cmp_enum(uimg::TextureInfo::OutputFormat format)
 {

@@ -2,7 +2,8 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image.hpp"
+module;
+
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_string.h>
@@ -11,6 +12,10 @@
 #ifdef __linux__
 #include <arpa/inet.h> // Required for ntohl
 #endif
+
+module pragma.image;
+
+import :image;
 
 #pragma comment(lib, "Ws2_32.lib") // Required for ntohl
 

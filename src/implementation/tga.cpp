@@ -2,11 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image_buffer.hpp"
-#include "util_image_tga.hpp"
+module;
+
 #include <fsys/filesystem.h>
 #include <cstring>
 #include <cassert>
+
+module pragma.image;
+
+import :buffer;
+import :image;
+import :tga;
 
 struct TGAInfo {
 	uint8_t header[6];

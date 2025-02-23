@@ -2,14 +2,15 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef __UTIL_IMAGE_TYPES_HPP__
-#define __UTIL_IMAGE_TYPES_HPP__
+module;
 
-#include "util_image_definitions.hpp"
+#include "definitions.hpp"
 #include <cinttypes>
 #include <optional>
 
-namespace uimg {
+export module pragma.image:types;
+
+export namespace uimg {
 	enum class Format : uint8_t {
 		None = 0u,
 
@@ -98,5 +99,3 @@ namespace uimg {
 		Count
 	};
 };
-
-#endif

@@ -2,26 +2,25 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef __UTIL_IMAGE_HPP__
-#define __UTIL_IMAGE_HPP__
+module;
 
-#include "util_image_definitions.hpp"
-#include "util_image_types.hpp"
-#include "util_texture_info.hpp"
+#include "definitions.hpp"
 #include <mathutil/uvec.h>
 #include <string>
 #include <memory>
 #include <functional>
 #include <cinttypes>
 #include <optional>
+#include <sharedutils/util_ifile.hpp>
 
-namespace ufile {
-	struct IFile;
-};
-namespace uimg {
-	class ImageBuffer;
-	struct TextureInfo;
+export module pragma.image:image;
 
+import :texture_info;
+import :types;
+import :buffer;
+import :texture_info;
+
+export namespace uimg {
 	DLLUIMG bool read_image_size(const std::string &file, uint32_t &pixelWidth, uint32_t &pixelHeight);
 	DLLUIMG void calculate_mipmap_size(uint32_t w, uint32_t h, uint32_t &outWMipmap, uint32_t &outHMipmap, uint32_t level);
 
@@ -68,5 +67,3 @@ namespace uimg {
 	DLLUIMG Vector3 linear_to_srgb(const Vector3 &color);
 	DLLUIMG Vector3 srgb_to_linear(const Vector3 &srgbIn);
 };
-
-#endif

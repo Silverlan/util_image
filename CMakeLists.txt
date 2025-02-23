@@ -10,8 +10,7 @@ pr_add_dependency(${PROJ_NAME} vfilesystem TARGET PUBLIC)
 pr_add_dependency(${PROJ_NAME} zlib TARGET)
 pr_add_dependency(${PROJ_NAME} png_static TARGET)
 
-pr_add_headers(${PROJ_NAME} "include/")
-pr_add_sources(${PROJ_NAME} "src/")
+pr_init_module(${PROJ_NAME})
 
 pr_add_compile_definitions(${PROJ_NAME} -DUIMG_ENABLE_NVTT PUBLIC)
 pr_add_compile_definitions(${PROJ_NAME} -DUIMG_DLL)
