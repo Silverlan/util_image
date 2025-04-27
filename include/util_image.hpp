@@ -31,6 +31,15 @@ namespace uimg {
 	DLLUIMG std::shared_ptr<ImageBuffer> load_image(ufile::IFile &f, PixelFormat pixelFormat = PixelFormat::LDR, bool flipVertically = false);
 	DLLUIMG std::shared_ptr<ImageBuffer> load_image(const std::string &fileName, PixelFormat pixelFormat = PixelFormat::LDR, bool flipVertically = false);
 	DLLUIMG bool save_image(ufile::IFile &f, ImageBuffer &imgBuffer, ImageFormat format, float quality = 1.f, bool flipVertically = false);
+#ifdef UIMG_ENABLE_SVG
+	struct DLLUIMG SvgImageInfo {
+		std::string styleSheet {};
+		std::optional<uint32_t> width {};
+		std::optional<uint32_t> height {};
+	};
+	DLLUIMG std::shared_ptr<ImageBuffer> load_svg(ufile::IFile &f, const SvgImageInfo &svgInfo = {});
+	DLLUIMG std::shared_ptr<ImageBuffer> load_svg(const std::string &fileName, const SvgImageInfo &svgInfo = {});
+#endif
 #ifdef UIMG_ENABLE_NVTT
 	struct DLLUIMG TextureOutputHandler {
 		std::function<void(int size, int width, int height, int depth, int face, int miplevel)> beginImage = nullptr;

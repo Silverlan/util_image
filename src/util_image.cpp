@@ -10,8 +10,10 @@
 #include <fsys/filesystem.h>
 #include <fsys/ifile.hpp>
 #include <cmath>
+#ifdef UIMG_ENABLE_SVG
+#include <lunasvg.h>
+#endif
 
-#pragma optimize("", off)
 void uimg::ChannelMask::Reverse() { *this = GetReverse(); }
 uimg::ChannelMask uimg::ChannelMask::GetReverse() const
 {
@@ -210,4 +212,31 @@ bool uimg::save_image(ufile::IFile &f, ::uimg::ImageBuffer &imgBuffer, ImageForm
 	stbi_flip_vertically_on_write(false); // Reset
 	return result != 0;
 }
-#pragma optimize("", on)
+
+#ifdef UIMG_ENABLE_SVG
+std::shared_ptr<uimg::ImageBuffer> uimg::load_svg(ufile::IFile &f, const SvgImageInfo &svgInfo)
+{
+	std::vector<uint8_t> data;
+	data.resize(f.GetSize());
+	if(f.Read(data.data(), data.size()) != data.size())
+		return nullptr;
+	auto document = lunasvg::Document::loadFromData(reinterpret_cast<char *>(data.data()), data.size());
+	if(document == nullptr)
+		return nullptr;
+	if(!svgInfo.styleSheet.empty())
+		document->applyStyleSheet(svgInfo.styleSheet);
+	auto bitmap = document->renderToBitmap(svgInfo.width ? static_cast<int32_t>(*svgInfo.width) : -1, svgInfo.height ? static_cast<int32_t>(*svgInfo.height) : -1);
+	if(bitmap.isNull())
+		return nullptr;
+	bitmap.convertToRGBA();
+	return uimg::ImageBuffer::Create(bitmap.data(), bitmap.width(), bitmap.height(), uimg::Format::RGBA8, false);
+}
+std::shared_ptr<uimg::ImageBuffer> uimg::load_svg(const std::string &fileName, const SvgImageInfo &svgInfo)
+{
+	auto fp = filemanager::open_file(fileName.c_str(), filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	if(fp == nullptr)
+		return nullptr;
+	fsys::File f {fp};
+	return load_svg(f, svgInfo);
+}
+#endif
