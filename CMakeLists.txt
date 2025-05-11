@@ -3,6 +3,13 @@ include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 # TODO: Enable by default once it's fully integrated
 option(USE_COMPRESSONATOR "Use Compressonator compressor instead of nvtt" OFF)
 
+if(WIN32)
+	# nvtt does not work with clang on windows
+	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+		set(USE_COMPRESSONATOR ON CACHE BOOL "Use Compressonator compressor instead of nvtt" FORCE)
+	endif()
+endif()
+
 set(PROJ_NAME util_image)
 pr_add_library(${PROJ_NAME} SHARED)
 
@@ -88,7 +95,7 @@ if(${TEX_COMPRESSION_LIBRARY} EQUAL ${TEX_COMPRESSION_LIBRARY_NVTT})
 else()
 	set(OPTION_ENABLE_ALL_APPS OFF CACHE BOOL "Enable all apps" FORCE)
 	set(OPTION_BUILD_CMP_SDK ON CACHE BOOL "Build Compressonator SDK" FORCE)
-	set(OPTION_BUILD_APPS_CMP_CLI ON CACHE BOOL "Build Application: CLI" FORCE)
+	set(OPTION_CMP_OPENCV ON CACHE BOOL "Use OpenCV" FORCE)
 
 	add_subdirectory("third_party_libs/compressonator")
 
