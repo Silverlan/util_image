@@ -154,7 +154,7 @@ int PNGImage::readpng_init(VFilePtr &f, ulg *pWidth, ulg *pHeight)
     }
 
 	png_set_read_fn(png_ptr,f.get(),[](png_structp png_ptr,png_bytep png_data,png_size_t png_size) {
-		static_cast<VFilePtrInternal*>(png_ptr->io_ptr)->Read(png_data,png_size);;
+		static_cast<VFilePtrInternal *>(png_get_io_ptr(png_ptr))->Read(png_data, png_size);
 	});
     png_set_sig_bytes(png_ptr, 8);  /* we already read the 8 signature bytes */
 
