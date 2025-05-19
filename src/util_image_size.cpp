@@ -29,7 +29,7 @@ bool uimg::read_ktx_size(VFilePtr &f, uint32_t &pixelWidth, uint32_t &pixelHeigh
 	// See https://www.khronos.org/opengles/sdk/tools/KTX/file_format_spec/#2.10
 	std::array<char, 12> identifier;
 	f->Read(identifier.data(), identifier.size());
-	const std::array<char, 12> cmpIdentifier = {'«', 'K', 'T', 'X', ' ', '1', '1', '»', '\r', '\n', '\x1A', '\n'};
+	const std::array<char, 12> cmpIdentifier = {'\xAB', 'K', 'T', 'X', ' ', '1', '1', '\xBB', '\r', '\n', '\x1A', '\n'};
 	if(compare_header(identifier.data(), cmpIdentifier.data(), identifier.size()) == false)
 		return false;                          // Incorrect header
 	f->Seek(f->Tell() + sizeof(uint32_t) * 6); // Skip all header information which we don't need

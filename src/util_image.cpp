@@ -81,6 +81,8 @@ std::string uimg::get_image_output_format_extension(ImageFormat format)
 		return "jpg";
 	case ImageFormat::HDR:
 		return "hdr";
+	default:
+		break;
 	}
 	return "";
 }
@@ -115,6 +117,8 @@ std::string uimg::get_file_extension(ImageFormat format)
 		return "jpg";
 	case ImageFormat::HDR:
 		return "hdr";
+	default:
+		break;
 	}
 	static_assert(umath::to_integral(ImageFormat::Count) == 5);
 	return "";
@@ -207,6 +211,8 @@ bool uimg::save_image(ufile::IFile &f, ::uimg::ImageBuffer &imgBuffer, ImageForm
 		break;
 	case ImageFormat::HDR:
 		result = stbi_write_hdr_to_func([](void *context, void *data, int size) { static_cast<ufile::IFile *>(context)->Write(data, size); }, fptr, w, h, numChannels, reinterpret_cast<float *>(data));
+		break;
+	default:
 		break;
 	}
 	stbi_flip_vertically_on_write(false); // Reset

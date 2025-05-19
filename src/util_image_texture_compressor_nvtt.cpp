@@ -57,6 +57,9 @@ struct ErrorHandler : public nvtt::ErrorHandler {
 		case nvtt::Error_UnsupportedOutputFormat:
 			m_errorHandler("Unsupported output format");
 			break;
+		default:
+			m_errorHandler("Unknown error");
+			break;
 		}
 	}
   private:
@@ -120,6 +123,8 @@ static nvtt::Format to_nvtt_enum(uimg::TextureInfo::OutputFormat format)
 		return nvtt::Format_ETC2_RGBM;
 	case uimg::TextureInfo::OutputFormat::KeepInputImageFormat:
 		break;
+	default:
+		break;
 	}
 	static_assert(umath::to_integral(uimg::TextureInfo::OutputFormat::Count) == 27);
 	return {};
@@ -136,6 +141,8 @@ static nvtt::Container to_nvtt_enum(uimg::TextureInfo::ContainerFormat format, u
 		}
 	case uimg::TextureInfo::ContainerFormat::KTX:
 		return nvtt::Container_KTX;
+	default:
+		break;
 	}
 	static_assert(umath::to_integral(uimg::TextureInfo::ContainerFormat::Count) == 2);
 	return {};
@@ -162,6 +169,8 @@ static nvtt::WrapMode to_nvtt_enum(uimg::TextureInfo::WrapMode wrapMode)
 		return nvtt::WrapMode_Repeat;
 	case uimg::TextureInfo::WrapMode::Mirror:
 		return nvtt::WrapMode_Mirror;
+	default:
+		break;
 	}
 	static_assert(umath::to_integral(uimg::TextureInfo::ContainerFormat::Count) == 2);
 	return {};
@@ -331,6 +340,8 @@ namespace uimg {
 				break;
 			case nvtt::Format_DXT1n:
 				compressionOptions.setColorWeights(1, 1, 0);
+				break;
+			default:
 				break;
 			}
 
