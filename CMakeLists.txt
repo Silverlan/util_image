@@ -10,6 +10,10 @@ if(WIN32)
 	endif()
 endif()
 
+if(UNIX)
+	set(USE_COMPRESSONATOR ON CACHE BOOL "Use Compressonator compressor instead of nvtt" FORCE)
+endif()
+
 set(PROJ_NAME util_image)
 pr_add_library(${PROJ_NAME} SHARED)
 
@@ -99,7 +103,10 @@ else()
 
 	add_subdirectory("third_party_libs/compressonator")
 
-	add_dependencies(${PROJ_NAME} Image_DDS Image_EXR Image_KTX Image_TGA CMP_Compressonator CMP_Framework CMP_Common CMP_Core )
+	add_dependencies(${PROJ_NAME} Image_DDS Image_KTX Image_TGA CMP_Compressonator CMP_Framework CMP_Common CMP_Core)
+	if(WIN32)
+		add_dependencies(${PROJ_NAME} Image_EXR)
+	endif()
 
 
 	if(WIN32)
