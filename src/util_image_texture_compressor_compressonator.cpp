@@ -275,14 +275,8 @@ namespace uimg {
             CMP_CompressOptions opts;
             memset(&opts, 0, sizeof(CMP_CompressOptions));
             opts.dwSize = sizeof(CMP_CompressOptions);
-#ifdef WIN32
             opts.bUseCGCompress = true;
             opts.nEncodeWith = CMP_GPU_OCL;
-#else
-            //until we have support for opencl in linux use CPU.
-            opts.bUseCGCompress = false;
-            opts.nEncodeWith = CMP_CPU_OCL;
-#endif
             opts.DestFormat = *cmpFormat;
             opts.SourceFormat = *origFormat;
             opts.fquality = 1;
