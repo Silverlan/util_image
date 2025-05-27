@@ -53,15 +53,15 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 		uimg::ChannelMask channelMask {};
 		if(texSaveInfo.channelMask.has_value())
 			channelMask = *texSaveInfo.channelMask;
-		else if(texInfo.inputFormat == uimg::TextureInfo::InputFormat::R8G8B8A8_UInt)
-			channelMask.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
 
+#if TEX_COMPRESSION_LIBRARY == TEX_COMPRESSION_LIBRARY_NVTT
 		switch(texInfo.inputFormat) {
 		case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
 		case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
 			channelMask.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
 			break;
 		}
+#endif
 
 		auto numMipmaps = umath::max(texSaveInfo.numMipmaps, static_cast<uint32_t>(1));
 		auto numLayers = texSaveInfo.numLayers;
