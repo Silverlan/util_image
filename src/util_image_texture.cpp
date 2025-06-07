@@ -31,7 +31,7 @@ std::string uimg::get_absolute_path(const std::string &fileName, uimg::TextureIn
 		fileNameWithExt += ".ktx";
 		break;
 	}
-	return filemanager::get_program_path() + '/' + fileNameWithExt;
+	return filemanager::get_program_write_path() + '/' + fileNameWithExt;
 }
 
 static uint32_t calculate_mipmap_size(uint32_t v, uint32_t level)
