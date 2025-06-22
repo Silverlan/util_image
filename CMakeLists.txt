@@ -1,52 +1,97 @@
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 
-# TODO: Enable by default once it's fully integrated
-option(USE_COMPRESSONATOR "Use Compressonator compressor instead of nvtt" OFF)
-
+set(ENABLE_NVTT_OPTION OFF)
 if(WIN32)
+	# NVTT is the fastest option on Windows
+    set(DEFAULT_ENABLE_NVTT ON)
+    set(DEFAULT_ENABLE_COMPRESSONATOR OFF)
+    set(DEFAULT_ENABLE_ISPC_TEXTURE_COMPRESSOR OFF)
+
 	# nvtt does not work with clang on windows
 	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-		set(USE_COMPRESSONATOR ON CACHE BOOL "Use Compressonator compressor instead of nvtt" FORCE)
+   		set(DEFAULT_ENABLE_NVTT OFF)
+		set(DEFAULT_ENABLE_ISPC_TEXTURE_COMPRESSOR ON)
+	else()
+		set(ENABLE_NVTT_OPTION ON)
 	endif()
+else()
+	# NVTT is not available on Linux.
+	# Compressonator does not support GPU acceleration on Linux and can be very slow for large images.
+	# ISPC TC does not support all BC compression types (e.g. BC2), but will fall back on compatible other types.
+    set(DEFAULT_ENABLE_NVTT OFF)
+    set(DEFAULT_ENABLE_COMPRESSONATOR OFF)
+    set(DEFAULT_ENABLE_ISPC_TEXTURE_COMPRESSOR ON)
 endif()
+
+if(ENABLE_NVTT_OPTION)
+	option(ENABLE_NVTT "Enable nvtt library" ${DEFAULT_ENABLE_NVTT})
+else()
+	set(ENABLE_NVTT ${DEFAULT_ENABLE_NVTT})
+endif()
+option(ENABLE_COMPRESSONATOR "Enable compressonator library" ${DEFAULT_ENABLE_COMPRESSONATOR})
+option(ENABLE_ISPC_TEXTURE_COMPRESSOR "Enable ISPC Texture Compressor library" ${DEFAULT_ENABLE_ISPC_TEXTURE_COMPRESSOR})
+
+option(ENABLE_SVG_SUPPORT "Enable SVG support" ON)
 
 set(PROJ_NAME util_image)
 pr_add_library(${PROJ_NAME} SHARED)
 
 pr_add_dependency(${PROJ_NAME} vfilesystem TARGET PUBLIC)
-pr_add_dependency(${PROJ_NAME} lunasvg TARGET)
+if(ENABLE_SVG_SUPPORT)
+	pr_add_dependency(${PROJ_NAME} lunasvg TARGET)
+endif()
 
 pr_add_external_dependency(${PROJ_NAME} libpng LIBRARY PRIVATE)
 pr_add_external_dependency(${PROJ_NAME} libpng_build HEADER_ONLY PRIVATE)
 pr_add_external_dependency(${PROJ_NAME} zlib LIBRARY PRIVATE)
 
-pr_add_headers(${PROJ_NAME} "include/")
-pr_add_sources(${PROJ_NAME} "src/")
+set(SOURCE_EXCLUSION_FILTER)
+if(NOT ENABLE_NVTT)
+    list(APPEND SOURCE_EXCLUSION_FILTER "src/compressors/nvtt.hpp")
+    list(APPEND SOURCE_EXCLUSION_FILTER "src/compressors/nvtt.cpp")
+endif()
+if(NOT ENABLE_COMPRESSONATOR)
+    list(APPEND SOURCE_EXCLUSION_FILTER "src/compressors/compressonator.hpp")
+    list(APPEND SOURCE_EXCLUSION_FILTER "src/compressors/compressonator.cpp")
+endif()
+if(NOT ENABLE_ISPC_TEXTURE_COMPRESSOR)
+    list(APPEND SOURCE_EXCLUSION_FILTER "src/compressors/ispctc.hpp")
+    list(APPEND SOURCE_EXCLUSION_FILTER "src/compressors/ispctc.cpp")
+endif()
 
-pr_add_compile_definitions(${PROJ_NAME} -DUIMG_ENABLE_NVTT PUBLIC)
-pr_add_compile_definitions(${PROJ_NAME} -DUIMG_ENABLE_SVG PUBLIC)
+if(DEFAULT_ENABLE_NVTT OR DEFAULT_ENABLE_COMPRESSONATOR OR DEFAULT_ENABLE_ISPC_TEXTURE_COMPRESSOR)
+	pr_add_compile_definitions(${PROJ_NAME} -DUIMG_ENABLE_TEXTURE_COMPRESSION PUBLIC)
+else()
+	list(APPEND SOURCE_EXCLUSION_FILTER "src/compressor.hpp")
+	list(APPEND SOURCE_EXCLUSION_FILTER "src/texture.cpp")
+endif()
+if(ENABLE_SVG_SUPPORT)
+	pr_add_compile_definitions(${PROJ_NAME} -DUIMG_ENABLE_SVG PUBLIC)
+endif()
 pr_add_compile_definitions(${PROJ_NAME} -DUIMG_DLL)
+
+pr_add_headers(${PROJ_NAME} "include/")
+pr_add_sources(${PROJ_NAME} "src/" EXCLUDE ${SOURCE_EXCLUSION_FILTER})
 
 set(COMPRESSONATOR_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party_libs/compressonator")
 
 set(DEPENDENCY_COMPRESSONATOR_INCLUDE "${COMPRESSONATOR_BASE_PATH}/cmp_compressonatorlib" CACHE PATH "Path to compressonator include directory.")
 set(DEPENDENCY_COMPRESSONATOR_OPENEXR_HALF_INCLUDE "${COMPRESSONATOR_BASE_PATH}/../common/lib/ext/openexr/ilmbase-2.2.0/Half" CACHE PATH "Path to compressonator_openexr_half include directory.")
 
-set(TEX_COMPRESSION_LIBRARY_NVTT 0)
-set(TEX_COMPRESSION_LIBRARY_COMPRESSONATOR 1)
-
-if(${USE_COMPRESSONATOR})
-	set(TEX_COMPRESSION_LIBRARY TEX_COMPRESSION_LIBRARY_COMPRESSONATOR)
-else()
-	set(TEX_COMPRESSION_LIBRARY TEX_COMPRESSION_LIBRARY_NVTT)
+if(ENABLE_NVTT)
+	pr_add_compile_definitions(${PROJ_NAME} -DUIMG_ENABLE_NVTT=1)
+endif()
+if(ENABLE_COMPRESSONATOR)
+	pr_add_compile_definitions(${PROJ_NAME} -DUIMG_ENABLE_COMPRESSONATOR=1)
+endif()
+if(ENABLE_ISPC_TEXTURE_COMPRESSOR)
+	pr_add_compile_definitions(${PROJ_NAME} -DUIMG_ENABLE_ISPC_TEXTURE_COMPRESSOR=1)
 endif()
 
-pr_add_compile_definitions(${PROJ_NAME} -DTEX_COMPRESSION_LIBRARY=${TEX_COMPRESSION_LIBRARY} PUBLIC)
-
-
-set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
-if(${TEX_COMPRESSION_LIBRARY} EQUAL ${TEX_COMPRESSION_LIBRARY_NVTT})
+if(ENABLE_NVTT)
+	set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
 	add_subdirectory("third_party_libs/nvtt")
+	set(BUILD_SHARED_LIBS ON CACHE BOOL ON FORCE)
 
 	set(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/src CACHE PATH "" FORCE)
 	set_target_properties(nvtt PROPERTIES FOLDER third_party_libs/nvtt)
@@ -92,7 +137,9 @@ if(${TEX_COMPRESSION_LIBRARY} EQUAL ${TEX_COMPRESSION_LIBRARY_NVTT})
 	pr_add_dependency(${PROJ_NAME} nvcore TARGET PRIVATE)
 	#TODO: This would get shoved in. If TEX_COMPRESSION_LIBRARY would change to compressonator, this dep would be lost.
 	pr_add_dependency(${PROJ_NAME} squish TARGET PRIVATE)
-else()
+endif()
+
+if(ENABLE_COMPRESSONATOR)
 	if(UNIX)
 		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_INCLUDE "${DEPENDENCY_COMPRESSONATOR_SOURCE_DIR}/cmp_compressonatorlib")
 		set(DEPENDENCY_COMPRESSONATOR_FRAMEWORK_LIBRARY "${DEPENDENCY_COMPRESSONATOR_LIBRARY_DIR}/libCMP_Framework.so")
@@ -118,6 +165,10 @@ else()
 	set(DEPENDENCY_COMPRESSONATOR_HALF_INCLUDE "${DEPENDENCY_COMPRESSONATOR_SOURCE_DIR}/cmp_framework/common/half")
 	pr_add_external_dependency(${PROJ_NAME} compressonator_half HEADER_ONLY PRIVATE)
 endif()
-set(BUILD_SHARED_LIBS ON CACHE BOOL ON FORCE)
+
+if(ENABLE_ISPC_TEXTURE_COMPRESSOR)
+	pr_add_external_dependency(${PROJ_NAME} ispctc LIBRARY PRIVATE)
+	pr_add_external_dependency(${PROJ_NAME} gli HEADER_ONLY PRIVATE)
+endif()
 
 pr_finalize(${PROJ_NAME})

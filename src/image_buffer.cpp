@@ -536,6 +536,7 @@ void uimg::ImageBuffer::Reallocate()
 }
 uimg::ImageBuffer::PixelIterator uimg::ImageBuffer::begin() { return PixelIterator {*this, 0}; }
 uimg::ImageBuffer::PixelIterator uimg::ImageBuffer::end() { return PixelIterator {*this, GetSize()}; }
+
 void uimg::ImageBuffer::Convert(ImageBuffer &srcImg, ImageBuffer &dstImg, Format targetFormat)
 {
 	if(dstImg.GetFormat() != targetFormat) {

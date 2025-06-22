@@ -5,7 +5,7 @@
 #ifndef __UTIL_IMAGE_TEXTURE_COMPRESSOR_HPP__
 #define __UTIL_IMAGE_TEXTURE_COMPRESSOR_HPP__
 
-#ifdef UIMG_ENABLE_NVTT
+#ifdef UIMG_ENABLE_TEXTURE_COMPRESSION
 
 #define TEX_COMPRESSION_LIBRARY_NVTT 0
 #define TEX_COMPRESSION_LIBRARY_COMPRESSONATOR 1
@@ -24,9 +24,9 @@
 #include <optional>
 
 namespace uimg {
-	class TextureCompressor {
+	class ITextureCompressor {
 	  public:
-		static std::unique_ptr<TextureCompressor> Create();
+		static std::unique_ptr<ITextureCompressor> Create(CompressorLibrary libType);
 		struct CompressInfo {
 			std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> getImageData;
 			std::function<void(const std::string &)> errorHandler;

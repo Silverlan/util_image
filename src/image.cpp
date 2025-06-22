@@ -53,6 +53,8 @@ void uimg::calculate_mipmap_size(uint32_t w, uint32_t h, uint32_t &outWMipmap, u
 		outHMipmap = 1;
 }
 
+uint32_t uimg::calculate_mipmap_count(uint32_t w, uint32_t h) { return 1 + static_cast<uint32_t>(floor(log2(fmaxf(static_cast<float>(w), static_cast<float>(h))))); }
+
 std::optional<uimg::ImageFormat> uimg::string_to_image_output_format(const std::string &str)
 {
 	if(ustring::compare<std::string>(str, "PNG", false))

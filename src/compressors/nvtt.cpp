@@ -2,9 +2,7 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "util_image_texture_compressor.hpp"
-
-#if UIMG_ENABLE_NVTT && TEX_COMPRESSION_LIBRARY == TEX_COMPRESSION_LIBRARY_NVTT
+#include "nvtt/compressonator.hpp"
 
 #include <nvtt/nvtt.h>
 #include <fsys/filesystem.h>
@@ -294,9 +292,9 @@ namespace uimg {
 
 			ResultData resultData {};
 
-			#ifdef _WIN32
+#ifdef _WIN32
 			FILE *fileHandle;
-			#endif
+#endif
 
 			auto &outputHandler = compressInfo.outputHandler;
 			if(outputHandler.index() == 0) {
@@ -308,13 +306,13 @@ namespace uimg {
 			else {
 				auto &fileName = std::get<std::string>(outputHandler);
 				std::string outputFilePath = compressInfo.absoluteFileName ? fileName.c_str() : get_absolute_path(fileName, texInfo.containerFormat).c_str();
-				#ifdef _WIN32
+#ifdef _WIN32
 				std::wstring wideOutputFilePath = ustring::string_to_wstring(outputFilePath);
 				_wfopen_s(&fileHandle, wideOutputFilePath.c_str(), L"wb");
 				outputOptions.setFileHandle(fileHandle);
-				#else
+#else
 				outputOptions.setFileName(outputFilePath.c_str());
-				#endif
+#endif
 				resultData.outputFilePath = outputFilePath;
 			}
 			outputOptions.setErrorHandler(&errHandler);
@@ -370,15 +368,13 @@ namespace uimg {
 			nvtt::Compressor compressor {};
 			compressor.enableCudaAcceleration(true);
 			auto res = compressor.process(inputOptions, compressionOptions, outputOptions);
-			#ifdef _WIN32
+#ifdef _WIN32
 			//NVTT does not close the handle. We need to close this ourselves.
 			fclose(fileHandle);
-			#endif
+#endif
 			return res ? resultData : std::optional<ResultData> {};
 		}
 	};
 };
 
 std::unique_ptr<uimg::TextureCompressor> uimg::TextureCompressor::Create() { return std::make_unique<TextureCompressorNvtt>(); }
-
-#endif

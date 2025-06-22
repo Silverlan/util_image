@@ -24,6 +24,7 @@ namespace uimg {
 
 	DLLUIMG bool read_image_size(const std::string &file, uint32_t &pixelWidth, uint32_t &pixelHeight);
 	DLLUIMG void calculate_mipmap_size(uint32_t w, uint32_t h, uint32_t &outWMipmap, uint32_t &outHMipmap, uint32_t level);
+	DLLUIMG uint32_t calculate_mipmap_count(uint32_t w, uint32_t h);
 
 	enum class ImageFormat : uint8_t { PNG = 0, BMP, TGA, JPG, HDR, Count };
 	enum class PixelFormat : uint8_t { LDR = 0, HDR, Float };
@@ -40,7 +41,12 @@ namespace uimg {
 	DLLUIMG std::shared_ptr<ImageBuffer> load_svg(ufile::IFile &f, const SvgImageInfo &svgInfo = {});
 	DLLUIMG std::shared_ptr<ImageBuffer> load_svg(const std::string &fileName, const SvgImageInfo &svgInfo = {});
 #endif
-#ifdef UIMG_ENABLE_NVTT
+#ifdef UIMG_ENABLE_TEXTURE_COMPRESSION
+	enum class CompressorLibrary : uint8_t {
+		Nvtt = 0,
+		Compressonator,
+		Ispctc,
+	};
 	struct DLLUIMG TextureOutputHandler {
 		std::function<void(int size, int width, int height, int depth, int face, int miplevel)> beginImage = nullptr;
 		std::function<bool(const void *data, int size)> writeData = nullptr;
@@ -60,6 +66,8 @@ namespace uimg {
 
 		bool cubemap = false;
 		std::optional<uimg::ChannelMask> channelMask {};
+
+		std::optional<CompressorLibrary> compressorLibrary {};
 	};
 	DLLUIMG bool compress_texture(const TextureOutputHandler &outputHandler, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler = nullptr);
 	DLLUIMG bool compress_texture(std::vector<std::vector<std::vector<uint8_t>>> &outputData, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo,

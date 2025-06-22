@@ -2,12 +2,11 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-
-#ifdef UIMG_ENABLE_NVTT
+#ifdef UIMG_ENABLE_TEXTURE_COMPRESSION
 #include "util_image.hpp"
 #include "util_image_buffer.hpp"
 #include "util_texture_info.hpp"
-#include "util_image_texture_compressor.hpp"
+#include "compressor.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
@@ -115,9 +114,9 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 
 		auto size = width * height * szPerPixel;
 
-		uimg::TextureCompressor::CompressInfo compressInfo {};
+		uimg::ITextureCompressor::CompressInfo compressInfo {};
 		compressInfo.getImageData = fGetImgData;
-        compressInfo.errorHandler = (errorHandler != nullptr) ? errorHandler : [](const std::string &err) {std::cout<<"Compression failure: "<<err<<std::endl;};
+		compressInfo.errorHandler = (errorHandler != nullptr) ? errorHandler : [](const std::string &err) { std::cout << "Compression failure: " << err << std::endl; };
 		compressInfo.textureSaveInfo = texSaveInfo;
 		compressInfo.outputHandler = outputHandler;
 		compressInfo.width = width;
@@ -126,7 +125,18 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 		compressInfo.numLayers = numLayers;
 		compressInfo.absoluteFileName = absoluteFileName;
 
-		auto compressor = uimg::TextureCompressor::Create();
+		uimg::CompressorLibrary compressorLib;
+		if(texSaveInfo.compressorLibrary)
+			compressorLib = *texSaveInfo.compressorLibrary;
+		else
+			compressorLib = uimg::CompressorLibrary::Ispctc; // TODO
+
+		auto compressor = uimg::ITextureCompressor::Create(compressorLib);
+		if(!compressor) {
+			if(errorHandler)
+				errorHandler("Failed to create compressor of type " + std::string {magic_enum::enum_name(compressorLib)});
+			return false;
+		}
 		auto resultData = compressor->Compress(compressInfo);
 		if(resultData) {
 			if(resultData->outputFilePath)
@@ -187,8 +197,7 @@ bool uimg::save_texture(const std::string &fileName, uimg::ImageBuffer &imgBuffe
 	newTexSaveInfo.szPerPixel = imgBuffer.GetPixelSize();
 	newTexSaveInfo.numLayers = numLayers;
 	newTexSaveInfo.numMipmaps = numMipmaps;
-	auto success = save_texture(
-	  fileName, [&imgBuffer](uint32_t iLayer, uint32_t iMipmap, std::function<void(void)> &outDeleter) -> const uint8_t * { return static_cast<uint8_t *>(imgBuffer.GetData()); }, newTexSaveInfo, errorHandler, absoluteFileName);
+	auto success = save_texture(fileName, [&imgBuffer](uint32_t iLayer, uint32_t iMipmap, std::function<void(void)> &outDeleter) -> const uint8_t * { return static_cast<uint8_t *>(imgBuffer.GetData()); }, newTexSaveInfo, errorHandler, absoluteFileName);
 	if(swapRedBlue)
 		imgBuffer.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
 	return success;
