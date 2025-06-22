@@ -708,7 +708,7 @@ void CDDSImage::save(const std::string& filename, bool flipImage) {
     if (is_compressed()) {
         ddsh.ddspf.dwFlags = DDSF_FOURCC;
 
-        if (m_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
+        if (m_format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || m_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
             ddsh.ddspf.dwFourCC = FOURCC_DXT1;
         if (m_format == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
             ddsh.ddspf.dwFourCC = FOURCC_DXT3;
@@ -954,7 +954,8 @@ void CDDSImage::upload_textureCubemap() {
 #endif
 
 bool CDDSImage::is_compressed() {
-	return (m_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
+	return (m_format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
+			|(m_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
 			|| (m_format == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
 			|| (m_format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT);
 }
@@ -975,7 +976,7 @@ inline unsigned int CDDSImage::clamp_size(unsigned int size) {
 ///////////////////////////////////////////////////////////////////////////////
 // calculates size of DXTC texture in bytes
 inline unsigned int CDDSImage::size_dxtc(unsigned int width, unsigned int height) {
-    return ((width + 3) / 4) * ((height + 3) / 4) * (m_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT ? 8 : 16);
+    return ((width + 3) / 4) * ((height + 3) / 4) * ((m_format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT || m_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1022,6 +1023,7 @@ void CDDSImage::flip(CSurface &surface) {
         unsigned int blocksize;
 
         switch (m_format) {
+        case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
         case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
             blocksize = 8;
             flipblocks = flip_blocks_dxtc1;
