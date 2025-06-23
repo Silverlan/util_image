@@ -125,24 +125,31 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 		compressInfo.numLayers = numLayers;
 		compressInfo.absoluteFileName = absoluteFileName;
 
-		uimg::CompressorLibrary compressorLib;
+		std::vector<uimg::CompressorLibrary> libTypes;
 		if(texSaveInfo.compressorLibrary)
-			compressorLib = *texSaveInfo.compressorLibrary;
-		else
-			compressorLib = uimg::CompressorLibrary::Ispctc; // TODO
+			libTypes.push_back(*texSaveInfo.compressorLibrary);
+		else {
+			// Compressor libraries in order of priority.
+			// Nvtt is usually the fastest but only available on Windows.
+			libTypes = {
+			  uimg::CompressorLibrary::Nvtt,
+			  uimg::CompressorLibrary::Ispctc,
+			  uimg::CompressorLibrary::Compressonator,
+			};
+		}
 
-		auto compressor = uimg::ITextureCompressor::Create(compressorLib);
-		if(!compressor) {
-			if(errorHandler)
-				errorHandler("Failed to create compressor of type " + std::string {magic_enum::enum_name(compressorLib)});
-			return false;
+		for(auto compressorLib : libTypes) {
+			auto compressor = uimg::ITextureCompressor::Create(compressorLib);
+			if(!compressor)
+				continue;
+			auto resultData = compressor->Compress(compressInfo);
+			if(resultData) {
+				if(resultData->outputFilePath)
+					filemanager::update_file_index_cache(*resultData->outputFilePath, true);
+				r = true;
+				break;
+			}
 		}
-		auto resultData = compressor->Compress(compressInfo);
-		if(resultData) {
-			if(resultData->outputFilePath)
-				filemanager::update_file_index_cache(*resultData->outputFilePath, true);
-		}
-		r = resultData.has_value();
 	}
 	return r;
 }

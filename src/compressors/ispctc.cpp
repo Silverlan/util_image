@@ -6,6 +6,7 @@
 #include "compressor.hpp"
 #include <sharedutils/magic_enum.hpp>
 #include <sharedutils/scope_guard.h>
+#include "gli/format.hpp"
 #include "util_image.hpp"
 #include "util_image_buffer.hpp"
 
@@ -15,11 +16,10 @@
 #include "gli/type.hpp"
 #include "ispc_texcomp.h"
 #include "mathutil/umath.h"
+#include "util_image_types.hpp"
 #include "util_texture_info.hpp"
 #include <gli/gli.hpp>
 #include <gli/generate_mipmaps.hpp>
-
-#include "nv_dds/nv_dds.h"
 
 // BC1
 #define GL_COMPRESSED_RGB_S3TC_DXT1_EXT 0x83F0
@@ -32,6 +32,9 @@
 // BC2
 #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
 #define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT 0x8C4E
+
+// BC3
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
 
 enum class TextureFormat {
 	BC1 = 0,
@@ -50,82 +53,42 @@ struct TextureImageInfo {
 	bool cubemap = false;
 };
 
-static bool save_nv_dds(TextureFormat format, const std::string &filename, const TextureImageInfo &imgInfo, std::string &outErr)
-{
-	uint32_t ddsFormat;
-	uint32_t numComponents;
-	switch(format) {
-	case TextureFormat::BC1:
-		ddsFormat = imgInfo.srgb ? GL_COMPRESSED_SRGB_S3TC_DXT1_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
-		numComponents = 3;
-		break;
-	case TextureFormat::BC1a:
-		ddsFormat = imgInfo.srgb ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT : GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-		numComponents = 4;
-		break;
-	case TextureFormat::BC2:
-		ddsFormat = imgInfo.srgb ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT : GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-		numComponents = 4;
-		break;
-	default:
-		outErr = "Unsupported texture format for DDS: " + std::string {magic_enum::enum_name(format)};
-		return false;
-	}
-
-	nv_dds::CDDSImage ddsImg;
-	auto &inTex = imgInfo.texture;
-	auto extent = inTex.extent(0);
-	if(imgInfo.cubemap) {
-		if(inTex.layers() != 6) {
-			outErr = "Cubemap texture must have exactly 6 layers, but has " + std::to_string(inTex.layers());
-			return false;
-		}
-		std::array<nv_dds::CTexture, 6> cubeSides;
-		for(uint32_t l = 0; l < cubeSides.size(); ++l) {
-			cubeSides[l] = nv_dds::CTexture {extent.x, extent.y, 1, inTex.size(0), static_cast<const uint8_t *>(inTex.data(l, 0, 0))};
-			for(size_t m = 1; m < inTex.levels(); ++m) {
-				auto mipExtent = inTex.extent(m);
-				cubeSides[l].add_mipmap(nv_dds::CSurface {mipExtent.x, mipExtent.y, l, inTex.size(m), static_cast<const uint8_t *>(inTex.data(l, 0, m))});
-			}
-		}
-		ddsImg.create_textureCubemap(ddsFormat, numComponents, cubeSides[0], cubeSides[1], cubeSides[2], cubeSides[3], cubeSides[4], cubeSides[5]);
-	}
-	else {
-		nv_dds::CTexture baseTex {extent.x, extent.y, 1, inTex.size(0), static_cast<const uint8_t *>(inTex.data(0, 0, 0))};
-		for(size_t l = 0; l < inTex.layers(); ++l) {
-			for(size_t m = 1; m < inTex.levels(); ++m) {
-				extent = inTex.extent(m);
-				baseTex.add_mipmap(nv_dds::CSurface {extent.x, extent.y, l, inTex.size(m), static_cast<const uint8_t *>(inTex.data(l, 0, m))});
-			}
-		}
-		if(inTex.layers() == 1)
-			ddsImg.create_textureFlat(ddsFormat, numComponents, baseTex);
-		else
-			ddsImg.create_texture3D(ddsFormat, numComponents, baseTex);
-	}
-	ddsImg.save(filename, false);
-
-	return true;
-}
 static gli::format to_gli_format(TextureFormat format, bool srgb)
 {
 	switch(format) {
 	case TextureFormat::BC1:
-		return srgb ? gli::format::FORMAT_RGB_DXT1_SRGB_BLOCK8 : gli::format::FORMAT_RGB_DXT1_UNORM_BLOCK8;
+		return srgb ? gli::format::FORMAT_RGBA_DXT1_SRGB_BLOCK8 : gli::format::FORMAT_RGBA_DXT1_UNORM_BLOCK8;
 	case TextureFormat::BC1a:
 		return srgb ? gli::format::FORMAT_RGBA_DXT1_SRGB_BLOCK8 : gli::format::FORMAT_RGBA_DXT1_UNORM_BLOCK8;
-		break;
 	case TextureFormat::BC2:
 		return srgb ? gli::format::FORMAT_RGBA_DXT3_SRGB_BLOCK16 : gli::format::FORMAT_RGBA_DXT3_UNORM_BLOCK16;
-		break;
 	case TextureFormat::BC3:
 		return srgb ? gli::format::FORMAT_RGBA_DXT5_SRGB_BLOCK16 : gli::format::FORMAT_RGBA_DXT5_UNORM_BLOCK16;
 	case TextureFormat::BC4:
 		return gli::format::FORMAT_R_ATI1N_UNORM_BLOCK8;
-		break;
 	case TextureFormat::BC5:
 		return gli::format::FORMAT_RG_ATI2N_UNORM_BLOCK16;
+	case TextureFormat::BC6H:
+		return gli::format::FORMAT_RGB_BP_UFLOAT_BLOCK16;
+	case TextureFormat::BC7:
+		return srgb ? gli::format::FORMAT_RGBA_BP_SRGB_BLOCK16 : gli::format::FORMAT_RGBA_BP_UNORM_BLOCK16;
+	default:
 		break;
+	}
+	throw std::runtime_error("Unsupported texture format for gli: " + std::string {magic_enum::enum_name(format)});
+	return {};
+}
+static gli::format to_gli_format(uimg::Format format)
+{
+	switch(format) {
+	case uimg::Format::RGBA8:
+		return gli::format::FORMAT_RGBA8_UNORM_PACK8;
+	case uimg::Format::R8:
+		return gli::format::FORMAT_R8_UNORM_PACK8;
+	case uimg::Format::RG8:
+		return gli::format::FORMAT_RG8_UNORM_PACK8;
+	case uimg::Format::RGBA16:
+		return gli::format::FORMAT_RGBA16_SFLOAT_PACK16;
 	default:
 		break;
 	}
@@ -181,78 +144,60 @@ static bool save_gli(TextureFormat format, const std::string &filename, const Te
 
 enum class DdsLibrary : uint8_t {
 	Gli = 0,
-	NvDds,
 };
 static bool save_dds(DdsLibrary ddsLib, TextureFormat format, const std::string &filename, const TextureImageInfo &imgInfo, std::string &outErr)
 {
 	switch(ddsLib) {
 	case DdsLibrary::Gli:
 		return save_gli(format, filename, imgInfo, false, outErr);
-	case DdsLibrary::NvDds:
-		return save_nv_dds(format, filename, imgInfo, outErr);
 	}
 	outErr = "Unsupported DDS library: " + std::string {magic_enum::enum_name(ddsLib)};
 	return false;
 }
 static bool save_ktx(TextureFormat format, const std::string &filename, const TextureImageInfo &imgInfo, std::string &outErr) { return save_gli(format, filename, imgInfo, true, outErr); }
 
+bool save_dds_test(const std::string &filename, const gli::texture &tex);
 std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompressor::Compress(const CompressInfo &compressInfo)
 {
 	auto &texInfo = compressInfo.textureSaveInfo.texInfo;
 	if(umath::to_integral(texInfo.outputFormat) < umath::to_integral(uimg::TextureInfo::OutputFormat::BCFirst) || umath::to_integral(texInfo.outputFormat) > umath::to_integral(uimg::TextureInfo::OutputFormat::BCLast))
 		return {};
 
-	uint32_t srcSizePerPixel;
-	uint32_t dstSizePerBlock;
 	TextureFormat dstTexFormat;
 
 	auto outputFormat = texInfo.outputFormat;
 	// BC1a and BC3n are not supported by ISPC TC, so we have to fall back
-	if(outputFormat == uimg::TextureInfo::OutputFormat::BC1a)
-		outputFormat = uimg::TextureInfo::OutputFormat::BC2;
+	// BC2 is also not supported, but BC3 is usually a better choice anyway.
+	if(outputFormat == uimg::TextureInfo::OutputFormat::BC1a || outputFormat == uimg::TextureInfo::OutputFormat::BC2)
+		outputFormat = uimg::TextureInfo::OutputFormat::BC3;
 	else if(outputFormat == uimg::TextureInfo::OutputFormat::BC3n)
 		outputFormat = uimg::TextureInfo::OutputFormat::BC5;
 
+	uimg::Format expectedInputFormat;
 	switch(outputFormat) {
 	case uimg::TextureInfo::OutputFormat::BC1:
-		srcSizePerPixel = 4;
-		dstSizePerBlock = 8;
 		dstTexFormat = TextureFormat::BC1;
-		break;
-	case uimg::TextureInfo::OutputFormat::BC1a:
-		srcSizePerPixel = 4;
-		dstSizePerBlock = 8;
-		dstTexFormat = TextureFormat::BC1a;
-		break;
-	case uimg::TextureInfo::OutputFormat::BC2:
-		srcSizePerPixel = 4;
-		dstSizePerBlock = 16;
-		dstTexFormat = TextureFormat::BC2;
+		expectedInputFormat = uimg::Format::RGBA8;
 		break;
 	case uimg::TextureInfo::OutputFormat::BC3:
-		srcSizePerPixel = 4;
-		dstSizePerBlock = 16;
 		dstTexFormat = TextureFormat::BC3;
+		expectedInputFormat = uimg::Format::RGBA8;
 		break;
 	case uimg::TextureInfo::OutputFormat::BC4:
-		srcSizePerPixel = 1;
-		dstSizePerBlock = 8;
 		dstTexFormat = TextureFormat::BC4;
+		expectedInputFormat = uimg::Format::R8;
 		break;
 	case uimg::TextureInfo::OutputFormat::BC5:
-		srcSizePerPixel = 2;
-		dstSizePerBlock = 16;
 		dstTexFormat = TextureFormat::BC5;
+		expectedInputFormat = uimg::Format::RG8;
 		break;
 	case uimg::TextureInfo::OutputFormat::BC6:
-		srcSizePerPixel = 8;
-		dstSizePerBlock = 16;
 		dstTexFormat = TextureFormat::BC6H;
+		expectedInputFormat = uimg::Format::RGBA16;
 		break;
 	case uimg::TextureInfo::OutputFormat::BC7:
-		srcSizePerPixel = 4;
-		dstSizePerBlock = 16;
 		dstTexFormat = TextureFormat::BC7;
+		expectedInputFormat = uimg::Format::RGBA8;
 		break;
 	default:
 		return {};
@@ -266,7 +211,7 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 	dstImageInfo.srgb = srgb;
 	dstImageInfo.cubemap = compressInfo.textureSaveInfo.cubemap;
 
-	auto gliFormat = to_gli_format(texInfo.inputFormat);
+	auto gliFormat = to_gli_format(expectedInputFormat);
 	auto numDstMipmaps = compressInfo.numMipmaps;
 	auto genMipmaps = umath::is_flag_set(texInfo.flags, uimg::TextureInfo::Flags::GenerateMipmaps);
 	if(genMipmaps)
@@ -280,8 +225,8 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 		outputTex = gli::texture_cube {to_gli_format(dstTexFormat, srgb), gli::extent3d {compressInfo.width, compressInfo.height, compressInfo.numLayers}, numDstMipmaps};
 	}
 	else {
-		inputTex = gli::texture3d {gliFormat, gli::extent3d {compressInfo.width, compressInfo.height, compressInfo.numLayers}, numDstMipmaps};
-		outputTex = gli::texture3d {to_gli_format(dstTexFormat, srgb), gli::extent3d {compressInfo.width, compressInfo.height, compressInfo.numLayers}, numDstMipmaps};
+		inputTex = gli::texture2d_array {gliFormat, gli::extent3d {compressInfo.width, compressInfo.height, compressInfo.numLayers}, compressInfo.numLayers, numDstMipmaps};
+		outputTex = gli::texture2d_array {to_gli_format(dstTexFormat, srgb), gli::extent3d {compressInfo.width, compressInfo.height, compressInfo.numLayers}, compressInfo.numLayers, numDstMipmaps};
 	}
 	auto swapRedBlue = (texInfo.inputFormat == uimg::TextureInfo::InputFormat::B8G8R8A8_UInt);
 	auto uimgFormat = to_uimg_format(texInfo.inputFormat);
@@ -297,6 +242,27 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 				imgBuf = imgBuf->Copy();
 				imgBuf->SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
 			}
+
+			// Make sure the image is in the expected input format
+			switch(outputFormat) {
+			case uimg::TextureInfo::OutputFormat::BC1:
+			case uimg::TextureInfo::OutputFormat::BC3:
+			case uimg::TextureInfo::OutputFormat::BC7:
+				imgBuf->Convert(uimg::Format::RGBA8);
+				break;
+			case uimg::TextureInfo::OutputFormat::BC4:
+				imgBuf->Convert(uimg::Format::R8);
+				break;
+			case uimg::TextureInfo::OutputFormat::BC5:
+				imgBuf->Convert(uimg::Format::RG8);
+				break;
+			case uimg::TextureInfo::OutputFormat::BC6:
+				imgBuf->Convert(uimg::Format::RGBA16);
+				break;
+			default:
+				return {};
+			}
+
 			memcpy(inputTex.data(l, 0, m), imgBuf->GetData(), inputTex.size(m));
 			if(deleter)
 				deleter();
@@ -318,6 +284,7 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 		}
 	}
 
+	uint32_t srcSizePerPixel = gli::block_size(inputTex.format());
 	for(auto l = decltype(compressInfo.numLayers) {0u}; l < compressInfo.numLayers; ++l) {
 		for(auto m = decltype(numDstMipmaps) {0u}; m < numDstMipmaps; ++m) {
 			auto extent = inputTex.extent(m);
@@ -391,19 +358,7 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 		switch(texInfo.containerFormat) {
 		case uimg::TextureInfo::ContainerFormat::DDS:
 			{
-				auto ddsLib = DdsLibrary::Gli;
-				// Note: We don't use gli for the older BC formats because it uses a header that isn't recognized by most DDS loaders.
-				// nv_dds is also significantly faster, however does not support the newer DDS formats (BC6, BC7, ...), so for those
-				// we fall back to gli.
-				switch(dstTexFormat) {
-				case TextureFormat::BC1:
-				case TextureFormat::BC1a:
-				case TextureFormat::BC2:
-				case TextureFormat::BC3:
-					ddsLib = DdsLibrary::NvDds;
-					break;
-				}
-				saveSuccess = save_dds(ddsLib, dstTexFormat, outputFilePath, dstImageInfo, err);
+				saveSuccess = save_dds(DdsLibrary::Gli, dstTexFormat, outputFilePath, dstImageInfo, err);
 				break;
 			}
 		case uimg::TextureInfo::ContainerFormat::KTX:
