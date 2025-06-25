@@ -21,21 +21,7 @@
 #include <gli/gli.hpp>
 #include <gli/generate_mipmaps.hpp>
 
-// BC1
-#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT 0x83F0
-#define GL_COMPRESSED_SRGB_S3TC_DXT1_EXT 0x8C4C
-
-// BC1a
-#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
-#define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT 0x8C4D
-
-// BC2
-#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
-#define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT 0x8C4E
-
-// BC3
-#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
-
+#pragma clang optimize off
 enum class TextureFormat {
 	BC1 = 0,
 	BC1a,
@@ -156,7 +142,6 @@ static bool save_dds(DdsLibrary ddsLib, TextureFormat format, const std::string 
 }
 static bool save_ktx(TextureFormat format, const std::string &filename, const TextureImageInfo &imgInfo, std::string &outErr) { return save_gli(format, filename, imgInfo, true, outErr); }
 
-bool save_dds_test(const std::string &filename, const gli::texture &tex);
 std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompressor::Compress(const CompressInfo &compressInfo)
 {
 	auto &texInfo = compressInfo.textureSaveInfo.texInfo;
