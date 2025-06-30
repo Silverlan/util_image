@@ -167,8 +167,8 @@ if(ENABLE_COMPRESSONATOR)
 endif()
 
 if(ENABLE_ISPC_TEXTURE_COMPRESSOR)
-	pr_add_external_dependency(${PROJ_NAME} ispctc LIBRARY PRIVATE)
-	pr_add_external_dependency(${PROJ_NAME} gli HEADER_ONLY PRIVATE)
+	pr_add_third_party_dependency(${PROJ_NAME} ispctc)
+	pr_add_third_party_dependency(${PROJ_NAME} gli)
 endif()
 
 pr_finalize(${PROJ_NAME})
