@@ -45,6 +45,12 @@ pr_add_external_dependency(${PROJ_NAME} libpng LIBRARY PRIVATE)
 pr_add_external_dependency(${PROJ_NAME} libpng_build HEADER_ONLY PRIVATE)
 pr_add_external_dependency(${PROJ_NAME} zlib LIBRARY PRIVATE)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
+
+if(ENABLE_ISPC_TEXTURE_COMPRESSOR)
+	find_package(ispctc REQUIRED)
+endif()
+
 set(SOURCE_EXCLUSION_FILTER)
 if(NOT ENABLE_NVTT)
     list(APPEND SOURCE_EXCLUSION_FILTER "src/compressors/nvtt.hpp")
