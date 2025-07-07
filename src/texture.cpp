@@ -52,15 +52,6 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 		if(texSaveInfo.channelMask.has_value())
 			channelMask = *texSaveInfo.channelMask;
 
-#if TEX_COMPRESSION_LIBRARY == TEX_COMPRESSION_LIBRARY_NVTT
-		switch(texInfo.inputFormat) {
-		case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
-		case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
-			channelMask.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
-			break;
-		}
-#endif
-
 		auto numMipmaps = umath::max(texSaveInfo.numMipmaps, static_cast<uint32_t>(1));
 		auto numLayers = texSaveInfo.numLayers;
 		auto width = texSaveInfo.width;
@@ -69,47 +60,6 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 		auto cubemap = texSaveInfo.cubemap;
 		std::vector<std::shared_ptr<uimg::ImageBuffer>> imgBuffers;
 		auto fGetImgData = pfGetImgData;
-		if(channelMask != uimg::ChannelMask {}) {
-			imgBuffers.resize(numLayers * numMipmaps);
-			uint32_t idx = 0;
-
-			uimg::Format uimgFormat;
-			switch(texSaveInfo.texInfo.inputFormat) {
-			case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
-			case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
-				uimgFormat = uimg::Format::RGBA8;
-				break;
-			case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
-				uimgFormat = uimg::Format::RGBA16;
-				break;
-			case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
-				uimgFormat = uimg::Format::RGBA32;
-				break;
-			case uimg::TextureInfo::InputFormat::R32_Float:
-				uimgFormat = uimg::Format::R32;
-				break;
-			default:
-				throw std::runtime_error {"Texture compression error: Unsupported format " + std::string {magic_enum::enum_name(texSaveInfo.texInfo.inputFormat)}};
-			}
-
-			for(auto i = decltype(numLayers) {0u}; i < numLayers; ++i) {
-				for(auto m = decltype(numMipmaps) {0u}; m < numMipmaps; ++m) {
-					std::function<void()> deleter = nullptr;
-					auto *data = fGetImgData(i, m, deleter);
-					auto &imgBuf = imgBuffers[idx++] = uimg::ImageBuffer::Create(data, calculate_mipmap_size(width, m), calculate_mipmap_size(height, m), uimgFormat);
-
-					imgBuf->SwapChannels(channelMask);
-					if(deleter)
-						deleter();
-				}
-			}
-			fGetImgData = [&imgBuffers, numMipmaps](uint32_t layer, uint32_t mip, std::function<void()> &deleter) -> const uint8_t * {
-				deleter = nullptr;
-				auto idx = layer * numMipmaps + mip;
-				auto &imgBuf = imgBuffers[idx];
-				return imgBuf ? static_cast<uint8_t *>(imgBuf->GetData()) : nullptr;
-			};
-		}
 
 		auto size = width * height * szPerPixel;
 
@@ -129,15 +79,65 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 			libTypes.push_back(*texSaveInfo.compressorLibrary);
 		else {
 			// Compressor libraries in order of priority.
-			// Nvtt is usually the fastest but only available on Windows.
+			// We evaluate nvtt last, because it may require some preprocessing (swapping red and blue channels)
 			libTypes = {
-			  uimg::CompressorLibrary::Nvtt,
 			  uimg::CompressorLibrary::Ispctc,
 			  uimg::CompressorLibrary::Compressonator,
+			  uimg::CompressorLibrary::Nvtt, // Nvtt needs to be last!
 			};
 		}
 
 		for(auto compressorLib : libTypes) {
+			if (compressorLib == uimg::CompressorLibrary::Nvtt) {
+				switch(texInfo.inputFormat) {
+					case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
+					case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
+						channelMask.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
+						break;
+				}
+
+				if(channelMask != uimg::ChannelMask {}) {
+					imgBuffers.resize(numLayers * numMipmaps);
+					uint32_t idx = 0;
+
+					uimg::Format uimgFormat;
+					switch(texSaveInfo.texInfo.inputFormat) {
+						case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
+						case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
+							uimgFormat = uimg::Format::RGBA8;
+							break;
+						case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
+							uimgFormat = uimg::Format::RGBA16;
+							break;
+						case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
+							uimgFormat = uimg::Format::RGBA32;
+							break;
+						case uimg::TextureInfo::InputFormat::R32_Float:
+							uimgFormat = uimg::Format::R32;
+							break;
+						default:
+							throw std::runtime_error {"Texture compression error: Unsupported format " + std::string {magic_enum::enum_name(texSaveInfo.texInfo.inputFormat)}};
+					}
+
+					for(auto i = decltype(numLayers) {0u}; i < numLayers; ++i) {
+						for(auto m = decltype(numMipmaps) {0u}; m < numMipmaps; ++m) {
+							std::function<void()> deleter = nullptr;
+							auto *data = fGetImgData(i, m, deleter);
+							auto &imgBuf = imgBuffers[idx++] = uimg::ImageBuffer::Create(data, calculate_mipmap_size(width, m), calculate_mipmap_size(height, m), uimgFormat);
+
+							imgBuf->SwapChannels(channelMask);
+							if(deleter)
+								deleter();
+						}
+					}
+					fGetImgData = [&imgBuffers, numMipmaps](uint32_t layer, uint32_t mip, std::function<void()> &deleter) -> const uint8_t * {
+						deleter = nullptr;
+						auto idx = layer * numMipmaps + mip;
+						auto &imgBuf = imgBuffers[idx];
+						return imgBuf ? static_cast<uint8_t *>(imgBuf->GetData()) : nullptr;
+					};
+				}
+			}
 			auto compressor = uimg::ITextureCompressor::Create(compressorLib);
 			if(!compressor)
 				continue;
