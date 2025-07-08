@@ -205,12 +205,12 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 		outputTex = gli::texture2d {to_gli_format(dstTexFormat, srgb), gli::extent2d {compressInfo.width, compressInfo.height}, numDstMipmaps};
 	}
 	else if(dstImageInfo.cubemap) {
-		inputTex = gli::texture_cube {gliFormat, gli::extent3d {compressInfo.width, compressInfo.height, compressInfo.numLayers}, numDstMipmaps};
-		outputTex = gli::texture_cube {to_gli_format(dstTexFormat, srgb), gli::extent3d {compressInfo.width, compressInfo.height, compressInfo.numLayers}, numDstMipmaps};
+		inputTex = gli::texture_cube {gliFormat, gli::extent3d {compressInfo.width, compressInfo.height, 1}, numDstMipmaps};
+		outputTex = gli::texture_cube {to_gli_format(dstTexFormat, srgb), gli::extent3d {compressInfo.width, compressInfo.height, 1}, numDstMipmaps};
 	}
 	else {
-		inputTex = gli::texture2d_array {gliFormat, gli::extent3d {compressInfo.width, compressInfo.height, compressInfo.numLayers}, compressInfo.numLayers, numDstMipmaps};
-		outputTex = gli::texture2d_array {to_gli_format(dstTexFormat, srgb), gli::extent3d {compressInfo.width, compressInfo.height, compressInfo.numLayers}, compressInfo.numLayers, numDstMipmaps};
+		inputTex = gli::texture2d_array {gliFormat, gli::extent3d {compressInfo.width, compressInfo.height, 1}, compressInfo.numLayers, numDstMipmaps};
+		outputTex = gli::texture2d_array {to_gli_format(dstTexFormat, srgb), gli::extent3d {compressInfo.width, compressInfo.height, 1}, compressInfo.numLayers, numDstMipmaps};
 	}
 	auto swapRedBlue = (texInfo.inputFormat == uimg::TextureInfo::InputFormat::B8G8R8A8_UInt);
 	auto uimgFormat = to_uimg_format(texInfo.inputFormat);
@@ -247,7 +247,7 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 				return {};
 			}
 
-			memcpy(inputTex.data(l, 0, m), imgBuf->GetData(), inputTex.size(m));
+			memcpy(inputTex.data(dstImageInfo.cubemap ? 0 : l, dstImageInfo.cubemap ? l : 0, m), imgBuf->GetData(), inputTex.size(m));
 			if(deleter)
 				deleter();
 		}
@@ -279,14 +279,14 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 			src.width = wMipmap;
 			src.height = hMipmap;
 			src.stride = wMipmap * srcSizePerPixel;
-			src.ptr = static_cast<uint8_t *>(inputTex.data(l, 0, m));
+			src.ptr = static_cast<uint8_t *>(inputTex.data(dstImageInfo.cubemap ? 0 : l, dstImageInfo.cubemap ? l : 0, m));
 
 			// Each block is always 4x4 pixels
 			auto blocksX = (wMipmap + 3) / 4;
 			auto blocksY = (hMipmap + 3) / 4;
 			auto numBlocks = blocksX * blocksY;
 
-			auto *dstData = static_cast<uint8_t *>(outputTex.data(l, 0, m));
+			auto *dstData = static_cast<uint8_t *>(outputTex.data(dstImageInfo.cubemap ? 0 : l, dstImageInfo.cubemap ? l : 0, m));
 			switch(dstTexFormat) {
 			case TextureFormat::BC1:
 				CompressBlocksBC1(&src, dstData);
@@ -326,7 +326,7 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 			for(size_t m = 0; m < tex.levels(); ++m) {
 				auto extent = tex.extent(m);
 				texOutputHandler.beginImage(tex.size(m), extent.x, extent.y, l, 0, m);
-				texOutputHandler.writeData(tex.data(l, 0, m), tex.size(m));
+				texOutputHandler.writeData(tex.data(dstImageInfo.cubemap ? 0 : l, dstImageInfo.cubemap ? l : 0, m), tex.size(m));
 				texOutputHandler.endImage();
 			}
 		}
