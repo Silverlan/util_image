@@ -212,7 +212,7 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 		inputTex = gli::texture2d_array {gliFormat, gli::extent3d {compressInfo.width, compressInfo.height, 1}, compressInfo.numLayers, numDstMipmaps};
 		outputTex = gli::texture2d_array {to_gli_format(dstTexFormat, srgb), gli::extent3d {compressInfo.width, compressInfo.height, 1}, compressInfo.numLayers, numDstMipmaps};
 	}
-	auto swapRedBlue = (texInfo.inputFormat == uimg::TextureInfo::InputFormat::B8G8R8A8_UInt);
+	auto swapRedBlue = false; // (texInfo.inputFormat == uimg::TextureInfo::InputFormat::B8G8R8A8_UInt);
 	auto uimgFormat = to_uimg_format(texInfo.inputFormat);
 	for(auto l = decltype(compressInfo.numLayers) {0u}; l < compressInfo.numLayers; ++l) {
 		for(auto m = decltype(compressInfo.numMipmaps) {0u}; m < compressInfo.numMipmaps; ++m) {
