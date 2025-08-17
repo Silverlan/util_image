@@ -81,19 +81,18 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 			// Compressor libraries in order of priority.
 			// We evaluate nvtt last, because it may require some preprocessing (swapping red and blue channels)
 			libTypes = {
-			  uimg::CompressorLibrary::Ispctc,
-			  uimg::CompressorLibrary::Compressonator,
+			  uimg::CompressorLibrary::Ispctc, uimg::CompressorLibrary::Compressonator,
 			  uimg::CompressorLibrary::Nvtt, // Nvtt needs to be last!
 			};
 		}
 
 		for(auto compressorLib : libTypes) {
-			if (compressorLib == uimg::CompressorLibrary::Nvtt) {
+			if(compressorLib == uimg::CompressorLibrary::Nvtt) {
 				switch(texInfo.inputFormat) {
-					case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
-					case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
-						channelMask.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
-						break;
+				case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
+				case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
+					channelMask.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
+					break;
 				}
 
 				if(channelMask != uimg::ChannelMask {}) {
@@ -102,21 +101,21 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 
 					uimg::Format uimgFormat;
 					switch(texSaveInfo.texInfo.inputFormat) {
-						case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
-						case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
-							uimgFormat = uimg::Format::RGBA8;
-							break;
-						case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
-							uimgFormat = uimg::Format::RGBA16;
-							break;
-						case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
-							uimgFormat = uimg::Format::RGBA32;
-							break;
-						case uimg::TextureInfo::InputFormat::R32_Float:
-							uimgFormat = uimg::Format::R32;
-							break;
-						default:
-							throw std::runtime_error {"Texture compression error: Unsupported format " + std::string {magic_enum::enum_name(texSaveInfo.texInfo.inputFormat)}};
+					case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
+					case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
+						uimgFormat = uimg::Format::RGBA8;
+						break;
+					case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
+						uimgFormat = uimg::Format::RGBA16;
+						break;
+					case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
+						uimgFormat = uimg::Format::RGBA32;
+						break;
+					case uimg::TextureInfo::InputFormat::R32_Float:
+						uimgFormat = uimg::Format::R32;
+						break;
+					default:
+						throw std::runtime_error {"Texture compression error: Unsupported format " + std::string {magic_enum::enum_name(texSaveInfo.texInfo.inputFormat)}};
 					}
 
 					for(auto i = decltype(numLayers) {0u}; i < numLayers; ++i) {
