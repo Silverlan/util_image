@@ -20,7 +20,6 @@
 #include <gli/gli.hpp>
 #include <gli/generate_mipmaps.hpp>
 
-#pragma clang optimize off
 enum class TextureFormat {
 	BC1 = 0,
 	BC1a,

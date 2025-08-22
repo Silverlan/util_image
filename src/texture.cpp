@@ -228,4 +228,3 @@ bool uimg::save_texture(const std::string &fileName, const std::vector<std::vect
 	  ltexSaveInfo, errorHandler, absoluteFileName);
 }
 #endif
-#pragma optimize("", on)

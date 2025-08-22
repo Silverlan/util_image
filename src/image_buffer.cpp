@@ -10,7 +10,7 @@
 #include <mathutil/umath.h>
 #include <thread>
 #include <stdexcept>
-#pragma optimize("", off)
+
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(const void *data, uint32_t width, uint32_t height, Format format) { return Create(const_cast<void *>(data), width, height, format, false); }
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::CreateWithCustomDeleter(void *data, uint32_t width, uint32_t height, Format format, const std::function<void(void *)> &customDeleter)
 {
@@ -808,4 +808,3 @@ std::ostream &operator<<(std::ostream &out, const uimg::ImageBuffer &o)
 	out << "[Channels:" << o.GetChannelCount() << "]";
 	return out;
 }
-#pragma optimize("", on)
