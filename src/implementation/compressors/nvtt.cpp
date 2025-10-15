@@ -1,11 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "compressors/nvtt.hpp"
+module;
 
 #include <nvtt/nvtt.h>
-#include <fsys/filesystem.h>
-#include <sharedutils/util_string.h>
+#include <string>
+#include <functional>
+#include <variant>
+#include <memory>
+
+module pragma.image;
+
+import :compressors.nvtt;
+import pragma.filesystem;
 
 struct OutputHandler : public nvtt::OutputHandler {
 	OutputHandler(VFilePtrReal f) : m_file {f} {}

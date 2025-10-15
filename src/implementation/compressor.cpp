@@ -1,15 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "compressor.hpp"
+module;
+
+#include <string>
+
+module pragma.image;
+
+import :compressor;
 #ifdef UIMG_ENABLE_NVTT
-#include "compressors/nvtt.hpp"
+import :compressors.nvtt;
 #endif
 #ifdef UIMG_ENABLE_COMPRESSONATOR
-#include "compressors/compressonator.hpp"
+import :compressors.compressonator;
 #endif
 #ifdef UIMG_ENABLE_ISPC_TEXTURE_COMPRESSOR
-#include "compressors/ispctc.hpp"
+import :compressors.ispctc;
 #endif
 
 std::unique_ptr<uimg::ITextureCompressor> uimg::ITextureCompressor::Create(CompressorLibrary libType)

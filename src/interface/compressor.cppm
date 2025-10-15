@@ -1,8 +1,17 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __UTIL_IMAGE_TEXTURE_COMPRESSOR_HPP__
-#define __UTIL_IMAGE_TEXTURE_COMPRESSOR_HPP__
+module;
+
+#include <functional>
+#include <string>
+#include <variant>
+#include <optional>
+#include <memory>
+
+export module pragma.image:compressor;
+
+export import :core;
 
 #ifdef UIMG_ENABLE_TEXTURE_COMPRESSION
 
@@ -15,14 +24,7 @@
 
 #endif
 
-#include "util_image.hpp"
-#include "util_texture_info.hpp"
-#include <functional>
-#include <string>
-#include <variant>
-#include <optional>
-
-namespace uimg {
+export namespace uimg {
 	class ITextureCompressor {
 	  public:
 		static std::unique_ptr<ITextureCompressor> Create(CompressorLibrary libType);
@@ -43,7 +45,5 @@ namespace uimg {
 		virtual std::optional<ResultData> Compress(const CompressInfo &compressInfo) = 0;
 	};
 };
-
-#endif
 
 #endif

@@ -1,8 +1,13 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "util_image_buffer.hpp"
-#include <mathutil/umath.h>
+module;
+
+#include <string>
+
+module pragma.image;
+
+import :buffer;
 
 uimg::ImageBuffer::PixelView::PixelView(ImageBuffer &imgBuffer, Offset offset) : m_imageBuffer {imgBuffer}, m_offset {offset} {}
 uimg::ImageBuffer::Offset uimg::ImageBuffer::PixelView::GetOffset() const { return m_offset; }

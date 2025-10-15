@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __UTIL_IMAGE_TYPES_HPP__
-#define __UTIL_IMAGE_TYPES_HPP__
+module;
 
 #include "util_image_definitions.hpp"
 #include <cinttypes>
 #include <optional>
 
-namespace uimg {
+export module pragma.image:types;
+
+export namespace uimg {
 	enum class Format : uint8_t {
 		None = 0u,
 
@@ -97,5 +98,3 @@ namespace uimg {
 		Count
 	};
 };
-
-#endif

@@ -1,20 +1,18 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "compressors/compressonator.hpp"
-#include "compressor.hpp"
+module;
 
-#include <compressonator.h>
-#include <common.h>
 #include <sharedutils/magic_enum.hpp>
-#include <sharedutils/scope_guard.h>
 #ifdef _WIN32
 #include <fileapi.h>
 
-#include <sharedutils/util_string.h>
-#include <sharedutils/util.h>
 #include <filesystem>
 #endif
+
+module pragma.image;
+
+import :compressors.compressonator;
 
 static std::optional<CMP_FORMAT> to_cmp_enum(uimg::TextureInfo::OutputFormat format)
 {

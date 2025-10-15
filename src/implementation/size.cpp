@@ -1,15 +1,22 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "util_image.hpp"
-#include <fsys/filesystem.h>
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_string.h>
+module;
+
 #include <array>
 #include <cstring>
 #ifdef __linux__
 #include <arpa/inet.h> // Required for ntohl
+#elif _WIN32
+#include <Windows.h>
 #endif
+#include <string>
+#include <memory>
+
+module pragma.image;
+
+import :core;
+import pragma.filesystem;
 
 #pragma comment(lib, "Ws2_32.lib") // Required for ntohl
 

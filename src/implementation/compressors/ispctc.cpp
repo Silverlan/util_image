@@ -1,24 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "compressors/ispctc.hpp"
-#include "compressor.hpp"
-#include <sharedutils/magic_enum.hpp>
-#include <sharedutils/scope_guard.h>
-#include "gli/format.hpp"
-#include "util_image.hpp"
-#include "util_image_buffer.hpp"
+module;
 
+#include <sharedutils/magic_enum.hpp>
+#include "gli/format.hpp"
 #include "gli/texture.hpp"
 #include "gli/texture2d.hpp"
 #include "gli/texture_cube.hpp"
 #include "gli/type.hpp"
 #include "ispc_texcomp.h"
-#include "mathutil/umath.h"
-#include "util_image_types.hpp"
-#include "util_texture_info.hpp"
 #include <gli/gli.hpp>
 #include <gli/generate_mipmaps.hpp>
+
+module pragma.image;
+
+import :compressors.ispctc;
 
 enum class TextureFormat {
 	BC1 = 0,

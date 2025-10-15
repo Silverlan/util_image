@@ -1,20 +1,21 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifdef UIMG_ENABLE_TEXTURE_COMPRESSION
-#include "util_image.hpp"
-#include "util_image_buffer.hpp"
-#include "util_texture_info.hpp"
-#include "compressor.hpp"
-#include <fsys/filesystem.h>
-#include <sharedutils/util_string.h>
-#include <sharedutils/util_file.h>
-#include <sharedutils/util_path.hpp>
+module;
+
 #include <sharedutils/magic_enum.hpp>
-#include <sharedutils/scope_guard.h>
 #include <variant>
 #include <cstring>
+#include <cmath>
+#include <functional>
+#include <iostream>
 
+module pragma.image;
+
+import :compressor;
+import pragma.filesystem;
+
+#ifdef UIMG_ENABLE_TEXTURE_COMPRESSION
 std::string uimg::get_absolute_path(const std::string &fileName, uimg::TextureInfo::ContainerFormat containerFormat)
 {
 	auto path = ufile::get_path_from_filename(fileName);

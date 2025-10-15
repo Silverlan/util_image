@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "util_image.hpp"
-#include "util_image_buffer.hpp"
+module;
+
 #include "stb_image_write.h"
 #include "stb_image.h"
-#include <sharedutils/util_string.h>
-#include <fsys/filesystem.h>
-#include <fsys/ifile.hpp>
 #include <cmath>
 #ifdef UIMG_ENABLE_SVG
 #include <lunasvg.h>
 #endif
+
+module pragma.image;
+
+import :core;
+import pragma.filesystem;
 
 void uimg::ChannelMask::Reverse() { *this = GetReverse(); }
 uimg::ChannelMask uimg::ChannelMask::GetReverse() const

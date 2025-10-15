@@ -1,8 +1,14 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "util_image_buffer.hpp"
-#include "util_image.hpp"
+module;
+
+#include "mathutil/glmutil.h"
+#include <string>
+
+module pragma.image;
+
+import :buffer;
 
 constexpr float GAMMA = 2.2;
 constexpr float INV_GAMMA = 1.0 / GAMMA;

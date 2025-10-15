@@ -1,11 +1,16 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "util_image_buffer.hpp"
-#include "util_image_tga.hpp"
-#include <fsys/filesystem.h>
+module;
+
 #include <cstring>
 #include <cassert>
+#include <stdexcept>
+#include <memory>
+
+module pragma.image;
+
+import :tga;
 
 struct TGAInfo {
 	uint8_t header[6];

@@ -1,15 +1,19 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#include "util_image_buffer.hpp"
+module;
+
+#include "mathutil/glmutil.h"
+#include "sharedutils/magic_enum.hpp"
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
-#include <sharedutils/util.h>
-#include <sharedutils/magic_enum.hpp>
-#include <mathutil/color.h>
-#include <mathutil/umath.h>
 #include <thread>
 #include <stdexcept>
+#include <functional>
+
+module pragma.image;
+
+import :buffer;
 
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(const void *data, uint32_t width, uint32_t height, Format format) { return Create(const_cast<void *>(data), width, height, format, false); }
 std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::CreateWithCustomDeleter(void *data, uint32_t width, uint32_t height, Format format, const std::function<void(void *)> &customDeleter)

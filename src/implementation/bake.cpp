@@ -1,7 +1,11 @@
-#include "util_image_buffer.hpp"
-#include "util_image.hpp"
-#include <sharedutils/util_baking.hpp>
+module;
+
+#include <string>
 #include <cstring>
+
+module pragma.image;
+
+import :core;
 
 struct ImBuf {
 	int x, y;
