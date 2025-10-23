@@ -36,6 +36,7 @@ option(ENABLE_SVG_SUPPORT "Enable SVG support" ON)
 set(PROJ_NAME util_image)
 pr_add_library(${PROJ_NAME} SHARED)
 
+pr_add_dependency(${PROJ_NAME} gli TARGET PRIVATE)
 pr_add_dependency(${PROJ_NAME} vfilesystem TARGET PUBLIC)
 if(ENABLE_SVG_SUPPORT)
 	pr_add_dependency(${PROJ_NAME} lunasvg TARGET)
