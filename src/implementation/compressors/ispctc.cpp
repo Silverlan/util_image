@@ -3,19 +3,20 @@
 
 module;
 
-#include <sharedutils/magic_enum.hpp>
-#include "gli/format.hpp"
-#include "gli/texture.hpp"
-#include "gli/texture2d.hpp"
-#include "gli/texture_cube.hpp"
-#include "gli/type.hpp"
+#include <optional>
+#include <memory>
+#include <stddef.h>
+#include <string>
+#include <functional>
+#include <variant>
+#include <cstring>
 #include "ispc_texcomp.h"
-#include <gli/gli.hpp>
-#include <gli/generate_mipmaps.hpp>
+#include "sharedutils/magic_enum.hpp"
 
 module pragma.image;
 
 import :compressors.ispctc;
+import gli;
 
 enum class TextureFormat {
 	BC1 = 0,

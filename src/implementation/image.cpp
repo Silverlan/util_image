@@ -3,6 +3,8 @@
 
 module;
 
+#include <optional>
+
 #include "stb_image_write.h"
 #include "stb_image.h"
 #include <cmath>

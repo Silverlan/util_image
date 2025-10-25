@@ -3,6 +3,8 @@
 
 module;
 
+#include <memory>
+
 #include <sharedutils/magic_enum.hpp>
 #include <variant>
 #include <cstring>

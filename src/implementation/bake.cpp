@@ -1,5 +1,9 @@
 module;
 
+#include <cinttypes>
+#include <vector>
+#include <memory>
+
 #include <string>
 #include <cstring>
 

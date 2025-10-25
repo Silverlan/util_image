@@ -3,6 +3,10 @@
 
 module;
 
+#include <cinttypes>
+#include <functional>
+#include <memory>
+
 #include "mathutil/glmutil.h"
 #include <string>
 

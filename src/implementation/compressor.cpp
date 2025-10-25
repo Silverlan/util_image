@@ -3,6 +3,9 @@
 
 module;
 
+#include <optional>
+#include <memory>
+
 #include <string>
 
 module pragma.image;
