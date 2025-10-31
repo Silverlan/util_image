@@ -4,11 +4,6 @@
 module;
 
 #include "util_image_definitions.hpp"
-#include <string>
-#include <memory>
-#include <functional>
-#include <cinttypes>
-#include <optional>
 
 export module pragma.image:core;
 

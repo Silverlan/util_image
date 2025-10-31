@@ -1,11 +1,6 @@
 module;
 
-#include <cinttypes>
-#include <vector>
-#include <memory>
 
-#include <string>
-#include <cstring>
 
 module pragma.image;
 
@@ -31,7 +26,7 @@ static int check_pixel_assigned(const void *buffer, const char *mask, const int 
 	if(index >= 0) {
 		const int alpha_index = depth * index + (depth - 1);
 
-		if(mask != NULL)
+		if(mask != nullptr)
 			res = mask[index] != 0 ? 1 : 0;
 		else if((is_float && ((const float *)buffer)[alpha_index] != 0.0f) || (!is_float && ((const unsigned char *)buffer)[alpha_index] != 0)) {
 			res = 1;
@@ -130,7 +125,7 @@ static void filter_extend(struct ImBuf *ibuf, std::vector<uint8_t> &vmask, int f
 								}
 							}
 
-							if(dstmask != NULL)
+							if(dstmask != nullptr)
 								dstmask[index] = util::baking::FILTER_MASK_MARGIN;
 							cannot_early_out = 1;
 						}
@@ -140,7 +135,7 @@ static void filter_extend(struct ImBuf *ibuf, std::vector<uint8_t> &vmask, int f
 		}
 
 		memcpy(srcbuf, dstbuf, bsize);
-		if(dstmask != NULL)
+		if(dstmask != nullptr)
 			memcpy(srcmask, dstmask, ((size_t)width) * height);
 	}
 }

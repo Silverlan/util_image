@@ -43,13 +43,8 @@ Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module;
 
-#include <memory>
 
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
 #include <zlib.h>
-#include <cstring>
 
 #include <png.h>        /* libpng header */
 

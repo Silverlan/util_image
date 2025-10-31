@@ -4,8 +4,6 @@
 module;
 
 #include "util_image_definitions.hpp"
-#include <memory>
-#include <optional>
 
 export module pragma.image:compressors.ispctc;
 

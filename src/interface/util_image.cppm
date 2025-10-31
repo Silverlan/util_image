@@ -3,8 +3,6 @@
 
 module;
 
-#include <unordered_map>
-#include <string>
 
 export module pragma.image;
 export import :buffer;

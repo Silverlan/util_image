@@ -3,8 +3,6 @@
 
 module;
 
-#include <cinttypes>
-#include <string>
 #include "util_image_definitions.hpp"
 
 export module pragma.image:texture_info;

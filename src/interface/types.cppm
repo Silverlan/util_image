@@ -4,10 +4,10 @@
 module;
 
 #include "util_image_definitions.hpp"
-#include <cinttypes>
-#include <optional>
 
 export module pragma.image:types;
+
+export import std.compat;
 
 export namespace uimg {
 	enum class Format : uint8_t {

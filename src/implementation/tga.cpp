@@ -3,12 +3,8 @@
 
 module;
 
-#include <vector>
 
-#include <cstring>
 #include <cassert>
-#include <stdexcept>
-#include <memory>
 
 module pragma.image;
 

@@ -3,13 +3,6 @@
 
 module;
 
-#include <optional>
-#include <memory>
-#include <stddef.h>
-#include <string>
-#include <functional>
-#include <variant>
-#include <cstring>
 #include "ispc_texcomp.h"
 #include "sharedutils/magic_enum.hpp"
 

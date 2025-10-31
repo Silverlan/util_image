@@ -4,13 +4,6 @@
 module;
 
 #include "util_image_definitions.hpp"
-#include <cinttypes>
-#include <functional>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <array>
-#include <memory>
 
 export module pragma.image:buffer;
 

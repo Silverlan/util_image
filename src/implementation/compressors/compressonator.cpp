@@ -7,7 +7,6 @@ module;
 #ifdef _WIN32
 #include <fileapi.h>
 
-#include <filesystem>
 #endif
 
 module pragma.image;

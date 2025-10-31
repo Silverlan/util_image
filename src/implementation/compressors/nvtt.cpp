@@ -4,10 +4,6 @@
 module;
 
 #include <nvtt/nvtt.h>
-#include <string>
-#include <functional>
-#include <variant>
-#include <memory>
 
 module pragma.image;
 

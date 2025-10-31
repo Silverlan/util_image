@@ -3,11 +3,6 @@
 
 module;
 
-#include <functional>
-#include <string>
-#include <variant>
-#include <optional>
-#include <memory>
 
 export module pragma.image:compressor;
 
