@@ -4,6 +4,9 @@
 module;
 
 #include <nvtt/nvtt.h>
+#ifdef _WIN32
+#include <wchar.h>
+#endif
 
 module pragma.image;
 
