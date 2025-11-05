@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.image:compressor;
 
 export import :core;

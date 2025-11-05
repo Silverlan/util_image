@@ -26,7 +26,7 @@ export {
 		DLLUIMG std::shared_ptr<ImageBuffer> load_image(ufile::IFile &f, PixelFormat pixelFormat = PixelFormat::LDR, bool flipVertically = false);
 		DLLUIMG std::shared_ptr<ImageBuffer> load_image(const std::string &fileName, PixelFormat pixelFormat = PixelFormat::LDR, bool flipVertically = false);
 		DLLUIMG bool save_image(ufile::IFile &f, ImageBuffer &imgBuffer, ImageFormat format, float quality = 1.f, bool flipVertically = false);
-	#ifdef UIMG_ENABLE_SVG
+#ifdef UIMG_ENABLE_SVG
 		struct DLLUIMG SvgImageInfo {
 			std::string styleSheet {};
 			std::optional<uint32_t> width {};
@@ -34,8 +34,8 @@ export {
 		};
 		DLLUIMG std::shared_ptr<ImageBuffer> load_svg(ufile::IFile &f, const SvgImageInfo &svgInfo = {});
 		DLLUIMG std::shared_ptr<ImageBuffer> load_svg(const std::string &fileName, const SvgImageInfo &svgInfo = {});
-	#endif
-	#ifdef UIMG_ENABLE_TEXTURE_COMPRESSION
+#endif
+#ifdef UIMG_ENABLE_TEXTURE_COMPRESSION
 		enum class CompressorLibrary : uint8_t {
 			Nvtt = 0,
 			Compressonator,
@@ -65,13 +65,13 @@ export {
 		};
 		DLLUIMG bool compress_texture(const TextureOutputHandler &outputHandler, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler = nullptr);
 		DLLUIMG bool compress_texture(std::vector<std::vector<std::vector<uint8_t>>> &outputData, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo,
-		const std::function<void(const std::string &)> &errorHandler = nullptr);
+		  const std::function<void(const std::string &)> &errorHandler = nullptr);
 		DLLUIMG bool save_texture(const std::string &fileName, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler = nullptr,
-		bool absoluteFileName = false);
+		  bool absoluteFileName = false);
 		DLLUIMG bool save_texture(ufile::IFile &f, ImageBuffer &imgBuffer, const TextureSaveInfo &texInfo);
 		DLLUIMG bool save_texture(const std::string &fileName, uimg::ImageBuffer &imgBuffer, const TextureSaveInfo &texInfo, const std::function<void(const std::string &)> &errorHandler = nullptr, bool absoluteFileName = false);
 		DLLUIMG bool save_texture(const std::string &fileName, const std::vector<std::vector<const void *>> &imgLayerMipmapData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler = nullptr, bool absoluteFileName = false);
-	#endif
+#endif
 		DLLUIMG std::optional<ImageFormat> string_to_image_output_format(const std::string &str);
 		DLLUIMG std::string get_image_output_format_extension(ImageFormat format);
 

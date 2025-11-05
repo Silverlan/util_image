@@ -15,7 +15,7 @@ export {
 		DLLUIMG float calc_luminance(const Vector3 &color);
 
 		class DLLUIMG ImageBuffer : public std::enable_shared_from_this<ImageBuffer> {
-		public:
+		  public:
 			static constexpr uint8_t FULLY_TRANSPARENT = 0u;
 			static constexpr uint8_t FULLY_OPAQUE = std::numeric_limits<uint8_t>::max();
 			using Offset = size_t;
@@ -42,7 +42,7 @@ export {
 				void CopyValue(Channel channel, const PixelView &outOther);
 
 				ImageBuffer &GetImageBuffer() const;
-			private:
+			  private:
 				PixelView(ImageBuffer &imgBuffer, Offset offset);
 				Offset GetAbsoluteOffset() const;
 				friend PixelIterator;
@@ -51,7 +51,7 @@ export {
 				Offset m_offset = 0u;
 			};
 			class DLLUIMG PixelIterator {
-			public:
+			  public:
 				using iterator_category = std::forward_iterator_tag;
 				using value_type = PixelView;
 				using difference_type = PixelView;
@@ -64,7 +64,7 @@ export {
 				PixelView *operator->();
 				bool operator==(const PixelIterator &other) const;
 				bool operator!=(const PixelIterator &other) const;
-			private:
+			  private:
 				friend ImageBuffer;
 				PixelIterator(ImageBuffer &imgBuffer, Offset offset);
 				PixelView m_pixelView;
@@ -168,7 +168,7 @@ export {
 
 			PixelIterator begin();
 			PixelIterator end();
-		private:
+		  private:
 			static void Convert(ImageBuffer &srcImg, ImageBuffer &dstImg, Format targetFormat);
 			ImageBuffer(const std::shared_ptr<void> &data, uint32_t width, uint32_t height, Format format);
 			std::pair<uint32_t, uint32_t> GetPixelCoordinates(Offset offset) const;

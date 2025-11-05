@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.image;
 export import :buffer;
 export import :core;

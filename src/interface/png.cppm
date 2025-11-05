@@ -3,7 +3,6 @@
 
 module;
 
-
 export module pragma.image:png;
 
 export import pragma.filesystem;

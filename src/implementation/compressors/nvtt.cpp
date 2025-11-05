@@ -272,7 +272,7 @@ return false;
 		virtual void beginImage(int size, int width, int height, int depth, int face, int miplevel) override { m_outputHandler.beginImage(size, width, height, depth, face, miplevel); }
 		virtual bool writeData(const void *data, int size) override { return m_outputHandler.writeData(data, size); }
 		virtual void endImage() override { m_outputHandler.endImage(); }
-		private:
+	  private:
 		uimg::TextureOutputHandler &m_outputHandler;
 	};
 

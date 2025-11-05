@@ -3,7 +3,6 @@
 
 module;
 
-
 #include "stb_image_write.h"
 #include "stb_image.h"
 #ifdef UIMG_ENABLE_SVG

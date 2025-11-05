@@ -81,7 +81,7 @@ export {
 				mipMapFilter = MipmapFilter::Kaiser;
 			}
 			bool IsNormalMap() const { return m_normalMap; }
-		private:
+		  private:
 			bool m_normalMap = false;
 		};
 		DLLUIMG std::string get_absolute_path(const std::string &fileName, uimg::TextureInfo::ContainerFormat containerFormat);

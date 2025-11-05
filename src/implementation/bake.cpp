@@ -1,7 +1,5 @@
 module;
 
-
-
 module pragma.image;
 
 import :core;
