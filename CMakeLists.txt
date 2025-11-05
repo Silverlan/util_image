@@ -78,7 +78,6 @@ endif()
 pr_add_compile_definitions(${PROJ_NAME} -DUIMG_DLL)
 
 pr_init_module(${PROJ_NAME} EXCLUDE ${SOURCE_EXCLUSION_FILTER})
-pr_add_headers(${PROJ_NAME} "include/")
 
 set(COMPRESSONATOR_BASE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party_libs/compressonator")
 

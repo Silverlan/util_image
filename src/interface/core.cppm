@@ -3,7 +3,7 @@
 
 module;
 
-#include "util_image_definitions.hpp"
+#include "definitions.hpp"
 
 export module pragma.image:core;
 

@@ -3,7 +3,6 @@
 
 module;
 
-#include <sharedutils/magic_enum.hpp>
 #ifdef _WIN32
 #include <fileapi.h>
 

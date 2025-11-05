@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2020 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#ifndef __UTIL_IMAGE_DEFINITIONS_HPP__
-#define __UTIL_IMAGE_DEFINITIONS_HPP__
+#pragma once
 
 #ifdef UIMG_STATIC
 #define DLLUIMG
@@ -18,6 +17,4 @@
 #else
 #define DLLUIMG __declspec(dllimport)
 #endif
-#endif
-
 #endif

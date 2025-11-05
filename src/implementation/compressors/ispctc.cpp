@@ -4,7 +4,6 @@
 module;
 
 #include "ispc_texcomp.h"
-#include "sharedutils/magic_enum.hpp"
 
 module pragma.image;
 

@@ -3,9 +3,6 @@
 
 module;
 
-
-#include "mathutil/glmutil.h"
-#include "sharedutils/magic_enum.hpp"
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
 
