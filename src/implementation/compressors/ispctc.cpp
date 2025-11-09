@@ -4,6 +4,7 @@
 module;
 
 #include "ispc_texcomp.h"
+#include <cassert>
 
 module pragma.image;
 
