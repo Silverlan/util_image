@@ -75,7 +75,8 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 			// Compressor libraries in order of priority.
 			// We evaluate nvtt last, because it may require some preprocessing (swapping red and blue channels)
 			libTypes = {
-			  uimg::CompressorLibrary::Ispctc, uimg::CompressorLibrary::Compressonator,
+			  uimg::CompressorLibrary::Ispctc,
+			  uimg::CompressorLibrary::Compressonator,
 			  uimg::CompressorLibrary::Nvtt, // Nvtt needs to be last!
 			};
 		}
