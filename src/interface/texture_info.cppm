@@ -4,6 +4,7 @@
 module;
 
 #include "definitions.hpp"
+#include "util_enum_flags.hpp"
 
 export module pragma.image:texture_info;
 
@@ -87,8 +88,5 @@ export {
 		DLLUIMG std::string get_absolute_path(const std::string &fileName, uimg::TextureInfo::ContainerFormat containerFormat);
 		using namespace umath::scoped_enum::bitwise;
 	};
-	namespace umath::scoped_enum::bitwise {
-		template<>
-		struct enable_bitwise_operators<uimg::TextureInfo::Flags> : std::true_type {};
-	}
+	REGISTER_ENUM_FLAGS(uimg::TextureInfo::Flags)
 }
