@@ -11,7 +11,7 @@ export import :types;
 export import pragma.math;
 
 export {
-	namespace uimg {
+	namespace pragma::image {
 		DLLUIMG float calc_luminance(const Vector3 &color);
 
 		class DLLUIMG ImageBuffer : public std::enable_shared_from_this<ImageBuffer> {
@@ -183,10 +183,10 @@ export {
 		};
 
 		struct DLLUIMG ImageLayerSet {
-			std::unordered_map<std::string, std::shared_ptr<uimg::ImageBuffer>> images;
+			std::unordered_map<std::string, std::shared_ptr<ImageBuffer>> images;
 		};
 
 		DLLUIMG std::optional<ToneMapping> string_to_tone_mapping(const std::string &str);
 	};
-	DLLUIMG std::ostream &operator<<(std::ostream &out, const uimg::ImageBuffer &o);
+	DLLUIMG std::ostream &operator<<(std::ostream &out, const pragma::image::ImageBuffer &o);
 }

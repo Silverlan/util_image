@@ -9,21 +9,21 @@ import :compressor;
 import pragma.filesystem;
 
 #ifdef UIMG_ENABLE_TEXTURE_COMPRESSION
-std::string uimg::get_absolute_path(const std::string &fileName, uimg::TextureInfo::ContainerFormat containerFormat)
+std::string pragma::image::get_absolute_path(const std::string &fileName, TextureInfo::ContainerFormat containerFormat)
 {
 	auto path = ufile::get_path_from_filename(fileName);
-	filemanager::create_path(path);
+	fs::create_path(path);
 	auto fileNameWithExt = fileName;
 	ufile::remove_extension_from_filename(fileNameWithExt, std::array<std::string, 2> {"dds", "ktx"});
 	switch(containerFormat) {
-	case uimg::TextureInfo::ContainerFormat::DDS:
+	case TextureInfo::ContainerFormat::DDS:
 		fileNameWithExt += ".dds";
 		break;
-	case uimg::TextureInfo::ContainerFormat::KTX:
+	case TextureInfo::ContainerFormat::KTX:
 		fileNameWithExt += ".ktx";
 		break;
 	}
-	return filemanager::get_program_write_path() + '/' + fileNameWithExt;
+	return fs::get_program_write_path() + '/' + fileNameWithExt;
 }
 
 static uint32_t calculate_mipmap_size(uint32_t v, uint32_t level)
@@ -36,28 +36,28 @@ static uint32_t calculate_mipmap_size(uint32_t v, uint32_t level)
 	return r;
 }
 
-static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std::string> &outputHandler, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &pfGetImgData, const uimg::TextureSaveInfo &texSaveInfo,
+static bool compress_texture(const std::variant<pragma::image::TextureOutputHandler, std::string> &outputHandler, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &pfGetImgData, const pragma::image::TextureSaveInfo &texSaveInfo,
   const std::function<void(const std::string &)> &errorHandler = nullptr, bool absoluteFileName = false)
 {
 	auto r = false;
 	{
 		auto &texInfo = texSaveInfo.texInfo;
-		uimg::ChannelMask channelMask {};
+		pragma::image::ChannelMask channelMask {};
 		if(texSaveInfo.channelMask.has_value())
 			channelMask = *texSaveInfo.channelMask;
 
-		auto numMipmaps = umath::max(texSaveInfo.numMipmaps, static_cast<uint32_t>(1));
+		auto numMipmaps = pragma::math::max(texSaveInfo.numMipmaps, static_cast<uint32_t>(1));
 		auto numLayers = texSaveInfo.numLayers;
 		auto width = texSaveInfo.width;
 		auto height = texSaveInfo.height;
 		auto szPerPixel = texSaveInfo.szPerPixel;
 		auto cubemap = texSaveInfo.cubemap;
-		std::vector<std::shared_ptr<uimg::ImageBuffer>> imgBuffers;
+		std::vector<std::shared_ptr<pragma::image::ImageBuffer>> imgBuffers;
 		auto fGetImgData = pfGetImgData;
 
 		auto size = width * height * szPerPixel;
 
-		uimg::ITextureCompressor::CompressInfo compressInfo {};
+		pragma::image::ITextureCompressor::CompressInfo compressInfo {};
 		compressInfo.getImageData = fGetImgData;
 		compressInfo.errorHandler = (errorHandler != nullptr) ? errorHandler : [](const std::string &err) { std::cout << "Compression failure: " << err << std::endl; };
 		compressInfo.textureSaveInfo = texSaveInfo;
@@ -68,46 +68,46 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 		compressInfo.numLayers = numLayers;
 		compressInfo.absoluteFileName = absoluteFileName;
 
-		std::vector<uimg::CompressorLibrary> libTypes;
+		std::vector<pragma::image::CompressorLibrary> libTypes;
 		if(texSaveInfo.compressorLibrary)
 			libTypes.push_back(*texSaveInfo.compressorLibrary);
 		else {
 			// Compressor libraries in order of priority.
 			// We evaluate nvtt last, because it may require some preprocessing (swapping red and blue channels)
 			libTypes = {
-			  uimg::CompressorLibrary::Ispctc,
-			  uimg::CompressorLibrary::Compressonator,
-			  uimg::CompressorLibrary::Nvtt, // Nvtt needs to be last!
+			  pragma::image::CompressorLibrary::Ispctc,
+			  pragma::image::CompressorLibrary::Compressonator,
+			  pragma::image::CompressorLibrary::Nvtt, // Nvtt needs to be last!
 			};
 		}
 
 		for(auto compressorLib : libTypes) {
-			if(compressorLib == uimg::CompressorLibrary::Nvtt) {
+			if(compressorLib == pragma::image::CompressorLibrary::Nvtt) {
 				switch(texInfo.inputFormat) {
-				case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
-				case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
-					channelMask.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
+				case pragma::image::TextureInfo::InputFormat::R8G8B8A8_UInt:
+				case pragma::image::TextureInfo::InputFormat::B8G8R8A8_UInt:
+					channelMask.SwapChannels(pragma::image::Channel::Red, pragma::image::Channel::Blue);
 					break;
 				}
 
-				if(channelMask != uimg::ChannelMask {}) {
+				if(channelMask != pragma::image::ChannelMask {}) {
 					imgBuffers.resize(numLayers * numMipmaps);
 					uint32_t idx = 0;
 
-					uimg::Format uimgFormat;
+					pragma::image::Format uimgFormat;
 					switch(texSaveInfo.texInfo.inputFormat) {
-					case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
-					case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
-						uimgFormat = uimg::Format::RGBA8;
+					case pragma::image::TextureInfo::InputFormat::R8G8B8A8_UInt:
+					case pragma::image::TextureInfo::InputFormat::B8G8R8A8_UInt:
+						uimgFormat = pragma::image::Format::RGBA8;
 						break;
-					case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
-						uimgFormat = uimg::Format::RGBA16;
+					case pragma::image::TextureInfo::InputFormat::R16G16B16A16_Float:
+						uimgFormat = pragma::image::Format::RGBA16;
 						break;
-					case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
-						uimgFormat = uimg::Format::RGBA32;
+					case pragma::image::TextureInfo::InputFormat::R32G32B32A32_Float:
+						uimgFormat = pragma::image::Format::RGBA32;
 						break;
-					case uimg::TextureInfo::InputFormat::R32_Float:
-						uimgFormat = uimg::Format::R32;
+					case pragma::image::TextureInfo::InputFormat::R32_Float:
+						uimgFormat = pragma::image::Format::R32;
 						break;
 					default:
 						throw std::runtime_error {"Texture compression error: Unsupported format " + std::string {magic_enum::enum_name(texSaveInfo.texInfo.inputFormat)}};
@@ -117,7 +117,7 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 						for(auto m = decltype(numMipmaps) {0u}; m < numMipmaps; ++m) {
 							std::function<void()> deleter = nullptr;
 							auto *data = fGetImgData(i, m, deleter);
-							auto &imgBuf = imgBuffers[idx++] = uimg::ImageBuffer::Create(data, calculate_mipmap_size(width, m), calculate_mipmap_size(height, m), uimgFormat);
+							auto &imgBuf = imgBuffers[idx++] = pragma::image::ImageBuffer::Create(data, calculate_mipmap_size(width, m), calculate_mipmap_size(height, m), uimgFormat);
 
 							imgBuf->SwapChannels(channelMask);
 							if(deleter)
@@ -132,13 +132,13 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 					};
 				}
 			}
-			auto compressor = uimg::ITextureCompressor::Create(compressorLib);
+			auto compressor = pragma::image::ITextureCompressor::Create(compressorLib);
 			if(!compressor)
 				continue;
 			auto resultData = compressor->Compress(compressInfo);
 			if(resultData) {
 				if(resultData->outputFilePath)
-					filemanager::update_file_index_cache(*resultData->outputFilePath, true);
+					pragma::fs::update_file_index_cache(*resultData->outputFilePath, true);
 				r = true;
 				break;
 			}
@@ -147,17 +147,17 @@ static bool compress_texture(const std::variant<uimg::TextureOutputHandler, std:
 	return r;
 }
 
-bool uimg::compress_texture(const TextureOutputHandler &outputHandler, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const uimg::TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler)
+bool pragma::image::compress_texture(const TextureOutputHandler &outputHandler, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler)
 {
 	return ::compress_texture(outputHandler, fGetImgData, texSaveInfo, errorHandler);
 }
 
-bool uimg::compress_texture(std::vector<std::vector<std::vector<uint8_t>>> &outputData, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const uimg::TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler)
+bool pragma::image::compress_texture(std::vector<std::vector<std::vector<uint8_t>>> &outputData, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler)
 {
 	outputData.resize(texSaveInfo.numLayers, std::vector<std::vector<uint8_t>>(texSaveInfo.numMipmaps, std::vector<uint8_t> {}));
 	auto iLevel = std::numeric_limits<uint32_t>::max();
 	auto iMipmap = std::numeric_limits<uint32_t>::max();
-	uimg::TextureOutputHandler outputHandler {};
+	TextureOutputHandler outputHandler {};
 	outputHandler.beginImage = [&outputData, &iLevel, &iMipmap](int size, int width, int height, int depth, int face, int miplevel) {
 		iLevel = face;
 		iMipmap = miplevel;
@@ -176,21 +176,21 @@ bool uimg::compress_texture(std::vector<std::vector<std::vector<uint8_t>>> &outp
 	return ::compress_texture(outputHandler, fGetImgData, texSaveInfo, errorHandler);
 }
 
-bool uimg::save_texture(const std::string &fileName, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const uimg::TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName)
+bool pragma::image::save_texture(const std::string &fileName, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName)
 {
 	return ::compress_texture(fileName, fGetImgData, texSaveInfo, errorHandler, absoluteFileName);
 }
 
-bool uimg::save_texture(const std::string &fileName, uimg::ImageBuffer &imgBuffer, const uimg::TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName)
+bool pragma::image::save_texture(const std::string &fileName, ImageBuffer &imgBuffer, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName)
 {
 	constexpr auto numLayers = 1u;
 	constexpr auto numMipmaps = 1u;
 
 	auto newTexSaveInfo = texSaveInfo;
-	auto swapRedBlue = (texSaveInfo.texInfo.inputFormat == uimg::TextureInfo::InputFormat::R8G8B8A8_UInt);
+	auto swapRedBlue = (texSaveInfo.texInfo.inputFormat == TextureInfo::InputFormat::R8G8B8A8_UInt);
 	if(swapRedBlue) {
-		imgBuffer.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
-		newTexSaveInfo.texInfo.inputFormat = uimg::TextureInfo::InputFormat::B8G8R8A8_UInt;
+		imgBuffer.SwapChannels(Channel::Red, Channel::Blue);
+		newTexSaveInfo.texInfo.inputFormat = TextureInfo::InputFormat::B8G8R8A8_UInt;
 	}
 	newTexSaveInfo.width = imgBuffer.GetWidth();
 	newTexSaveInfo.height = imgBuffer.GetHeight();
@@ -199,11 +199,11 @@ bool uimg::save_texture(const std::string &fileName, uimg::ImageBuffer &imgBuffe
 	newTexSaveInfo.numMipmaps = numMipmaps;
 	auto success = save_texture(fileName, [&imgBuffer](uint32_t iLayer, uint32_t iMipmap, std::function<void(void)> &outDeleter) -> const uint8_t * { return static_cast<uint8_t *>(imgBuffer.GetData()); }, newTexSaveInfo, errorHandler, absoluteFileName);
 	if(swapRedBlue)
-		imgBuffer.SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
+		imgBuffer.SwapChannels(Channel::Red, Channel::Blue);
 	return success;
 }
 
-bool uimg::save_texture(const std::string &fileName, const std::vector<std::vector<const void *>> &imgLayerMipmapData, const uimg::TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName)
+bool pragma::image::save_texture(const std::string &fileName, const std::vector<std::vector<const void *>> &imgLayerMipmapData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler, bool absoluteFileName)
 {
 	auto numLayers = imgLayerMipmapData.size();
 	auto numMipmaps = imgLayerMipmapData.empty() ? 1 : imgLayerMipmapData.front().size();

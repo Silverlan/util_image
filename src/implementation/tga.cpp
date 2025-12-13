@@ -27,7 +27,7 @@ struct TGAHeader {
 const uint8_t uTGAcompare[12] = {0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 const uint8_t cTGAcompare[12] = {0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-static bool load_uncompressed_tga(std::shared_ptr<uimg::ImageBuffer> &texture, VFilePtr &fTGA)
+static bool load_uncompressed_tga(std::shared_ptr<pragma::image::ImageBuffer> &texture, pragma::fs::VFilePtr &fTGA)
 {
 	TGAInfo tga;
 	if(fTGA->Read(&tga.header, sizeof(tga.header)) == 0)
@@ -43,9 +43,9 @@ static bool load_uncompressed_tga(std::shared_ptr<uimg::ImageBuffer> &texture, V
 	if((width <= 0) || (height <= 0) || ((bpp != 24) && (bpp != 32)))
 		return false;
 	if(bpp == 24)
-		texture = uimg::ImageBuffer::Create(width, height, uimg::Format::RGB8);
+		texture = pragma::image::ImageBuffer::Create(width, height, pragma::image::Format::RGB8);
 	else
-		texture = uimg::ImageBuffer::Create(width, height, uimg::Format::RGBA8);
+		texture = pragma::image::ImageBuffer::Create(width, height, pragma::image::Format::RGBA8);
 
 	tga.bytesPerPixel = (tga.Bpp / 8);
 	tga.imageSize = (tga.bytesPerPixel * tga.Width * tga.Height);
@@ -61,7 +61,7 @@ static bool load_uncompressed_tga(std::shared_ptr<uimg::ImageBuffer> &texture, V
 	return true;
 }
 
-static bool load_compressed_tga(std::shared_ptr<uimg::ImageBuffer> &texture, VFilePtr &fTGA)
+static bool load_compressed_tga(std::shared_ptr<pragma::image::ImageBuffer> &texture, pragma::fs::VFilePtr &fTGA)
 {
 	TGAInfo tga {};
 	if(fTGA->Read(&tga.header[0], sizeof(tga.header)) == 0)
@@ -75,9 +75,9 @@ static bool load_compressed_tga(std::shared_ptr<uimg::ImageBuffer> &texture, VFi
 	if((width <= 0) || (height <= 0) || ((bpp != 24) && (bpp != 32)))
 		return false;
 	if(bpp == 24)
-		texture = uimg::ImageBuffer::Create(width, height, uimg::Format::RGB8);
+		texture = pragma::image::ImageBuffer::Create(width, height, pragma::image::Format::RGB8);
 	else
-		texture = uimg::ImageBuffer::Create(width, height, uimg::Format::RGBA8);
+		texture = pragma::image::ImageBuffer::Create(width, height, pragma::image::Format::RGBA8);
 
 	tga.bytesPerPixel = (tga.Bpp / 8);
 	tga.imageSize = (tga.bytesPerPixel * tga.Width * tga.Height);
@@ -130,7 +130,7 @@ static bool load_compressed_tga(std::shared_ptr<uimg::ImageBuffer> &texture, VFi
 	return true;
 }
 
-static bool load(VFilePtr &fTGA, std::shared_ptr<uimg::ImageBuffer> &texture)
+static bool load(pragma::fs::VFilePtr &fTGA, std::shared_ptr<pragma::image::ImageBuffer> &texture)
 {
 	texture = nullptr;
 	TGAHeader tgaheader;
@@ -143,18 +143,18 @@ static bool load(VFilePtr &fTGA, std::shared_ptr<uimg::ImageBuffer> &texture)
 	return false;
 }
 
-static bool load(const std::string &path, std::shared_ptr<uimg::ImageBuffer> &texture)
+static bool load(const std::string &path, std::shared_ptr<pragma::image::ImageBuffer> &texture)
 {
 	texture = nullptr;
-	auto fTGA = FileManager::OpenFile(path.c_str(), "rb");
+	auto fTGA = pragma::fs::open_file(path.c_str(), pragma::fs::FileMode::Read | pragma::fs::FileMode::Binary);
 	if(fTGA == nullptr)
 		return false;
 	return load(fTGA, texture);
 }
 
-std::shared_ptr<uimg::ImageBuffer> uimg::impl::load_tga_image(std::shared_ptr<VFilePtrInternal> &file)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::impl::load_tga_image(std::shared_ptr<fs::VFilePtrInternal> &file)
 {
-	std::shared_ptr<uimg::ImageBuffer> image = nullptr;
+	std::shared_ptr<ImageBuffer> image = nullptr;
 	auto bSuccess = load(file, image);
 	return bSuccess ? image : nullptr;
 }

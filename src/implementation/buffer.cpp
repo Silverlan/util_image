@@ -10,8 +10,8 @@ module pragma.image;
 
 import :buffer;
 
-std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(const void *data, uint32_t width, uint32_t height, Format format) { return Create(const_cast<void *>(data), width, height, format, false); }
-std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::CreateWithCustomDeleter(void *data, uint32_t width, uint32_t height, Format format, const std::function<void(void *)> &customDeleter)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::ImageBuffer::Create(const void *data, uint32_t width, uint32_t height, Format format) { return Create(const_cast<void *>(data), width, height, format, false); }
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::ImageBuffer::CreateWithCustomDeleter(void *data, uint32_t width, uint32_t height, Format format, const std::function<void(void *)> &customDeleter)
 {
 	if(customDeleter == nullptr) {
 		auto buf = Create(width, height, format);
@@ -22,33 +22,33 @@ std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::CreateWithCustomDeleter(vo
 	auto ptrData = std::shared_ptr<void> {data, customDeleter};
 	return std::shared_ptr<ImageBuffer> {new ImageBuffer {ptrData, width, height, format}};
 }
-void uimg::ImageBuffer::Reset(void *data, uint32_t width, uint32_t height, Format format)
+void pragma::image::ImageBuffer::Reset(void *data, uint32_t width, uint32_t height, Format format)
 {
 	m_data.reset(data, [](void *) {});
 	m_width = width;
 	m_height = height;
 	m_format = format;
 }
-std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(void *data, uint32_t width, uint32_t height, Format format, bool ownedExternally)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::ImageBuffer::Create(void *data, uint32_t width, uint32_t height, Format format, bool ownedExternally)
 {
 	if(ownedExternally == false)
 		return CreateWithCustomDeleter(data, width, height, format, nullptr);
 	return CreateWithCustomDeleter(data, width, height, format, [](void *) {});
 }
-std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(uint32_t width, uint32_t height, Format format)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::ImageBuffer::Create(uint32_t width, uint32_t height, Format format)
 {
 	auto buf = std::shared_ptr<ImageBuffer> {new ImageBuffer {nullptr, width, height, format}};
 	buf->Reallocate();
 	return buf;
 }
-std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(ImageBuffer &parent, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::ImageBuffer::Create(ImageBuffer &parent, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
 	auto xMax = parent.GetWidth();
 	auto yMax = parent.GetHeight();
-	x = umath::min(x, xMax);
-	y = umath::min(y, yMax);
-	w = umath::min(x + w, xMax) - x;
-	h = umath::min(y + h, yMax) - y;
+	x = pragma::math::min(x, xMax);
+	y = pragma::math::min(y, yMax);
+	w = pragma::math::min(x + w, xMax) - x;
+	h = pragma::math::min(y + h, yMax) - y;
 
 	auto buf = std::shared_ptr<ImageBuffer> {new ImageBuffer {nullptr, w, h, parent.GetFormat()}};
 	buf->m_offsetRelToParent = {x, y};
@@ -56,7 +56,7 @@ std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Create(ImageBuffer &parent
 	buf->m_data = parent.m_data;
 	return buf;
 }
-std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::CreateCubemap(const std::array<std::shared_ptr<ImageBuffer>, 6> &cubemapSides)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::ImageBuffer::CreateCubemap(const std::array<std::shared_ptr<ImageBuffer>, 6> &cubemapSides)
 {
 	auto &img0 = cubemapSides.front();
 	auto w = img0->GetWidth();
@@ -88,13 +88,13 @@ std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::CreateCubemap(const std::a
 		t.join();
 	return cubemap;
 }
-uimg::ImageBuffer::LDRValue uimg::ImageBuffer::ToLDRValue(HDRValue value) { return umath::clamp<uint32_t>(umath::float16_to_float32_glm(value) * static_cast<float>(std::numeric_limits<uint8_t>::max()), 0, std::numeric_limits<uint8_t>::max()); }
-uimg::ImageBuffer::LDRValue uimg::ImageBuffer::ToLDRValue(FloatValue value) { return umath::clamp<uint32_t>(value * static_cast<float>(std::numeric_limits<uint8_t>::max()), 0, std::numeric_limits<uint8_t>::max()); }
-uimg::ImageBuffer::HDRValue uimg::ImageBuffer::ToHDRValue(LDRValue value) { return ToHDRValue(ToFloatValue(value)); }
-uimg::ImageBuffer::HDRValue uimg::ImageBuffer::ToHDRValue(FloatValue value) { return umath::float32_to_float16_glm(value); }
-uimg::ImageBuffer::FloatValue uimg::ImageBuffer::ToFloatValue(LDRValue value) { return value / static_cast<float>(std::numeric_limits<LDRValue>::max()); }
-uimg::ImageBuffer::FloatValue uimg::ImageBuffer::ToFloatValue(HDRValue value) { return umath::float16_to_float32_glm(value); }
-uimg::Format uimg::ImageBuffer::ToLDRFormat(Format format)
+pragma::image::ImageBuffer::LDRValue pragma::image::ImageBuffer::ToLDRValue(HDRValue value) { return pragma::math::clamp<uint32_t>(pragma::math::float16_to_float32_glm(value) * static_cast<float>(std::numeric_limits<uint8_t>::max()), 0, std::numeric_limits<uint8_t>::max()); }
+pragma::image::ImageBuffer::LDRValue pragma::image::ImageBuffer::ToLDRValue(FloatValue value) { return pragma::math::clamp<uint32_t>(value * static_cast<float>(std::numeric_limits<uint8_t>::max()), 0, std::numeric_limits<uint8_t>::max()); }
+pragma::image::ImageBuffer::HDRValue pragma::image::ImageBuffer::ToHDRValue(LDRValue value) { return ToHDRValue(ToFloatValue(value)); }
+pragma::image::ImageBuffer::HDRValue pragma::image::ImageBuffer::ToHDRValue(FloatValue value) { return pragma::math::float32_to_float16_glm(value); }
+pragma::image::ImageBuffer::FloatValue pragma::image::ImageBuffer::ToFloatValue(LDRValue value) { return value / static_cast<float>(std::numeric_limits<LDRValue>::max()); }
+pragma::image::ImageBuffer::FloatValue pragma::image::ImageBuffer::ToFloatValue(HDRValue value) { return pragma::math::float16_to_float32_glm(value); }
+pragma::image::Format pragma::image::ImageBuffer::ToLDRFormat(Format format)
 {
 	switch(format) {
 	case Format::R8:
@@ -114,10 +114,10 @@ uimg::Format uimg::ImageBuffer::ToLDRFormat(Format format)
 	case Format::RGBA32:
 		return Format::RGBA8;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
-uimg::Format uimg::ImageBuffer::ToHDRFormat(Format format)
+pragma::image::Format pragma::image::ImageBuffer::ToHDRFormat(Format format)
 {
 	switch(format) {
 	case Format::R8:
@@ -137,10 +137,10 @@ uimg::Format uimg::ImageBuffer::ToHDRFormat(Format format)
 	case Format::RGBA32:
 		return Format::RGBA16;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
-uimg::Format uimg::ImageBuffer::ToFloatFormat(Format format)
+pragma::image::Format pragma::image::ImageBuffer::ToFloatFormat(Format format)
 {
 	switch(format) {
 	case Format::R8:
@@ -160,10 +160,10 @@ uimg::Format uimg::ImageBuffer::ToFloatFormat(Format format)
 	case Format::RGBA32:
 		return Format::RGBA32;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
-uimg::Format uimg::ImageBuffer::ToRGBFormat(Format format)
+pragma::image::Format pragma::image::ImageBuffer::ToRGBFormat(Format format)
 {
 	switch(format) {
 	case Format::R8:
@@ -182,10 +182,10 @@ uimg::Format uimg::ImageBuffer::ToRGBFormat(Format format)
 	case Format::RGBA32:
 		return Format::RGB32;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
-uimg::Format uimg::ImageBuffer::ToRGBAFormat(Format format)
+pragma::image::Format pragma::image::ImageBuffer::ToRGBAFormat(Format format)
 {
 	switch(format) {
 	case Format::R8:
@@ -204,12 +204,12 @@ uimg::Format uimg::ImageBuffer::ToRGBAFormat(Format format)
 	case Format::RGBA32:
 		return Format::RGBA32;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 	return Format::None;
 }
-size_t uimg::ImageBuffer::GetRowStride() const { return GetPixelSize() * GetWidth(); }
-size_t uimg::ImageBuffer::GetPixelStride() const { return GetPixelSize(); }
-void uimg::ImageBuffer::FlipHorizontally()
+size_t pragma::image::ImageBuffer::GetRowStride() const { return GetPixelSize() * GetWidth(); }
+size_t pragma::image::ImageBuffer::GetPixelStride() const { return GetPixelSize(); }
+void pragma::image::ImageBuffer::FlipHorizontally()
 {
 	auto w = GetWidth();
 	auto h = GetHeight();
@@ -217,17 +217,17 @@ void uimg::ImageBuffer::FlipHorizontally()
 	auto pxStride = GetPixelStride();
 	auto *p = static_cast<uint8_t *>(GetData());
 	for(auto y = decltype(h) {0u}; y < h; ++y) {
-		util::flip_item_sequence(p, w * pxStride, w, pxStride);
+		pragma::util::flip_item_sequence(p, w * pxStride, w, pxStride);
 		p += rowStride;
 	}
 }
-void uimg::ImageBuffer::FlipVertically()
+void pragma::image::ImageBuffer::FlipVertically()
 {
 	auto w = GetWidth();
 	auto h = GetHeight();
-	util::flip_item_sequence(GetData(), w * h * GetPixelStride(), h, GetRowStride());
+	pragma::util::flip_item_sequence(GetData(), w * h * GetPixelStride(), h, GetRowStride());
 }
-void uimg::ImageBuffer::Flip(bool horizontally, bool vertically)
+void pragma::image::ImageBuffer::Flip(bool horizontally, bool vertically)
 {
 	if(horizontally && vertically) {
 		// Optimized algorithm for flipping both axes at once
@@ -264,7 +264,7 @@ void uimg::ImageBuffer::Flip(bool horizontally, bool vertically)
 		if((h % 2) != 0) {
 			// Uneven height; We still have to flip the center row horizontally
 			auto *p = static_cast<uint8_t *>(sequence) + (h / 2) * GetRowStride();
-			util::flip_item_sequence(p, GetRowStride(), GetWidth(), GetPixelStride());
+			pragma::util::flip_item_sequence(p, GetRowStride(), GetWidth(), GetPixelStride());
 		}
 		delete[] tmp;
 		return;
@@ -274,7 +274,7 @@ void uimg::ImageBuffer::Flip(bool horizontally, bool vertically)
 	if(vertically)
 		FlipVertically();
 }
-void uimg::ImageBuffer::Crop(uint32_t x, uint32_t y, uint32_t w, uint32_t h, void *optOutCroppedData)
+void pragma::image::ImageBuffer::Crop(uint32_t x, uint32_t y, uint32_t w, uint32_t h, void *optOutCroppedData)
 {
 	std::shared_ptr<void> newData = nullptr;
 	void *newDataPtr = optOutCroppedData;
@@ -296,34 +296,34 @@ void uimg::ImageBuffer::Crop(uint32_t x, uint32_t y, uint32_t w, uint32_t h, voi
 	m_width = w;
 	m_height = h;
 }
-void uimg::ImageBuffer::InitPixelView(uint32_t x, uint32_t y, PixelView &pxView) { pxView.m_offset = GetPixelOffset(x, y); }
-uimg::ImageBuffer::PixelView uimg::ImageBuffer::GetPixelView(Offset offset) { return PixelView {*this, offset}; }
-uimg::ImageBuffer::PixelView uimg::ImageBuffer::GetPixelView(uint32_t x, uint32_t y) { return GetPixelView(GetPixelOffset(x, y)); }
-void uimg::ImageBuffer::SetPixelColor(uint32_t x, uint32_t y, const std::array<uint8_t, 4> &color) { SetPixelColor(GetPixelIndex(x, y), color); }
-void uimg::ImageBuffer::SetPixelColor(PixelIndex index, const std::array<uint8_t, 4> &color)
+void pragma::image::ImageBuffer::InitPixelView(uint32_t x, uint32_t y, PixelView &pxView) { pxView.m_offset = GetPixelOffset(x, y); }
+pragma::image::ImageBuffer::PixelView pragma::image::ImageBuffer::GetPixelView(Offset offset) { return PixelView {*this, offset}; }
+pragma::image::ImageBuffer::PixelView pragma::image::ImageBuffer::GetPixelView(uint32_t x, uint32_t y) { return GetPixelView(GetPixelOffset(x, y)); }
+void pragma::image::ImageBuffer::SetPixelColor(uint32_t x, uint32_t y, const std::array<uint8_t, 4> &color) { SetPixelColor(GetPixelIndex(x, y), color); }
+void pragma::image::ImageBuffer::SetPixelColor(PixelIndex index, const std::array<uint8_t, 4> &color)
 {
 	auto pxView = GetPixelView(GetPixelOffset(index));
 	for(uint8_t i = 0; i < 4; ++i)
-		pxView.SetValue(static_cast<uimg::Channel>(i), color.at(i));
+		pxView.SetValue(static_cast<Channel>(i), color.at(i));
 }
-void uimg::ImageBuffer::SetPixelColor(uint32_t x, uint32_t y, const std::array<uint16_t, 4> &color) { SetPixelColor(GetPixelIndex(x, y), color); }
-void uimg::ImageBuffer::SetPixelColor(PixelIndex index, const std::array<uint16_t, 4> &color)
+void pragma::image::ImageBuffer::SetPixelColor(uint32_t x, uint32_t y, const std::array<uint16_t, 4> &color) { SetPixelColor(GetPixelIndex(x, y), color); }
+void pragma::image::ImageBuffer::SetPixelColor(PixelIndex index, const std::array<uint16_t, 4> &color)
 {
 	auto pxView = GetPixelView(GetPixelOffset(index));
 	for(uint8_t i = 0; i < 4; ++i)
-		pxView.SetValue(static_cast<uimg::Channel>(i), color.at(i));
+		pxView.SetValue(static_cast<Channel>(i), color.at(i));
 }
-void uimg::ImageBuffer::SetPixelColor(uint32_t x, uint32_t y, const Vector4 &color) { SetPixelColor(GetPixelIndex(x, y), color); }
-void uimg::ImageBuffer::SetPixelColor(PixelIndex index, const Vector4 &color)
+void pragma::image::ImageBuffer::SetPixelColor(uint32_t x, uint32_t y, const Vector4 &color) { SetPixelColor(GetPixelIndex(x, y), color); }
+void pragma::image::ImageBuffer::SetPixelColor(PixelIndex index, const Vector4 &color)
 {
 	auto pxView = GetPixelView(GetPixelOffset(index));
 	for(uint8_t i = 0; i < 4; ++i)
-		pxView.SetValue(static_cast<uimg::Channel>(i), color[i]);
+		pxView.SetValue(static_cast<Channel>(i), color[i]);
 }
 
-uimg::ImageBuffer *uimg::ImageBuffer::GetParent() { return (m_parent.expired() == false) ? m_parent.lock().get() : nullptr; }
-const std::pair<uint64_t, uint64_t> &uimg::ImageBuffer::GetPixelCoordinatesRelativeToParent() const { return m_offsetRelToParent; }
-uimg::ImageBuffer::Offset uimg::ImageBuffer::GetAbsoluteOffset(Offset localOffset) const
+pragma::image::ImageBuffer *pragma::image::ImageBuffer::GetParent() { return (m_parent.expired() == false) ? m_parent.lock().get() : nullptr; }
+const std::pair<uint64_t, uint64_t> &pragma::image::ImageBuffer::GetPixelCoordinatesRelativeToParent() const { return m_offsetRelToParent; }
+pragma::image::ImageBuffer::Offset pragma::image::ImageBuffer::GetAbsoluteOffset(Offset localOffset) const
 {
 	if(m_parent.expired())
 		return localOffset;
@@ -333,8 +333,8 @@ uimg::ImageBuffer::Offset uimg::ImageBuffer::GetAbsoluteOffset(Offset localOffse
 	pxCoords.second += m_offsetRelToParent.second;
 	return parent->GetAbsoluteOffset(parent->GetPixelOffset(pxCoords.first, pxCoords.second));
 }
-float uimg::calc_luminance(const Vector3 &color) { return 0.212671 * color.r + 0.71516 * color.g + 0.072169 * color.b; }
-void uimg::ImageBuffer::CalcLuminance(float &outAvgLuminance, float &outMinLuminance, float &outMaxLuminance, Vector3 &outAvgIntensity, float *optOutLogAvgLuminance) const
+float pragma::image::calc_luminance(const Vector3 &color) { return 0.212671 * color.r + 0.71516 * color.g + 0.072169 * color.b; }
+void pragma::image::ImageBuffer::CalcLuminance(float &outAvgLuminance, float &outMinLuminance, float &outMaxLuminance, Vector3 &outAvgIntensity, float *optOutLogAvgLuminance) const
 {
 	float delta = 1e-4f;
 	outAvgLuminance = 0.f;
@@ -363,7 +363,7 @@ void uimg::ImageBuffer::CalcLuminance(float &outAvgLuminance, float &outMinLumin
 	if(optOutLogAvgLuminance)
 		*optOutLogAvgLuminance = std::exp(*optOutLogAvgLuminance / numPixels);
 }
-uint8_t uimg::ImageBuffer::GetChannelCount(Format format)
+uint8_t pragma::image::ImageBuffer::GetChannelCount(Format format)
 {
 	switch(format) {
 	case Format::R8:
@@ -383,10 +383,10 @@ uint8_t uimg::ImageBuffer::GetChannelCount(Format format)
 	case Format::RGBA32:
 		return 4;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 	return 0;
 }
-uint8_t uimg::ImageBuffer::GetChannelSize(Format format)
+uint8_t pragma::image::ImageBuffer::GetChannelSize(Format format)
 {
 	switch(format) {
 	case Format::R8:
@@ -405,19 +405,19 @@ uint8_t uimg::ImageBuffer::GetChannelSize(Format format)
 	case Format::RGBA32:
 		return 4;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 	return 0;
 }
-uimg::ImageBuffer::Size uimg::ImageBuffer::GetPixelSize(Format format) { return GetChannelCount(format) * GetChannelSize(format); }
-uimg::ImageBuffer::ImageBuffer(const std::shared_ptr<void> &data, uint32_t width, uint32_t height, Format format) : m_data {data}, m_width {width}, m_height {height}, m_format {format} {}
-std::pair<uint32_t, uint32_t> uimg::ImageBuffer::GetPixelCoordinates(Offset offset) const
+pragma::image::ImageBuffer::Size pragma::image::ImageBuffer::GetPixelSize(Format format) { return GetChannelCount(format) * GetChannelSize(format); }
+pragma::image::ImageBuffer::ImageBuffer(const std::shared_ptr<void> &data, uint32_t width, uint32_t height, Format format) : m_data {data}, m_width {width}, m_height {height}, m_format {format} {}
+std::pair<uint32_t, uint32_t> pragma::image::ImageBuffer::GetPixelCoordinates(Offset offset) const
 {
 	offset /= GetPixelSize();
 	auto x = offset % GetWidth();
 	auto y = offset / GetWidth();
 	return {x, y};
 }
-void uimg::ImageBuffer::Insert(const ImageBuffer &other, uint32_t x, uint32_t y, uint32_t xOther, uint32_t yOther, uint32_t wOther, uint32_t hOther)
+void pragma::image::ImageBuffer::Insert(const ImageBuffer &other, uint32_t x, uint32_t y, uint32_t xOther, uint32_t yOther, uint32_t wOther, uint32_t hOther)
 {
 	other.ClampBounds(xOther, yOther, wOther, hOther);
 	ClampPixelCoordinatesToBounds(x, y);
@@ -433,16 +433,16 @@ void uimg::ImageBuffer::Insert(const ImageBuffer &other, uint32_t x, uint32_t y,
 		}
 	}
 }
-void uimg::ImageBuffer::Insert(const ImageBuffer &other, uint32_t x, uint32_t y) { Insert(other, x, y, 0, 0, other.GetWidth(), other.GetHeight()); }
-std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Copy() const { return uimg::ImageBuffer::Create(m_data.get(), m_width, m_height, m_format, false); }
-std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::Copy(Format format) const
+void pragma::image::ImageBuffer::Insert(const ImageBuffer &other, uint32_t x, uint32_t y) { Insert(other, x, y, 0, 0, other.GetWidth(), other.GetHeight()); }
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::ImageBuffer::Copy() const { return ImageBuffer::Create(m_data.get(), m_width, m_height, m_format, false); }
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::ImageBuffer::Copy(Format format) const
 {
 	// Optimized copy that performs copy +format change in one go
-	auto cpy = uimg::ImageBuffer::Create(m_width, m_height, m_format);
+	auto cpy = ImageBuffer::Create(m_width, m_height, m_format);
 	Convert(const_cast<ImageBuffer &>(*this), *cpy, format);
 	return cpy;
 }
-bool uimg::ImageBuffer::Copy(ImageBuffer &dst) const
+bool pragma::image::ImageBuffer::Copy(ImageBuffer &dst) const
 {
 	auto w = GetWidth();
 	auto h = GetHeight();
@@ -451,7 +451,7 @@ bool uimg::ImageBuffer::Copy(ImageBuffer &dst) const
 	Copy(dst, 0, 0, 0, 0, w, h);
 	return true;
 }
-void uimg::ImageBuffer::Copy(ImageBuffer &dst, uint32_t xSrc, uint32_t ySrc, uint32_t xDst, uint32_t yDst, uint32_t w, uint32_t h) const
+void pragma::image::ImageBuffer::Copy(ImageBuffer &dst, uint32_t xSrc, uint32_t ySrc, uint32_t xDst, uint32_t yDst, uint32_t w, uint32_t h) const
 {
 	if(GetFormat() == dst.GetFormat() && xSrc == 0 && ySrc == 0 && xDst == 0 && yDst == 0 && w == GetWidth() && h == GetHeight()) {
 		memcpy(dst.GetData(), GetData(), GetSize());
@@ -464,13 +464,13 @@ void uimg::ImageBuffer::Copy(ImageBuffer &dst, uint32_t xSrc, uint32_t ySrc, uin
 		pxDst.CopyValues(px);
 	}
 }
-uimg::Format uimg::ImageBuffer::GetFormat() const { return m_format; }
-uint32_t uimg::ImageBuffer::GetWidth() const { return m_width; }
-uint32_t uimg::ImageBuffer::GetHeight() const { return m_height; }
-uimg::ImageBuffer::Size uimg::ImageBuffer::GetPixelSize() const { return GetPixelSize(GetFormat()); }
-uint32_t uimg::ImageBuffer::GetPixelCount() const { return m_width * m_height; }
-bool uimg::ImageBuffer::HasAlphaChannel() const { return GetChannelCount() >= umath::to_integral(Channel::Alpha) + 1; }
-bool uimg::ImageBuffer::IsLDRFormat() const
+pragma::image::Format pragma::image::ImageBuffer::GetFormat() const { return m_format; }
+uint32_t pragma::image::ImageBuffer::GetWidth() const { return m_width; }
+uint32_t pragma::image::ImageBuffer::GetHeight() const { return m_height; }
+pragma::image::ImageBuffer::Size pragma::image::ImageBuffer::GetPixelSize() const { return GetPixelSize(GetFormat()); }
+uint32_t pragma::image::ImageBuffer::GetPixelCount() const { return m_width * m_height; }
+bool pragma::image::ImageBuffer::HasAlphaChannel() const { return GetChannelCount() >= pragma::math::to_integral(Channel::Alpha) + 1; }
+bool pragma::image::ImageBuffer::IsLDRFormat() const
 {
 	switch(GetFormat()) {
 	case Format::R_LDR:
@@ -479,10 +479,10 @@ bool uimg::ImageBuffer::IsLDRFormat() const
 	case Format::RGBA_LDR:
 		return true;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 	return false;
 }
-bool uimg::ImageBuffer::IsHDRFormat() const
+bool pragma::image::ImageBuffer::IsHDRFormat() const
 {
 	switch(GetFormat()) {
 	case Format::R_HDR:
@@ -491,10 +491,10 @@ bool uimg::ImageBuffer::IsHDRFormat() const
 	case Format::RGBA_HDR:
 		return true;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 	return false;
 }
-bool uimg::ImageBuffer::IsFloatFormat() const
+bool pragma::image::ImageBuffer::IsFloatFormat() const
 {
 	switch(GetFormat()) {
 	case Format::R_FLOAT:
@@ -503,20 +503,20 @@ bool uimg::ImageBuffer::IsFloatFormat() const
 	case Format::RGBA_FLOAT:
 		return true;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 	return false;
 }
-uint8_t uimg::ImageBuffer::GetChannelCount() const { return GetChannelCount(GetFormat()); }
-uint8_t uimg::ImageBuffer::GetChannelSize() const { return GetChannelSize(GetFormat()); }
-uimg::ImageBuffer::PixelIndex uimg::ImageBuffer::GetPixelIndex(uint32_t x, uint32_t y) const { return y * GetWidth() + x; }
-uimg::ImageBuffer::Offset uimg::ImageBuffer::GetPixelOffset(uint32_t x, uint32_t y) const { return GetPixelOffset(GetPixelIndex(x, y)); }
-uimg::ImageBuffer::Offset uimg::ImageBuffer::GetPixelOffset(PixelIndex index) const { return index * GetPixelSize(); }
-void uimg::ImageBuffer::ClampPixelCoordinatesToBounds(uint32_t &inOutX, uint32_t &inOutY) const
+uint8_t pragma::image::ImageBuffer::GetChannelCount() const { return GetChannelCount(GetFormat()); }
+uint8_t pragma::image::ImageBuffer::GetChannelSize() const { return GetChannelSize(GetFormat()); }
+pragma::image::ImageBuffer::PixelIndex pragma::image::ImageBuffer::GetPixelIndex(uint32_t x, uint32_t y) const { return y * GetWidth() + x; }
+pragma::image::ImageBuffer::Offset pragma::image::ImageBuffer::GetPixelOffset(uint32_t x, uint32_t y) const { return GetPixelOffset(GetPixelIndex(x, y)); }
+pragma::image::ImageBuffer::Offset pragma::image::ImageBuffer::GetPixelOffset(PixelIndex index) const { return index * GetPixelSize(); }
+void pragma::image::ImageBuffer::ClampPixelCoordinatesToBounds(uint32_t &inOutX, uint32_t &inOutY) const
 {
-	inOutX = umath::clamp(inOutX, 0u, GetWidth() - 1);
-	inOutY = umath::clamp(inOutY, 0u, GetHeight() - 1);
+	inOutX = pragma::math::clamp(inOutX, 0u, GetWidth() - 1);
+	inOutY = pragma::math::clamp(inOutY, 0u, GetHeight() - 1);
 }
-void uimg::ImageBuffer::ClampBounds(uint32_t &inOutX, uint32_t &inOutY, uint32_t &inOutW, uint32_t &inOutH) const
+void pragma::image::ImageBuffer::ClampBounds(uint32_t &inOutX, uint32_t &inOutY, uint32_t &inOutW, uint32_t &inOutH) const
 {
 	ClampPixelCoordinatesToBounds(inOutX, inOutY);
 	auto w = GetWidth();
@@ -526,16 +526,16 @@ void uimg::ImageBuffer::ClampBounds(uint32_t &inOutX, uint32_t &inOutY, uint32_t
 	if(inOutY + inOutH > h)
 		inOutH = h - inOutY;
 }
-const void *uimg::ImageBuffer::GetData() const { return const_cast<ImageBuffer *>(this)->GetData(); }
-void *uimg::ImageBuffer::GetData() { return m_data.get(); }
-void uimg::ImageBuffer::Reallocate()
+const void *pragma::image::ImageBuffer::GetData() const { return const_cast<ImageBuffer *>(this)->GetData(); }
+void *pragma::image::ImageBuffer::GetData() { return m_data.get(); }
+void pragma::image::ImageBuffer::Reallocate()
 {
 	m_data = std::shared_ptr<void> {new uint8_t[GetSize()], [](const void *ptr) { delete[] static_cast<const uint8_t *>(ptr); }};
 }
-uimg::ImageBuffer::PixelIterator uimg::ImageBuffer::begin() { return PixelIterator {*this, 0}; }
-uimg::ImageBuffer::PixelIterator uimg::ImageBuffer::end() { return PixelIterator {*this, GetSize()}; }
+pragma::image::ImageBuffer::PixelIterator pragma::image::ImageBuffer::begin() { return PixelIterator {*this, 0}; }
+pragma::image::ImageBuffer::PixelIterator pragma::image::ImageBuffer::end() { return PixelIterator {*this, GetSize()}; }
 
-void uimg::ImageBuffer::Convert(ImageBuffer &srcImg, ImageBuffer &dstImg, Format targetFormat)
+void pragma::image::ImageBuffer::Convert(ImageBuffer &srcImg, ImageBuffer &dstImg, Format targetFormat)
 {
 	if(dstImg.GetFormat() != targetFormat) {
 		dstImg.m_format = targetFormat;
@@ -546,7 +546,7 @@ void uimg::ImageBuffer::Convert(ImageBuffer &srcImg, ImageBuffer &dstImg, Format
 	while(itSrc != srcImg.end()) {
 		auto &srcPixel = *itSrc;
 		auto &dstPixel = *itDst;
-		auto numChannels = umath::to_integral(Channel::Count);
+		auto numChannels = pragma::math::to_integral(Channel::Count);
 		for(auto i = decltype(numChannels) {0u}; i < numChannels; ++i) {
 			auto channel = static_cast<Channel>(i);
 			switch(targetFormat) {
@@ -569,21 +569,21 @@ void uimg::ImageBuffer::Convert(ImageBuffer &srcImg, ImageBuffer &dstImg, Format
 				dstPixel.SetValue(channel, srcPixel.GetFloatValue(channel));
 				break;
 			}
-			static_assert(umath::to_integral(Format::Count) == 13u);
+			static_assert(pragma::math::to_integral(Format::Count) == 13u);
 		}
 		++itSrc;
 		++itDst;
 	}
 }
-void uimg::ImageBuffer::Convert(Format targetFormat)
+void pragma::image::ImageBuffer::Convert(Format targetFormat)
 {
 	if(GetFormat() == targetFormat)
 		return;
 	auto cpy = *this;
 	Convert(cpy, *this, targetFormat);
 }
-void uimg::ImageBuffer::Convert(ImageBuffer &dst) { Convert(*this, dst, dst.GetFormat()); }
-void uimg::ImageBuffer::SwapChannels(ChannelMask swizzle)
+void pragma::image::ImageBuffer::Convert(ImageBuffer &dst) { Convert(*this, dst, dst.GetFormat()); }
+void pragma::image::ImageBuffer::SwapChannels(ChannelMask swizzle)
 {
 	if(swizzle == ChannelMask {})
 		return;
@@ -597,26 +597,26 @@ void uimg::ImageBuffer::SwapChannels(ChannelMask swizzle)
 		auto *channelData = static_cast<uint8_t *>(pxData);
 
 		for(auto i = decltype(numChannels) {0u}; i < numChannels; ++i)
-			memcpy(tmpChannelData.data() + i * channelSize, channelData + umath::to_integral(swizzle[i]) * channelSize, channelSize);
+			memcpy(tmpChannelData.data() + i * channelSize, channelData + pragma::math::to_integral(swizzle[i]) * channelSize, channelSize);
 
 		memcpy(channelData, tmpChannelData.data(), pxSize);
 	}
 }
-void uimg::ImageBuffer::SwapChannels(Channel channel0, Channel channel1)
+void pragma::image::ImageBuffer::SwapChannels(Channel channel0, Channel channel1)
 {
 	auto channelSize = GetChannelSize();
 	std::vector<uint8_t> tmpChannelData {};
 	tmpChannelData.resize(channelSize);
 	for(auto &px : *this) {
 		auto *pxData = px.GetPixelData();
-		auto &channelData0 = *(static_cast<uint8_t *>(pxData) + umath::to_integral(channel0) * channelSize);
-		auto &channelData1 = *(static_cast<uint8_t *>(pxData) + umath::to_integral(channel1) * channelSize);
+		auto &channelData0 = *(static_cast<uint8_t *>(pxData) + pragma::math::to_integral(channel0) * channelSize);
+		auto &channelData1 = *(static_cast<uint8_t *>(pxData) + pragma::math::to_integral(channel1) * channelSize);
 		memcpy(tmpChannelData.data(), &channelData0, channelSize);
 		memcpy(&channelData0, &channelData1, channelSize);
 		memcpy(&channelData1, tmpChannelData.data(), channelSize);
 	}
 }
-void uimg::ImageBuffer::ToLDR()
+void pragma::image::ImageBuffer::ToLDR()
 {
 	switch(m_format) {
 	case Format::R16:
@@ -636,9 +636,9 @@ void uimg::ImageBuffer::ToLDR()
 		Convert(Format::RGBA8);
 		return;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 }
-void uimg::ImageBuffer::ToHDR()
+void pragma::image::ImageBuffer::ToHDR()
 {
 	switch(m_format) {
 	case Format::R8:
@@ -658,9 +658,9 @@ void uimg::ImageBuffer::ToHDR()
 		Convert(Format::RGBA16);
 		return;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 }
-void uimg::ImageBuffer::ToFloat()
+void pragma::image::ImageBuffer::ToFloat()
 {
 	switch(m_format) {
 	case Format::R8:
@@ -680,17 +680,17 @@ void uimg::ImageBuffer::ToFloat()
 		Convert(Format::RGBA32);
 		return;
 	}
-	static_assert(umath::to_integral(Format::Count) == 13u);
+	static_assert(pragma::math::to_integral(Format::Count) == 13u);
 }
-void uimg::ImageBuffer::Clear(const Color &color) { Clear(color.ToVector4()); }
-void uimg::ImageBuffer::Clear(const Vector4 &color)
+void pragma::image::ImageBuffer::Clear(const Color &color) { Clear(color.ToVector4()); }
+void pragma::image::ImageBuffer::Clear(const Vector4 &color)
 {
 	for(auto &px : *this) {
 		for(uint8_t i = 0; i < 4; ++i)
 			px.SetValue(static_cast<Channel>(i), color[i]);
 	}
 }
-void uimg::ImageBuffer::ClearAlpha(LDRValue alpha)
+void pragma::image::ImageBuffer::ClearAlpha(LDRValue alpha)
 {
 	if(HasAlphaChannel() == false)
 		return;
@@ -712,94 +712,94 @@ void uimg::ImageBuffer::ClearAlpha(LDRValue alpha)
 		return;
 	}
 }
-uimg::ImageBuffer::Size uimg::ImageBuffer::GetSize() const { return GetPixelCount() * GetPixelSize(GetFormat()); }
-void uimg::ImageBuffer::Read(Offset offset, Size size, void *outData)
+pragma::image::ImageBuffer::Size pragma::image::ImageBuffer::GetSize() const { return GetPixelCount() * GetPixelSize(GetFormat()); }
+void pragma::image::ImageBuffer::Read(Offset offset, Size size, void *outData)
 {
 	auto *srcPtr = static_cast<uint8_t *>(m_data.get()) + offset;
 	memcpy(outData, srcPtr, size);
 }
-void uimg::ImageBuffer::Write(Offset offset, Size size, const void *inData)
+void pragma::image::ImageBuffer::Write(Offset offset, Size size, const void *inData)
 {
 	auto *dstPtr = static_cast<uint8_t *>(m_data.get()) + offset;
 	memcpy(dstPtr, inData, size);
 }
-void uimg::ImageBuffer::Resize(Size width, Size height, EdgeAddressMode addressMode, Filter filter, ColorSpace colorSpace)
+void pragma::image::ImageBuffer::Resize(Size width, Size height, EdgeAddressMode addressMode, Filter filter, ColorSpace colorSpace)
 {
 	if(width == m_width && height == m_height)
 		return;
 	auto imgResized = Create(width, height, GetFormat());
 	stbir_datatype stformat;
 	if(IsLDRFormat())
-		stformat = stbir_datatype::STBIR_TYPE_UINT8;
+		stformat = STBIR_TYPE_UINT8;
 	else if(IsHDRFormat())
-		stformat = stbir_datatype::STBIR_TYPE_UINT16;
+		stformat = STBIR_TYPE_UINT16;
 	else if(IsFloatFormat())
-		stformat = stbir_datatype::STBIR_TYPE_FLOAT;
+		stformat = STBIR_TYPE_FLOAT;
 	else
 		return;
 
 	stbir_edge stedge;
 	switch(addressMode) {
 	case EdgeAddressMode::Clamp:
-		stedge = stbir_edge::STBIR_EDGE_CLAMP;
+		stedge = STBIR_EDGE_CLAMP;
 		break;
 	case EdgeAddressMode::Reflect:
-		stedge = stbir_edge::STBIR_EDGE_REFLECT;
+		stedge = STBIR_EDGE_REFLECT;
 		break;
 	case EdgeAddressMode::Wrap:
-		stedge = stbir_edge::STBIR_EDGE_WRAP;
+		stedge = STBIR_EDGE_WRAP;
 		break;
 	case EdgeAddressMode::Zero:
-		stedge = stbir_edge::STBIR_EDGE_ZERO;
+		stedge = STBIR_EDGE_ZERO;
 		break;
 	}
-	static_assert(umath::to_integral(EdgeAddressMode::Count) == 4);
+	static_assert(pragma::math::to_integral(EdgeAddressMode::Count) == 4);
 
 	stbir_filter stfilter;
 	switch(filter) {
 	case Filter::Default:
-		stfilter = stbir_filter::STBIR_FILTER_DEFAULT;
+		stfilter = STBIR_FILTER_DEFAULT;
 		break;
 	case Filter::Box:
-		stfilter = stbir_filter::STBIR_FILTER_BOX;
+		stfilter = STBIR_FILTER_BOX;
 		break;
 	case Filter::Triangle:
-		stfilter = stbir_filter::STBIR_FILTER_TRIANGLE;
+		stfilter = STBIR_FILTER_TRIANGLE;
 		break;
 	case Filter::CubicBSpline:
-		stfilter = stbir_filter::STBIR_FILTER_CUBICBSPLINE;
+		stfilter = STBIR_FILTER_CUBICBSPLINE;
 		break;
 	case Filter::CatmullRom:
-		stfilter = stbir_filter::STBIR_FILTER_CATMULLROM;
+		stfilter = STBIR_FILTER_CATMULLROM;
 		break;
 	case Filter::Mitchell:
-		stfilter = stbir_filter::STBIR_FILTER_MITCHELL;
+		stfilter = STBIR_FILTER_MITCHELL;
 		break;
 	}
-	static_assert(umath::to_integral(Filter::Count) == 6);
+	static_assert(pragma::math::to_integral(Filter::Count) == 6);
 
 	stbir_colorspace stColorspace;
 	switch(colorSpace) {
 	case ColorSpace::Auto:
-		stColorspace = !IsLDRFormat() ? stbir_colorspace::STBIR_COLORSPACE_LINEAR : stbir_colorspace::STBIR_COLORSPACE_SRGB;
+		stColorspace = !IsLDRFormat() ? STBIR_COLORSPACE_LINEAR : STBIR_COLORSPACE_SRGB;
 		break;
 	case ColorSpace::Linear:
-		stColorspace = stbir_colorspace::STBIR_COLORSPACE_LINEAR;
+		stColorspace = STBIR_COLORSPACE_LINEAR;
 		break;
 	case ColorSpace::SRGB:
-		stColorspace = stbir_colorspace::STBIR_COLORSPACE_SRGB;
+		stColorspace = STBIR_COLORSPACE_SRGB;
 		break;
 	}
-	static_assert(umath::to_integral(ColorSpace::Count) == 3);
+	static_assert(pragma::math::to_integral(ColorSpace::Count) == 3);
 
 	auto res = stbir_resize(static_cast<uint8_t *>(GetData()), GetWidth(), GetHeight(), 0 /* stride */, static_cast<uint8_t *>(imgResized->GetData()), imgResized->GetWidth(), imgResized->GetHeight(), 0 /* stride */, stformat, GetChannelCount(),
-	  HasAlphaChannel() ? umath::to_integral(Channel::Alpha) : STBIR_ALPHA_CHANNEL_NONE, 0 /* flags */, stedge, stedge, stfilter, stfilter, stColorspace, nullptr);
+	  HasAlphaChannel() ? pragma::math::to_integral(Channel::Alpha) : STBIR_ALPHA_CHANNEL_NONE, 0 /* flags */, stedge, stedge, stfilter, stfilter, stColorspace, nullptr);
 	if(res == 0)
 		return;
 	*this = *imgResized;
 }
 
-std::ostream &operator<<(std::ostream &out, const uimg::ImageBuffer &o)
+std::ostream &operator<<(std::ostream &out, const pragma::image::ImageBuffer &o)
 {
 	out << "ImageBuffer";
 	out << "[Format:" << magic_enum::enum_name(o.GetFormat()) << "]";

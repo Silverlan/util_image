@@ -9,7 +9,7 @@ export module pragma.image:compressors.nvtt;
 
 export import :compressor;
 
-export namespace uimg {
+export namespace pragma::image {
 	class NvttTextureCompressor : public ITextureCompressor {
 	  public:
 		static std::unique_ptr<ITextureCompressor> Create();

@@ -12,7 +12,7 @@ export import :types;
 export import pragma.util;
 
 export {
-	namespace uimg {
+	namespace pragma::image {
 		class ImageBuffer;
 		struct TextureInfo;
 
@@ -47,7 +47,7 @@ export {
 			std::function<void()> endImage = nullptr;
 		};
 		struct DLLUIMG TextureSaveInfo {
-			uimg::TextureInfo texInfo {};
+			TextureInfo texInfo {};
 
 			// Only needed if no image buffer was specified
 			uint32_t width = 0;
@@ -59,7 +59,7 @@ export {
 			uint32_t numMipmaps = 0;
 
 			bool cubemap = false;
-			std::optional<uimg::ChannelMask> channelMask {};
+			std::optional<ChannelMask> channelMask {};
 
 			std::optional<CompressorLibrary> compressorLibrary {};
 		};
@@ -69,7 +69,7 @@ export {
 		DLLUIMG bool save_texture(const std::string &fileName, const std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> &fGetImgData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler = nullptr,
 		  bool absoluteFileName = false);
 		DLLUIMG bool save_texture(ufile::IFile &f, ImageBuffer &imgBuffer, const TextureSaveInfo &texInfo);
-		DLLUIMG bool save_texture(const std::string &fileName, uimg::ImageBuffer &imgBuffer, const TextureSaveInfo &texInfo, const std::function<void(const std::string &)> &errorHandler = nullptr, bool absoluteFileName = false);
+		DLLUIMG bool save_texture(const std::string &fileName, ImageBuffer &imgBuffer, const TextureSaveInfo &texInfo, const std::function<void(const std::string &)> &errorHandler = nullptr, bool absoluteFileName = false);
 		DLLUIMG bool save_texture(const std::string &fileName, const std::vector<std::vector<const void *>> &imgLayerMipmapData, const TextureSaveInfo &texSaveInfo, const std::function<void(const std::string &)> &errorHandler = nullptr, bool absoluteFileName = false);
 #endif
 		DLLUIMG std::optional<ImageFormat> string_to_image_output_format(const std::string &str);

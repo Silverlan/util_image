@@ -11,7 +11,7 @@ export module pragma.image:texture_info;
 import pragma.math;
 
 export {
-	namespace uimg {
+	namespace pragma::image {
 		struct DLLUIMG TextureInfo {
 			enum class InputFormat : uint8_t { KeepInputImageFormat = 0u, R8G8B8A8_UInt, R16G16B16A16_Float, R32G32B32A32_Float, R32_Float, B8G8R8A8_UInt, Count };
 			enum class OutputFormat : uint8_t {
@@ -85,8 +85,8 @@ export {
 		  private:
 			bool m_normalMap = false;
 		};
-		DLLUIMG std::string get_absolute_path(const std::string &fileName, uimg::TextureInfo::ContainerFormat containerFormat);
-		using namespace umath::scoped_enum::bitwise;
+		DLLUIMG std::string get_absolute_path(const std::string &fileName, TextureInfo::ContainerFormat containerFormat);
+		using namespace pragma::math::scoped_enum::bitwise;
 	};
-	REGISTER_ENUM_FLAGS(uimg::TextureInfo::Flags)
+	REGISTER_ENUM_FLAGS(pragma::image::TextureInfo::Flags)
 }

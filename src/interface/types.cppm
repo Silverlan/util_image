@@ -9,7 +9,7 @@ export module pragma.image:types;
 
 export import std.compat;
 
-export namespace uimg {
+export namespace pragma::image {
 	enum class Format : uint8_t {
 		None = 0u,
 

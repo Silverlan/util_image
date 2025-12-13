@@ -14,18 +14,18 @@ module pragma.image;
 import :core;
 import pragma.filesystem;
 
-void uimg::ChannelMask::Reverse() { *this = GetReverse(); }
-uimg::ChannelMask uimg::ChannelMask::GetReverse() const
+void pragma::image::ChannelMask::Reverse() { *this = GetReverse(); }
+pragma::image::ChannelMask pragma::image::ChannelMask::GetReverse() const
 {
-	uimg::ChannelMask rmask;
+	ChannelMask rmask;
 	rmask.red = alpha;
 	rmask.green = blue;
 	rmask.blue = green;
 	rmask.alpha = red;
 	return rmask;
 }
-void uimg::ChannelMask::SwapChannels(Channel a, Channel b) { umath::swap((*this)[umath::to_integral(a)], (*this)[umath::to_integral(b)]); }
-std::optional<uint8_t> uimg::ChannelMask::GetChannelIndex(Channel channel) const
+void pragma::image::ChannelMask::SwapChannels(Channel a, Channel b) { pragma::math::swap((*this)[pragma::math::to_integral(a)], (*this)[pragma::math::to_integral(b)]); }
+std::optional<uint8_t> pragma::image::ChannelMask::GetChannelIndex(Channel channel) const
 {
 	if(red == channel)
 		return 0;
@@ -40,7 +40,7 @@ std::optional<uint8_t> uimg::ChannelMask::GetChannelIndex(Channel channel) const
 
 ///////////
 
-void uimg::calculate_mipmap_size(uint32_t w, uint32_t h, uint32_t &outWMipmap, uint32_t &outHMipmap, uint32_t level)
+void pragma::image::calculate_mipmap_size(uint32_t w, uint32_t h, uint32_t &outWMipmap, uint32_t &outHMipmap, uint32_t level)
 {
 	outWMipmap = w;
 	outHMipmap = h;
@@ -53,24 +53,24 @@ void uimg::calculate_mipmap_size(uint32_t w, uint32_t h, uint32_t &outWMipmap, u
 		outHMipmap = 1;
 }
 
-uint32_t uimg::calculate_mipmap_count(uint32_t w, uint32_t h) { return 1 + static_cast<uint32_t>(floor(log2(fmaxf(static_cast<float>(w), static_cast<float>(h))))); }
+uint32_t pragma::image::calculate_mipmap_count(uint32_t w, uint32_t h) { return 1 + static_cast<uint32_t>(floor(log2(fmaxf(static_cast<float>(w), static_cast<float>(h))))); }
 
-std::optional<uimg::ImageFormat> uimg::string_to_image_output_format(const std::string &str)
+std::optional<pragma::image::ImageFormat> pragma::image::string_to_image_output_format(const std::string &str)
 {
-	if(ustring::compare<std::string>(str, "PNG", false))
+	if(pragma::string::compare<std::string>(str, "PNG", false))
 		return ImageFormat::PNG;
-	else if(ustring::compare<std::string>(str, "BMP", false))
+	else if(pragma::string::compare<std::string>(str, "BMP", false))
 		return ImageFormat::BMP;
-	else if(ustring::compare<std::string>(str, "TGA", false))
+	else if(pragma::string::compare<std::string>(str, "TGA", false))
 		return ImageFormat::TGA;
-	else if(ustring::compare<std::string>(str, "JPG", false))
+	else if(pragma::string::compare<std::string>(str, "JPG", false))
 		return ImageFormat::JPG;
-	else if(ustring::compare<std::string>(str, "HDR", false))
+	else if(pragma::string::compare<std::string>(str, "HDR", false))
 		return ImageFormat::HDR;
 	return {};
 }
 
-std::string uimg::get_image_output_format_extension(ImageFormat format)
+std::string pragma::image::get_image_output_format_extension(ImageFormat format)
 {
 	switch(format) {
 	case ImageFormat::PNG:
@@ -89,24 +89,24 @@ std::string uimg::get_image_output_format_extension(ImageFormat format)
 	return "";
 }
 
-std::optional<uimg::ToneMapping> uimg::string_to_tone_mapping(const std::string &str)
+std::optional<pragma::image::ToneMapping> pragma::image::string_to_tone_mapping(const std::string &str)
 {
-	if(ustring::compare<std::string>(str, "gamma_correction", false))
-		return uimg::ToneMapping::GammaCorrection;
-	else if(ustring::compare<std::string>(str, "reinhard", false))
-		return uimg::ToneMapping::Reinhard;
-	else if(ustring::compare<std::string>(str, "hejil_richard", false))
-		return uimg::ToneMapping::HejilRichard;
-	else if(ustring::compare<std::string>(str, "uncharted", false))
-		return uimg::ToneMapping::Uncharted;
-	else if(ustring::compare<std::string>(str, "aces", false))
-		return uimg::ToneMapping::Aces;
-	else if(ustring::compare<std::string>(str, "gran_turismo", false))
-		return uimg::ToneMapping::GranTurismo;
+	if(pragma::string::compare<std::string>(str, "gamma_correction", false))
+		return ToneMapping::GammaCorrection;
+	else if(pragma::string::compare<std::string>(str, "reinhard", false))
+		return ToneMapping::Reinhard;
+	else if(pragma::string::compare<std::string>(str, "hejil_richard", false))
+		return ToneMapping::HejilRichard;
+	else if(pragma::string::compare<std::string>(str, "uncharted", false))
+		return ToneMapping::Uncharted;
+	else if(pragma::string::compare<std::string>(str, "aces", false))
+		return ToneMapping::Aces;
+	else if(pragma::string::compare<std::string>(str, "gran_turismo", false))
+		return ToneMapping::GranTurismo;
 	return {};
 }
 
-std::string uimg::get_file_extension(ImageFormat format)
+std::string pragma::image::get_file_extension(ImageFormat format)
 {
 	switch(format) {
 	case ImageFormat::PNG:
@@ -122,20 +122,20 @@ std::string uimg::get_file_extension(ImageFormat format)
 	default:
 		break;
 	}
-	static_assert(umath::to_integral(ImageFormat::Count) == 5);
+	static_assert(pragma::math::to_integral(ImageFormat::Count) == 5);
 	return "";
 }
 
-std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(const std::string &fileName, PixelFormat pixelFormat, bool flipVertically)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::load_image(const std::string &fileName, PixelFormat pixelFormat, bool flipVertically)
 {
-	auto fp = FileManager::OpenFile(fileName.c_str(), "rb");
+	auto fp = fs::open_file(fileName.c_str(), fs::FileMode::Read | fs::FileMode::Binary);
 	if(fp == nullptr)
 		return nullptr;
-	fsys::File f {fp};
+	fs::File f {fp};
 	return load_image(f, pixelFormat, flipVertically);
 }
 
-std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(ufile::IFile &f, PixelFormat pixelFormat, bool flipVertically)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::load_image(ufile::IFile &f, PixelFormat pixelFormat, bool flipVertically)
 {
 	int width, height, nrComponents;
 	stbi_io_callbacks ioCallbacks {};
@@ -146,24 +146,24 @@ std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(ufile::IFile &f, PixelForm
 	};
 	ioCallbacks.eof = [](void *user) -> int { return static_cast<ufile::IFile *>(user)->Eof(); };
 	stbi_set_flip_vertically_on_load(flipVertically);
-	std::shared_ptr<::uimg::ImageBuffer> imgBuffer = nullptr;
+	std::shared_ptr<ImageBuffer> imgBuffer = nullptr;
 	switch(pixelFormat) {
 	case PixelFormat::LDR:
 		{
 			auto *data = stbi_load_from_callbacks(&ioCallbacks, &f, &width, &height, &nrComponents, 4);
-			imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data, width, height, uimg::Format::RGBA8, [](void *data) { stbi_image_free(data); }) : nullptr;
+			imgBuffer = data ? ImageBuffer::CreateWithCustomDeleter(data, width, height, Format::RGBA8, [](void *data) { stbi_image_free(data); }) : nullptr;
 			break;
 		}
 	case PixelFormat::HDR:
 		{
 			auto *data = stbi_load_16_from_callbacks(&ioCallbacks, &f, &width, &height, &nrComponents, 4);
-			imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data, width, height, uimg::Format::RGBA16, [](void *data) { stbi_image_free(data); }) : nullptr;
+			imgBuffer = data ? ImageBuffer::CreateWithCustomDeleter(data, width, height, Format::RGBA16, [](void *data) { stbi_image_free(data); }) : nullptr;
 			break;
 		}
 	case PixelFormat::Float:
 		{
 			auto *data = stbi_loadf_from_callbacks(&ioCallbacks, &f, &width, &height, &nrComponents, 4);
-			imgBuffer = data ? uimg::ImageBuffer::CreateWithCustomDeleter(data, width, height, uimg::Format::RGBA32, [](void *data) { stbi_image_free(data); }) : nullptr;
+			imgBuffer = data ? ImageBuffer::CreateWithCustomDeleter(data, width, height, Format::RGBA32, [](void *data) { stbi_image_free(data); }) : nullptr;
 			break;
 		}
 	}
@@ -171,16 +171,16 @@ std::shared_ptr<::uimg::ImageBuffer> uimg::load_image(ufile::IFile &f, PixelForm
 	return imgBuffer;
 }
 
-bool uimg::save_image(ufile::IFile &f, ::uimg::ImageBuffer &imgBuffer, ImageFormat format, float quality, bool flipVertically)
+bool pragma::image::save_image(ufile::IFile &f, ImageBuffer &imgBuffer, ImageFormat format, float quality, bool flipVertically)
 {
 	auto *fptr = &f;
 
 	auto imgFormat = imgBuffer.GetFormat();
-	// imgFormat = ::uimg::ImageBuffer::ToRGBFormat(imgFormat);
+	// imgFormat = ::pragma::image::ImageBuffer::ToRGBFormat(imgFormat);
 	if(format != ImageFormat::HDR)
-		imgFormat = ::uimg::ImageBuffer::ToLDRFormat(imgFormat);
+		imgFormat = ImageBuffer::ToLDRFormat(imgFormat);
 	else
-		imgFormat = ::uimg::ImageBuffer::ToFloatFormat(imgFormat);
+		imgFormat = ImageBuffer::ToFloatFormat(imgFormat);
 	imgBuffer.Convert(imgFormat);
 	auto w = imgBuffer.GetWidth();
 	auto h = imgBuffer.GetHeight();
@@ -222,7 +222,7 @@ bool uimg::save_image(ufile::IFile &f, ::uimg::ImageBuffer &imgBuffer, ImageForm
 }
 
 #ifdef UIMG_ENABLE_SVG
-std::shared_ptr<uimg::ImageBuffer> uimg::load_svg(ufile::IFile &f, const SvgImageInfo &svgInfo)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::load_svg(ufile::IFile &f, const SvgImageInfo &svgInfo)
 {
 	std::vector<uint8_t> data;
 	data.resize(f.GetSize());
@@ -237,14 +237,14 @@ std::shared_ptr<uimg::ImageBuffer> uimg::load_svg(ufile::IFile &f, const SvgImag
 	if(bitmap.isNull())
 		return nullptr;
 	bitmap.convertToRGBA();
-	return uimg::ImageBuffer::Create(bitmap.data(), bitmap.width(), bitmap.height(), uimg::Format::RGBA8, false);
+	return ImageBuffer::Create(bitmap.data(), bitmap.width(), bitmap.height(), Format::RGBA8, false);
 }
-std::shared_ptr<uimg::ImageBuffer> uimg::load_svg(const std::string &fileName, const SvgImageInfo &svgInfo)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::load_svg(const std::string &fileName, const SvgImageInfo &svgInfo)
 {
-	auto fp = filemanager::open_file(fileName.c_str(), filemanager::FileMode::Read | filemanager::FileMode::Binary);
+	auto fp = fs::open_file(fileName.c_str(), fs::FileMode::Read | fs::FileMode::Binary);
 	if(fp == nullptr)
 		return nullptr;
-	fsys::File f {fp};
+	fs::File f {fp};
 	return load_svg(f, svgInfo);
 }
 #endif

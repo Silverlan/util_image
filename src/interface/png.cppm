@@ -7,9 +7,9 @@ export module pragma.image:png;
 
 export import pragma.filesystem;
 
-export namespace uimg {
+export namespace pragma::image {
 	class ImageBuffer;
 	namespace impl {
-		std::shared_ptr<ImageBuffer> load_png_image(std::shared_ptr<VFilePtrInternal> &file);
+		std::shared_ptr<ImageBuffer> load_png_image(std::shared_ptr<fs::VFilePtrInternal> &file);
 	};
 };

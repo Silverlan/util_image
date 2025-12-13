@@ -18,15 +18,15 @@ export import :core;
 
 #endif
 
-export namespace uimg {
+export namespace pragma::image {
 	class ITextureCompressor {
 	  public:
 		static std::unique_ptr<ITextureCompressor> Create(CompressorLibrary libType);
 		struct CompressInfo {
 			std::function<const uint8_t *(uint32_t, uint32_t, std::function<void()> &)> getImageData;
 			std::function<void(const std::string &)> errorHandler;
-			uimg::TextureSaveInfo textureSaveInfo;
-			std::variant<uimg::TextureOutputHandler, std::string> outputHandler;
+			TextureSaveInfo textureSaveInfo;
+			std::variant<TextureOutputHandler, std::string> outputHandler;
 			uint32_t width;
 			uint32_t height;
 			uint32_t numMipmaps;

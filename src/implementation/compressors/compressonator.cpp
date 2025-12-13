@@ -12,62 +12,62 @@ module pragma.image;
 
 import :compressors.compressonator;
 
-static std::optional<CMP_FORMAT> to_cmp_enum(uimg::TextureInfo::OutputFormat format)
+static std::optional<CMP_FORMAT> to_cmp_enum(image::TextureInfo::OutputFormat format)
 {
 	switch(format) {
-	case uimg::TextureInfo::OutputFormat::RGB:
+	case image::TextureInfo::OutputFormat::RGB:
 		return CMP_FORMAT_RGB_888;
-	case uimg::TextureInfo::OutputFormat::RGBA:
+	case image::TextureInfo::OutputFormat::RGBA:
 		return CMP_FORMAT_RGBA_8888;
-	case uimg::TextureInfo::OutputFormat::DXT1:
+	case image::TextureInfo::OutputFormat::DXT1:
 		return CMP_FORMAT_DXT1;
-	case uimg::TextureInfo::OutputFormat::DXT1a:
+	case image::TextureInfo::OutputFormat::DXT1a:
 		return CMP_FORMAT_DXT1;
-	case uimg::TextureInfo::OutputFormat::DXT3:
+	case image::TextureInfo::OutputFormat::DXT3:
 		return CMP_FORMAT_DXT3;
-	case uimg::TextureInfo::OutputFormat::DXT5:
+	case image::TextureInfo::OutputFormat::DXT5:
 		return CMP_FORMAT_DXT5;
-	case uimg::TextureInfo::OutputFormat::DXT5n:
+	case image::TextureInfo::OutputFormat::DXT5n:
 		return CMP_FORMAT_DXT5;
-	case uimg::TextureInfo::OutputFormat::BC1:
+	case image::TextureInfo::OutputFormat::BC1:
 		return CMP_FORMAT_BC1;
-	case uimg::TextureInfo::OutputFormat::BC1a:
+	case image::TextureInfo::OutputFormat::BC1a:
 		return CMP_FORMAT_BC1;
-	case uimg::TextureInfo::OutputFormat::BC2:
+	case image::TextureInfo::OutputFormat::BC2:
 		return CMP_FORMAT_BC2;
-	case uimg::TextureInfo::OutputFormat::BC3:
+	case image::TextureInfo::OutputFormat::BC3:
 		return CMP_FORMAT_BC3;
-	case uimg::TextureInfo::OutputFormat::BC3n:
+	case image::TextureInfo::OutputFormat::BC3n:
 		return CMP_FORMAT_BC3;
-	case uimg::TextureInfo::OutputFormat::BC4:
+	case image::TextureInfo::OutputFormat::BC4:
 		return CMP_FORMAT_BC4;
-	case uimg::TextureInfo::OutputFormat::BC5:
+	case image::TextureInfo::OutputFormat::BC5:
 		return CMP_FORMAT_BC5;
-	case uimg::TextureInfo::OutputFormat::DXT1n:
+	case image::TextureInfo::OutputFormat::DXT1n:
 		return CMP_FORMAT_BC1;
-	case uimg::TextureInfo::OutputFormat::CTX1:
+	case image::TextureInfo::OutputFormat::CTX1:
 		return CMP_FORMAT_BC1;
-	case uimg::TextureInfo::OutputFormat::BC6:
+	case image::TextureInfo::OutputFormat::BC6:
 		return CMP_FORMAT_BC6H;
-	case uimg::TextureInfo::OutputFormat::BC7:
+	case image::TextureInfo::OutputFormat::BC7:
 		return CMP_FORMAT_BC7;
-	case uimg::TextureInfo::OutputFormat::BC3_RGBM:
+	case image::TextureInfo::OutputFormat::BC3_RGBM:
 		return CMP_FORMAT_BC3;
-	case uimg::TextureInfo::OutputFormat::ETC1:
+	case image::TextureInfo::OutputFormat::ETC1:
 		return CMP_FORMAT_ETC_RGB;
-	case uimg::TextureInfo::OutputFormat::ETC2_R:
+	case image::TextureInfo::OutputFormat::ETC2_R:
 		return CMP_FORMAT_ETC2_RGB;
-	case uimg::TextureInfo::OutputFormat::ETC2_RG:
+	case image::TextureInfo::OutputFormat::ETC2_RG:
 		return CMP_FORMAT_ETC2_RGB;
-	case uimg::TextureInfo::OutputFormat::ETC2_RGB:
+	case image::TextureInfo::OutputFormat::ETC2_RGB:
 		return CMP_FORMAT_ETC2_RGB;
-	case uimg::TextureInfo::OutputFormat::ETC2_RGBA:
+	case image::TextureInfo::OutputFormat::ETC2_RGBA:
 		return CMP_FORMAT_ETC2_RGBA;
-	case uimg::TextureInfo::OutputFormat::ETC2_RGB_A1:
+	case image::TextureInfo::OutputFormat::ETC2_RGB_A1:
 		return CMP_FORMAT_ETC2_RGBA1;
-	case uimg::TextureInfo::OutputFormat::ETC2_RGBM:
+	case image::TextureInfo::OutputFormat::ETC2_RGBM:
 		return {};
-	case uimg::TextureInfo::OutputFormat::KeepInputImageFormat:
+	case image::TextureInfo::OutputFormat::KeepInputImageFormat:
 		break;
 	}
 
@@ -75,20 +75,20 @@ static std::optional<CMP_FORMAT> to_cmp_enum(uimg::TextureInfo::OutputFormat for
 	return {};
 }
 
-static std::optional<CMP_FORMAT> to_cmp_enum(uimg::TextureInfo::InputFormat format)
+static std::optional<CMP_FORMAT> to_cmp_enum(image::TextureInfo::InputFormat format)
 {
 	switch(format) {
-	case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
+	case image::TextureInfo::InputFormat::B8G8R8A8_UInt:
 		return CMP_FORMAT_BGRA_8888;
-	case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
+	case image::TextureInfo::InputFormat::R8G8B8A8_UInt:
 		return CMP_FORMAT_RGBA_8888;
-	case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
+	case image::TextureInfo::InputFormat::R16G16B16A16_Float:
 		return CMP_FORMAT_RGBA_16F;
-	case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
+	case image::TextureInfo::InputFormat::R32G32B32A32_Float:
 		return CMP_FORMAT_RGBA_32F;
-	case uimg::TextureInfo::InputFormat::R32_Float:
+	case image::TextureInfo::InputFormat::R32_Float:
 		return CMP_FORMAT_R_32F;
-	case uimg::TextureInfo::InputFormat::KeepInputImageFormat:
+	case image::TextureInfo::InputFormat::KeepInputImageFormat:
 		break;
 	}
 	return {};
@@ -160,54 +160,54 @@ static std::string cmp_result_to_string(CMP_ERROR err)
 	}
 }
 
-static std::optional<CMP_ChannelFormat> get_cmp_channel_format(uimg::TextureInfo::InputFormat inputFormat)
+static std::optional<CMP_ChannelFormat> get_cmp_channel_format(image::TextureInfo::InputFormat inputFormat)
 {
 	switch(inputFormat) {
-	case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
-	case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
+	case image::TextureInfo::InputFormat::R8G8B8A8_UInt:
+	case image::TextureInfo::InputFormat::B8G8R8A8_UInt:
 		return CMP_ChannelFormat::CF_8bit;
-	case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
+	case image::TextureInfo::InputFormat::R16G16B16A16_Float:
 		return CMP_ChannelFormat::CF_16bit;
-	case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
-	case uimg::TextureInfo::InputFormat::R32_Float:
+	case image::TextureInfo::InputFormat::R32G32B32A32_Float:
+	case image::TextureInfo::InputFormat::R32_Float:
 		return CMP_ChannelFormat::CF_Float32;
 	}
 	return {};
 }
 
-static std::optional<uint8_t> get_cmp_format_pixel_size(uimg::TextureInfo::InputFormat inputFormat)
+static std::optional<uint8_t> get_cmp_format_pixel_size(image::TextureInfo::InputFormat inputFormat)
 {
 	switch(inputFormat) {
-	case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
-	case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
+	case image::TextureInfo::InputFormat::R8G8B8A8_UInt:
+	case image::TextureInfo::InputFormat::B8G8R8A8_UInt:
 		return 4;
-	case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
+	case image::TextureInfo::InputFormat::R16G16B16A16_Float:
 		return 8;
-	case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
+	case image::TextureInfo::InputFormat::R32G32B32A32_Float:
 		return 16;
-	case uimg::TextureInfo::InputFormat::R32_Float:
+	case image::TextureInfo::InputFormat::R32_Float:
 		return 4;
 	}
 	return {};
 }
 
-static std::optional<CMP_TextureDataType> get_cmp_texture_data_type(const uimg::TextureInfo &texInfo)
+static std::optional<CMP_TextureDataType> get_cmp_texture_data_type(const image::TextureInfo &texInfo)
 {
 	if(texInfo.IsNormalMap())
 		return CMP_TextureDataType::TDT_NORMAL_MAP;
 	switch(texInfo.inputFormat) {
-	case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
-	case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
-	case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
-	case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
+	case image::TextureInfo::InputFormat::R8G8B8A8_UInt:
+	case image::TextureInfo::InputFormat::B8G8R8A8_UInt:
+	case image::TextureInfo::InputFormat::R16G16B16A16_Float:
+	case image::TextureInfo::InputFormat::R32G32B32A32_Float:
 		return CMP_TextureDataType::TDT_ARGB;
-	case uimg::TextureInfo::InputFormat::R32_Float:
+	case image::TextureInfo::InputFormat::R32_Float:
 		return CMP_TextureDataType::TDT_R;
 	}
 	return {};
 }
 
-static std::optional<CMP_TextureType> get_cmp_texture_type(const uimg::TextureSaveInfo &texInfo)
+static std::optional<CMP_TextureType> get_cmp_texture_type(const image::TextureSaveInfo &texInfo)
 {
 	if(texInfo.cubemap)
 		return CMP_TextureType::TT_CubeMap;
@@ -222,7 +222,7 @@ static void PrintDetails(char* data) {
 }
 #endif
 
-std::optional<uimg::ITextureCompressor::ResultData> uimg::CompressonatorTextureCompressor::Compress(const CompressInfo &compressInfo)
+std::optional<image::ITextureCompressor::ResultData> image::CompressonatorTextureCompressor::Compress(const CompressInfo &compressInfo)
 {
 	CMP_InitFramework();
 
@@ -290,7 +290,7 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::CompressonatorTextureC
 		return {};
 	}
 	ms.m_format = *origFormat;
-	util::ScopeGuard sgMs {[&cmips, &ms]() { cmips.FreeMipSet(&ms); }};
+	pragma::util::ScopeGuard sgMs {[&cmips, &ms]() { cmips.FreeMipSet(&ms); }};
 	for(auto l = decltype(compressInfo.numLayers) {0u}; l < compressInfo.numLayers; ++l) {
 		for(auto m = decltype(compressInfo.numMipmaps) {0u}; m < compressInfo.numMipmaps; ++m) {
 			std::function<void(void)> deleter = nullptr;
@@ -321,7 +321,7 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::CompressonatorTextureC
 	}
 	ms.m_nMipLevels = compressInfo.numMipmaps;
 
-	if(umath::is_flag_set(texInfo.flags, uimg::TextureInfo::Flags::GenerateMipmaps)) {
+	if(pragma::math::is_flag_set(texInfo.flags, TextureInfo::Flags::GenerateMipmaps)) {
 		auto resMip = CMP_GenerateMIPLevels(&ms, 1);
 		if(resMip != CMP_OK) {
 			// CMP_GenerateMIPLevels returns a CMP_INT, even though the return values are CMP_ERROR. Reason unclear.
@@ -341,12 +341,12 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::CompressonatorTextureC
 		compressInfo.errorHandler(cmp_result_to_string(err));
 		return {};
 	}
-	util::ScopeGuard sgMsProcessed {[&msProcessed]() { CMP_FreeMipSet(&msProcessed); }};
+	pragma::util::ScopeGuard sgMsProcessed {[&msProcessed]() { CMP_FreeMipSet(&msProcessed); }};
 	ResultData resultData {};
 	auto &outputHandler = compressInfo.outputHandler;
 	if(outputHandler.index() == 0) {
-		auto &texOutputHandler = std::get<uimg::TextureOutputHandler>(outputHandler);
-		auto &r = const_cast<uimg::TextureOutputHandler &>(texOutputHandler);
+		auto &texOutputHandler = std::get<TextureOutputHandler>(outputHandler);
+		auto &r = const_cast<TextureOutputHandler &>(texOutputHandler);
 		for(auto l = decltype(compressInfo.numLayers) {0u}; l < compressInfo.numLayers; ++l) {
 			for(auto m = decltype(compressInfo.numMipmaps) {0u}; m < compressInfo.numMipmaps; ++m) {
 				auto *pMipLv = cmips.GetMipLevel(&msProcessed, m, l);
@@ -363,11 +363,11 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::CompressonatorTextureC
 		std::string outputFilePath = compressInfo.absoluteFileName ? fileName.c_str() : get_absolute_path(fileName, texInfo.containerFormat).c_str();
 #ifdef _WIN32
 		//due to CMP_SaveTexture using only narrow (non-UTF-8 of course) strings, I have to do this.
-		std::wstring wRealOutputFilePath = ustring::string_to_wstring(outputFilePath);
-		std::string tmpPath = ustring::wstring_to_string(std::filesystem::temp_directory_path().native());
+		std::wstring wRealOutputFilePath = pragma::string::string_to_wstring(outputFilePath);
+		std::string tmpPath = pragma::string::wstring_to_string(std::filesystem::temp_directory_path().native());
 		// MSDN recommends GUIDS as written in GetTempFileName so we oblige.
 		//we need to name this .dds since CMP_SaveTexture depends on the file extension. Sorry MSDN.
-		outputFilePath = tmpPath + util::uuid_to_string(util::generate_uuid_v4()) + ".tmp.dds";
+		outputFilePath = tmpPath + pragma::util::uuid_to_string(pragma::util::generate_uuid_v4()) + ".tmp.dds";
 #endif
 		// TODO: This does not work with KTX
 		err = CMP_SaveTexture(outputFilePath.c_str(), &msProcessed);
@@ -380,11 +380,11 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::CompressonatorTextureC
 		path inFile(outputFilePath), outFile(wRealOutputFilePath);
 		std::filesystem::copy(inFile, outFile, std::filesystem::copy_options::overwrite_existing);
 		std::filesystem::remove(inFile);
-		outputFilePath = ustring::wstring_to_string(wRealOutputFilePath);
+		outputFilePath = pragma::string::wstring_to_string(wRealOutputFilePath);
 #endif
 
 		resultData.outputFilePath = outputFilePath;
 	}
 	return resultData;
 }
-std::unique_ptr<uimg::ITextureCompressor> uimg::CompressonatorTextureCompressor::Create() { return std::make_unique<CompressonatorTextureCompressor>(); }
+std::unique_ptr<image::ITextureCompressor> image::CompressonatorTextureCompressor::Create() { return std::make_unique<CompressonatorTextureCompressor>(); }

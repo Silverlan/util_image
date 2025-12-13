@@ -53,16 +53,16 @@ static gli::format to_gli_format(TextureFormat format, bool srgb)
 	throw std::runtime_error("Unsupported texture format for gli: " + std::string {magic_enum::enum_name(format)});
 	return {};
 }
-static gli::format to_gli_format(uimg::Format format)
+static gli::format to_gli_format(pragma::image::Format format)
 {
 	switch(format) {
-	case uimg::Format::RGBA8:
+	case pragma::image::Format::RGBA8:
 		return gli::format::FORMAT_RGBA8_UNORM_PACK8;
-	case uimg::Format::R8:
+	case pragma::image::Format::R8:
 		return gli::format::FORMAT_R8_UNORM_PACK8;
-	case uimg::Format::RG8:
+	case pragma::image::Format::RG8:
 		return gli::format::FORMAT_RG8_UNORM_PACK8;
-	case uimg::Format::RGBA16:
+	case pragma::image::Format::RGBA16:
 		return gli::format::FORMAT_RGBA16_SFLOAT_PACK16;
 	default:
 		break;
@@ -70,35 +70,35 @@ static gli::format to_gli_format(uimg::Format format)
 	throw std::runtime_error("Unsupported texture format for gli: " + std::string {magic_enum::enum_name(format)});
 	return {};
 }
-static gli::format to_gli_format(uimg::TextureInfo::InputFormat inputFormat)
+static gli::format to_gli_format(pragma::image::TextureInfo::InputFormat inputFormat)
 {
 	switch(inputFormat) {
-	case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
+	case pragma::image::TextureInfo::InputFormat::B8G8R8A8_UInt:
 		return gli::format::FORMAT_RGBA8_UNORM_PACK8;
-	case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
+	case pragma::image::TextureInfo::InputFormat::R8G8B8A8_UInt:
 		return gli::format::FORMAT_RGBA8_UNORM_PACK8;
-	case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
+	case pragma::image::TextureInfo::InputFormat::R16G16B16A16_Float:
 		return gli::format::FORMAT_RGBA16_SFLOAT_PACK16;
-	case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
+	case pragma::image::TextureInfo::InputFormat::R32G32B32A32_Float:
 		return gli::format::FORMAT_RGBA32_SFLOAT_PACK32;
-	case uimg::TextureInfo::InputFormat::R32_Float:
+	case pragma::image::TextureInfo::InputFormat::R32_Float:
 		return gli::format::FORMAT_R32_SFLOAT_PACK32;
 	}
 	throw std::runtime_error("Unsupported input format for gli: " + std::string {magic_enum::enum_name(inputFormat)});
 	return {};
 }
-static uimg::Format to_uimg_format(uimg::TextureInfo::InputFormat inputFormat)
+static pragma::image::Format to_uimg_format(pragma::image::TextureInfo::InputFormat inputFormat)
 {
 	switch(inputFormat) {
-	case uimg::TextureInfo::InputFormat::B8G8R8A8_UInt:
-	case uimg::TextureInfo::InputFormat::R8G8B8A8_UInt:
-		return uimg::Format::RGBA8;
-	case uimg::TextureInfo::InputFormat::R16G16B16A16_Float:
-		return uimg::Format::RGBA16;
-	case uimg::TextureInfo::InputFormat::R32G32B32A32_Float:
-		return uimg::Format::RGBA32;
-	case uimg::TextureInfo::InputFormat::R32_Float:
-		return uimg::Format::R32;
+	case pragma::image::TextureInfo::InputFormat::B8G8R8A8_UInt:
+	case pragma::image::TextureInfo::InputFormat::R8G8B8A8_UInt:
+		return pragma::image::Format::RGBA8;
+	case pragma::image::TextureInfo::InputFormat::R16G16B16A16_Float:
+		return pragma::image::Format::RGBA16;
+	case pragma::image::TextureInfo::InputFormat::R32G32B32A32_Float:
+		return pragma::image::Format::RGBA32;
+	case pragma::image::TextureInfo::InputFormat::R32_Float:
+		return pragma::image::Format::R32;
 	}
 	throw std::runtime_error("Unsupported input format for uimg: " + std::string {magic_enum::enum_name(inputFormat)});
 	return {};
@@ -131,10 +131,10 @@ static bool save_dds(DdsLibrary ddsLib, TextureFormat format, const std::string 
 }
 static bool save_ktx(TextureFormat format, const std::string &filename, const TextureImageInfo &imgInfo, std::string &outErr) { return save_gli(format, filename, imgInfo, true, outErr); }
 
-std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompressor::Compress(const CompressInfo &compressInfo)
+std::optional<pragma::image::ITextureCompressor::ResultData> pragma::image::IspctcTextureCompressor::Compress(const CompressInfo &compressInfo)
 {
 	auto &texInfo = compressInfo.textureSaveInfo.texInfo;
-	if(umath::to_integral(texInfo.outputFormat) < umath::to_integral(uimg::TextureInfo::OutputFormat::BCFirst) || umath::to_integral(texInfo.outputFormat) > umath::to_integral(uimg::TextureInfo::OutputFormat::BCLast))
+	if(pragma::math::to_integral(texInfo.outputFormat) < pragma::math::to_integral(TextureInfo::OutputFormat::BCFirst) || pragma::math::to_integral(texInfo.outputFormat) > pragma::math::to_integral(TextureInfo::OutputFormat::BCLast))
 		return {};
 
 	TextureFormat dstTexFormat;
@@ -142,43 +142,43 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 	auto outputFormat = texInfo.outputFormat;
 	// BC1a and BC3n are not supported by ISPC TC, so we have to fall back
 	// BC2 is also not supported, but BC3 is usually a better choice anyway.
-	if(outputFormat == uimg::TextureInfo::OutputFormat::BC1a || outputFormat == uimg::TextureInfo::OutputFormat::BC2)
-		outputFormat = uimg::TextureInfo::OutputFormat::BC3;
-	else if(outputFormat == uimg::TextureInfo::OutputFormat::BC3n)
-		outputFormat = uimg::TextureInfo::OutputFormat::BC5;
+	if(outputFormat == TextureInfo::OutputFormat::BC1a || outputFormat == TextureInfo::OutputFormat::BC2)
+		outputFormat = TextureInfo::OutputFormat::BC3;
+	else if(outputFormat == TextureInfo::OutputFormat::BC3n)
+		outputFormat = TextureInfo::OutputFormat::BC5;
 
-	uimg::Format expectedInputFormat;
+	Format expectedInputFormat;
 	switch(outputFormat) {
-	case uimg::TextureInfo::OutputFormat::BC1:
+	case TextureInfo::OutputFormat::BC1:
 		dstTexFormat = TextureFormat::BC1;
-		expectedInputFormat = uimg::Format::RGBA8;
+		expectedInputFormat = Format::RGBA8;
 		break;
-	case uimg::TextureInfo::OutputFormat::BC3:
+	case TextureInfo::OutputFormat::BC3:
 		dstTexFormat = TextureFormat::BC3;
-		expectedInputFormat = uimg::Format::RGBA8;
+		expectedInputFormat = Format::RGBA8;
 		break;
-	case uimg::TextureInfo::OutputFormat::BC4:
+	case TextureInfo::OutputFormat::BC4:
 		dstTexFormat = TextureFormat::BC4;
-		expectedInputFormat = uimg::Format::R8;
+		expectedInputFormat = Format::R8;
 		break;
-	case uimg::TextureInfo::OutputFormat::BC5:
+	case TextureInfo::OutputFormat::BC5:
 		dstTexFormat = TextureFormat::BC5;
-		expectedInputFormat = uimg::Format::RG8;
+		expectedInputFormat = Format::RG8;
 		break;
-	case uimg::TextureInfo::OutputFormat::BC6:
+	case TextureInfo::OutputFormat::BC6:
 		dstTexFormat = TextureFormat::BC6H;
-		expectedInputFormat = uimg::Format::RGBA16;
+		expectedInputFormat = Format::RGBA16;
 		break;
-	case uimg::TextureInfo::OutputFormat::BC7:
+	case TextureInfo::OutputFormat::BC7:
 		dstTexFormat = TextureFormat::BC7;
-		expectedInputFormat = uimg::Format::RGBA8;
+		expectedInputFormat = Format::RGBA8;
 		break;
 	default:
 		return {};
 	}
 
 	gli::texture inputTex;
-	auto srgb = umath::is_flag_set(texInfo.flags, uimg::TextureInfo::Flags::SRGB);
+	auto srgb = pragma::math::is_flag_set(texInfo.flags, TextureInfo::Flags::SRGB);
 
 	TextureImageInfo dstImageInfo {};
 	auto &outputTex = dstImageInfo.texture;
@@ -187,9 +187,9 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 
 	auto gliFormat = to_gli_format(expectedInputFormat);
 	auto numDstMipmaps = compressInfo.numMipmaps;
-	auto genMipmaps = umath::is_flag_set(texInfo.flags, uimg::TextureInfo::Flags::GenerateMipmaps);
+	auto genMipmaps = pragma::math::is_flag_set(texInfo.flags, TextureInfo::Flags::GenerateMipmaps);
 	if(genMipmaps)
-		numDstMipmaps = uimg::calculate_mipmap_count(compressInfo.width, compressInfo.height);
+		numDstMipmaps = pragma::image::calculate_mipmap_count(compressInfo.width, compressInfo.height);
 	if(compressInfo.numLayers == 1) {
 		inputTex = gli::texture2d {gliFormat, gli::extent2d {compressInfo.width, compressInfo.height}, numDstMipmaps};
 		outputTex = gli::texture2d {to_gli_format(dstTexFormat, srgb), gli::extent2d {compressInfo.width, compressInfo.height}, numDstMipmaps};
@@ -202,7 +202,7 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 		inputTex = gli::texture2d_array {gliFormat, gli::extent3d {compressInfo.width, compressInfo.height, 1}, compressInfo.numLayers, numDstMipmaps};
 		outputTex = gli::texture2d_array {to_gli_format(dstTexFormat, srgb), gli::extent3d {compressInfo.width, compressInfo.height, 1}, compressInfo.numLayers, numDstMipmaps};
 	}
-	auto swapRedBlue = false; // (texInfo.inputFormat == uimg::TextureInfo::InputFormat::B8G8R8A8_UInt);
+	auto swapRedBlue = false; // (texInfo.inputFormat == pragma::image::TextureInfo::InputFormat::B8G8R8A8_UInt);
 	auto uimgFormat = to_uimg_format(texInfo.inputFormat);
 	for(auto l = decltype(compressInfo.numLayers) {0u}; l < compressInfo.numLayers; ++l) {
 		for(auto m = decltype(compressInfo.numMipmaps) {0u}; m < compressInfo.numMipmaps; ++m) {
@@ -210,28 +210,28 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 			auto *data = compressInfo.getImageData(l, m, deleter);
 			assert(data != nullptr);
 			auto extent = inputTex.extent(m);
-			auto imgBuf = uimg::ImageBuffer::Create(const_cast<unsigned char *>(data), extent.x, extent.y, uimgFormat, true);
+			auto imgBuf = ImageBuffer::Create(const_cast<unsigned char *>(data), extent.x, extent.y, uimgFormat, true);
 			if(swapRedBlue) {
 				// Copy the buffer to not pollute the original data
 				imgBuf = imgBuf->Copy();
-				imgBuf->SwapChannels(uimg::Channel::Red, uimg::Channel::Blue);
+				imgBuf->SwapChannels(Channel::Red, Channel::Blue);
 			}
 
 			// Make sure the image is in the expected input format
 			switch(outputFormat) {
-			case uimg::TextureInfo::OutputFormat::BC1:
-			case uimg::TextureInfo::OutputFormat::BC3:
-			case uimg::TextureInfo::OutputFormat::BC7:
-				imgBuf->Convert(uimg::Format::RGBA8);
+			case TextureInfo::OutputFormat::BC1:
+			case TextureInfo::OutputFormat::BC3:
+			case TextureInfo::OutputFormat::BC7:
+				imgBuf->Convert(Format::RGBA8);
 				break;
-			case uimg::TextureInfo::OutputFormat::BC4:
-				imgBuf->Convert(uimg::Format::R8);
+			case TextureInfo::OutputFormat::BC4:
+				imgBuf->Convert(Format::R8);
 				break;
-			case uimg::TextureInfo::OutputFormat::BC5:
-				imgBuf->Convert(uimg::Format::RG8);
+			case TextureInfo::OutputFormat::BC5:
+				imgBuf->Convert(Format::RG8);
 				break;
-			case uimg::TextureInfo::OutputFormat::BC6:
-				imgBuf->Convert(uimg::Format::RGBA16);
+			case TextureInfo::OutputFormat::BC6:
+				imgBuf->Convert(Format::RGBA16);
 				break;
 			default:
 				return {};
@@ -310,7 +310,7 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 
 	auto &outputHandler = compressInfo.outputHandler;
 	if(outputHandler.index() == 0) {
-		auto &texOutputHandler = std::get<uimg::TextureOutputHandler>(outputHandler);
+		auto &texOutputHandler = std::get<TextureOutputHandler>(outputHandler);
 		auto &tex = dstImageInfo.texture;
 		for(size_t l = 0; l < tex.layers(); ++l) {
 			for(size_t m = 0; m < tex.levels(); ++m) {
@@ -330,12 +330,12 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 		std::string err;
 		auto saveSuccess = false;
 		switch(texInfo.containerFormat) {
-		case uimg::TextureInfo::ContainerFormat::DDS:
+		case TextureInfo::ContainerFormat::DDS:
 			{
 				saveSuccess = save_dds(DdsLibrary::Gli, dstTexFormat, outputFilePath, dstImageInfo, err);
 				break;
 			}
-		case uimg::TextureInfo::ContainerFormat::KTX:
+		case TextureInfo::ContainerFormat::KTX:
 			saveSuccess = save_ktx(dstTexFormat, outputFilePath, dstImageInfo, err);
 			break;
 		default:
@@ -353,4 +353,4 @@ std::optional<uimg::ITextureCompressor::ResultData> uimg::IspctcTextureCompresso
 	}
 	return {};
 }
-std::unique_ptr<uimg::ITextureCompressor> uimg::IspctcTextureCompressor::Create() { return std::make_unique<IspctcTextureCompressor>(); }
+std::unique_ptr<pragma::image::ITextureCompressor> pragma::image::IspctcTextureCompressor::Create() { return std::make_unique<IspctcTextureCompressor>(); }

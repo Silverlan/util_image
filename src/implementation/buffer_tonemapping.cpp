@@ -15,11 +15,11 @@ constexpr Vector3 VINV_GAMMA {INV_GAMMA};
 
 // linear to sRGB approximation
 // see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-Vector3 uimg::linear_to_srgb(const Vector3 &color) { return glm::pow(color, VINV_GAMMA); }
+Vector3 pragma::image::linear_to_srgb(const Vector3 &color) { return glm::pow(color, VINV_GAMMA); }
 
 // sRGB to linear approximation
 // see http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-Vector3 uimg::srgb_to_linear(const Vector3 &srgbIn) { return glm::pow(srgbIn, VGAMMA); }
+Vector3 pragma::image::srgb_to_linear(const Vector3 &srgbIn) { return glm::pow(srgbIn, VGAMMA); }
 
 // Uncharted 2 tone map
 // see: http://filmicworlds.com/blog/filmic-tonemapping-operators/
@@ -39,7 +39,7 @@ static Vector3 tone_mapping_uncharted(const Vector3 &color)
 	const float W = 11.2;
 	auto toneMappedColor = tone_mapping_uncharted2_impl(color * 2.f);
 	auto whiteScale = 1.0 / tone_mapping_uncharted2_impl(uvec::vec3(W));
-	return uimg::linear_to_srgb(toneMappedColor * whiteScale);
+	return pragma::image::linear_to_srgb(toneMappedColor * whiteScale);
 }
 
 // Hejl Richard tone map
@@ -59,7 +59,7 @@ static Vector3 tone_mapping_aces(const Vector3 &color)
 	const float C = 2.43;
 	const float D = 0.59;
 	const float E = 0.14;
-	return uimg::linear_to_srgb(glm::clamp((color * (A * color + B)) / (color * (C * color + D) + E), 0.f, 1.f));
+	return pragma::image::linear_to_srgb(glm::clamp((color * (A * color + B)) / (color * (C * color + D) + E), 0.f, 1.f));
 }
 
 static Vector3 tone_mapping_reinhard(const Vector3 &color)
@@ -101,45 +101,45 @@ static Vector3 tone_mapping_gran_turismo(const Vector3 &x)
 	const float c = 1.33; // black
 	const float b = 0.0;  // pedestal
 
-	return uimg::linear_to_srgb(uchimura(x, P, a, m, l, c, b));
+	return pragma::image::linear_to_srgb(uchimura(x, P, a, m, l, c, b));
 }
 
 static std::array<uint8_t, 3> to_ldr_color(const Vector3 &col)
 {
-	return {static_cast<uint8_t>(umath::min(col.r * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max()))), static_cast<uint8_t>(umath::min(col.g * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max()))),
-	  static_cast<uint8_t>(umath::min(col.b * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max())))};
+	return {static_cast<uint8_t>(pragma::math::min(col.r * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max()))), static_cast<uint8_t>(pragma::math::min(col.g * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max()))),
+	  static_cast<uint8_t>(pragma::math::min(col.b * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max())))};
 }
 
-void uimg::ImageBuffer::ApplyExposure(float exposure)
+void pragma::image::ImageBuffer::ApplyExposure(float exposure)
 {
 	if(exposure == 0.f)
 		return;
 	auto powExposure = glm::pow(2.f, exposure);
-	auto numChannels = umath::min(GetChannelCount(), static_cast<uint8_t>(3));
+	auto numChannels = pragma::math::min(GetChannelCount(), static_cast<uint8_t>(3));
 	for(auto &pxView : *this) {
 		for(auto i = decltype(numChannels) {0u}; i < numChannels; ++i) {
-			auto val = pxView.GetFloatValue(static_cast<uimg::Channel>(i));
+			auto val = pxView.GetFloatValue(static_cast<Channel>(i));
 			val *= powExposure;
-			pxView.SetValue(static_cast<uimg::Channel>(i), val);
+			pxView.SetValue(static_cast<Channel>(i), val);
 		}
 	}
 }
 
-void uimg::ImageBuffer::ApplyGammaCorrection(float gamma)
+void pragma::image::ImageBuffer::ApplyGammaCorrection(float gamma)
 {
 	if(gamma == 1.f)
 		return;
 	auto INV_GAMMA = 1.0 / gamma;
-	auto numChannels = umath::min(GetChannelCount(), static_cast<uint8_t>(3));
+	auto numChannels = pragma::math::min(GetChannelCount(), static_cast<uint8_t>(3));
 	for(auto &pxView : *this) {
 		for(auto i = decltype(numChannels) {0u}; i < numChannels; ++i) {
-			auto channel = static_cast<uimg::Channel>(i);
+			auto channel = static_cast<Channel>(i);
 			pxView.SetValue(channel, static_cast<float>(glm::pow(pxView.GetFloatValue(channel), INV_GAMMA)));
 		}
 	}
 }
 
-std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::ApplyToneMapping(ToneMapping toneMappingMethod)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::ImageBuffer::ApplyToneMapping(ToneMapping toneMappingMethod)
 {
 	std::function<std::array<uint8_t, 3>(const Vector3 &)> fToneMapper = nullptr;
 	switch(toneMappingMethod) {
@@ -164,7 +164,7 @@ std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::ApplyToneMapping(ToneMappi
 	}
 	return ApplyToneMapping(fToneMapper);
 }
-std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::ApplyToneMapping(const std::function<std::array<uint8_t, 3>(const Vector3 &)> &fToneMapper)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::ImageBuffer::ApplyToneMapping(const std::function<std::array<uint8_t, 3>(const Vector3 &)> &fToneMapper)
 {
 	if(IsHDRFormat() == false && IsFloatFormat() == false)
 		return shared_from_this();
@@ -183,7 +183,7 @@ std::shared_ptr<uimg::ImageBuffer> uimg::ImageBuffer::ApplyToneMapping(const std
 		dstPixel.SetValue(Channel::Red, toneMappedColor.at(0));
 		dstPixel.SetValue(Channel::Green, toneMappedColor.at(1));
 		dstPixel.SetValue(Channel::Blue, toneMappedColor.at(2));
-		dstPixel.SetValue(Channel::Alpha, umath::min(srcPixel.GetFloatValue(Channel::Alpha), static_cast<float>(std::numeric_limits<uint8_t>::max())));
+		dstPixel.SetValue(Channel::Alpha, pragma::math::min(srcPixel.GetFloatValue(Channel::Alpha), static_cast<float>(std::numeric_limits<uint8_t>::max())));
 
 		++itSrc;
 		++itDst;

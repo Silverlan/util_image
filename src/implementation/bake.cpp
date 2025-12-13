@@ -6,7 +6,7 @@ import :core;
 
 struct ImBuf {
 	int x, y;
-	std::shared_ptr<uimg::ImageBuffer> rect;
+	std::shared_ptr<pragma::image::ImageBuffer> rect;
 };
 
 static int filter_make_index(const int x, const int y, const int w, const int h)
@@ -124,7 +124,7 @@ static void filter_extend(struct ImBuf *ibuf, std::vector<uint8_t> &vmask, int f
 							}
 
 							if(dstmask != nullptr)
-								dstmask[index] = util::baking::FILTER_MASK_MARGIN;
+								dstmask[index] = pragma::util::baking::FILTER_MASK_MARGIN;
 							cannot_early_out = 1;
 						}
 					}
@@ -138,7 +138,7 @@ static void filter_extend(struct ImBuf *ibuf, std::vector<uint8_t> &vmask, int f
 	}
 }
 
-void uimg::bake_margin(ImageBuffer &imgBuffer, std::vector<uint8_t> &mask, const int margin)
+void pragma::image::bake_margin(ImageBuffer &imgBuffer, std::vector<uint8_t> &mask, const int margin)
 {
 	ImBuf imgBuf {};
 	imgBuf.rect = imgBuffer.shared_from_this();

@@ -16,7 +16,7 @@ import :compressors.compressonator;
 import :compressors.ispctc;
 #endif
 
-std::unique_ptr<uimg::ITextureCompressor> uimg::ITextureCompressor::Create(CompressorLibrary libType)
+std::unique_ptr<pragma::image::ITextureCompressor> pragma::image::ITextureCompressor::Create(CompressorLibrary libType)
 {
 	switch(libType) {
 #ifdef UIMG_ENABLE_NVTT

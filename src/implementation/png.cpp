@@ -81,7 +81,7 @@ typedef unsigned long ulg;
 
 struct PNGImage {
 	void readpng_version_info(void);
-	int readpng_init(VFilePtr &f, ulg *pWidth, ulg *pHeight);
+	int readpng_init(pragma::fs::VFilePtr &f, ulg *pWidth, ulg *pHeight);
 	int readpng_get_bgcolor(uch *bg_red, uch *bg_green, uch *bg_blue);
 	uch *readpng_get_image(double display_exponent, int *pChannels, ulg *pRowbytes);
 	void readpng_cleanup(int free_image_data);
@@ -109,7 +109,7 @@ void PNGImage::readpng_version_info(void)
 
 /* return value = 0 for success, 1 for bad sig, 2 for bad IHDR, 4 for no mem */
 
-int PNGImage::readpng_init(VFilePtr &f, ulg *pWidth, ulg *pHeight)
+int PNGImage::readpng_init(pragma::fs::VFilePtr &f, ulg *pWidth, ulg *pHeight)
 {
 	uch sig[8];
 
@@ -144,7 +144,7 @@ int PNGImage::readpng_init(VFilePtr &f, ulg *pWidth, ulg *pHeight)
 		return 2;
 	}
 
-	png_set_read_fn(png_ptr, f.get(), [](png_structp png_ptr, png_bytep png_data, png_size_t png_size) { static_cast<VFilePtrInternal *>(png_get_io_ptr(png_ptr))->Read(png_data, png_size); });
+	png_set_read_fn(png_ptr, f.get(), [](png_structp png_ptr, png_bytep png_data, png_size_t png_size) { static_cast<pragma::fs::VFilePtrInternal *>(png_get_io_ptr(png_ptr))->Read(png_data, png_size); });
 	png_set_sig_bytes(png_ptr, 8); /* we already read the 8 signature bytes */
 
 	png_read_info(png_ptr, info_ptr); /* read all PNG info up to image data */
@@ -320,13 +320,13 @@ void PNGImage::readpng_cleanup(int free_image_data)
 	}
 }
 
-std::shared_ptr<uimg::ImageBuffer> uimg::impl::load_png_image(std::shared_ptr<VFilePtrInternal> &file)
+std::shared_ptr<pragma::image::ImageBuffer> pragma::image::impl::load_png_image(std::shared_ptr<fs::VFilePtrInternal> &file)
 {
 	PNGImage pngImg {};
 	unsigned long width, height;
 	if(pngImg.readpng_init(file, &width, &height) != 0)
 		return nullptr;
-	util::ScopeGuard sg([&pngImg]() { pngImg.readpng_cleanup(true); });
+	pragma::util::ScopeGuard sg([&pngImg]() { pngImg.readpng_cleanup(true); });
 	switch(pngImg.color_type) {
 	case PNG_COLOR_TYPE_PALETTE:
 		png_set_palette_to_rgb(pngImg.png_ptr);
@@ -360,10 +360,10 @@ std::shared_ptr<uimg::ImageBuffer> uimg::impl::load_png_image(std::shared_ptr<VF
 	auto numChannels = -1;
 	unsigned long rowBytes = 0u;
 	auto *imgData = pngImg.readpng_get_image(1.0, &numChannels, &rowBytes);
-	std::shared_ptr<uimg::ImageBuffer> imgBuffer = nullptr;
+	std::shared_ptr<ImageBuffer> imgBuffer = nullptr;
 	if(pngImg.color_type & PNG_COLOR_MASK_COLOR) {
 		if(numChannels == 4) {
-			imgBuffer = uimg::ImageBuffer::Create(width, height, uimg::Format::RGBA8);
+			imgBuffer = ImageBuffer::Create(width, height, Format::RGBA8);
 			memcpy(imgBuffer->GetData(), imgData, imgBuffer->GetSize());
 			if((pngImg.color_type & PNG_COLOR_MASK_ALPHA) == 0)
 				imgBuffer->ClearAlpha();
@@ -371,14 +371,14 @@ std::shared_ptr<uimg::ImageBuffer> uimg::impl::load_png_image(std::shared_ptr<VF
 		else {
 			if(numChannels != 3)
 				return nullptr;
-			imgBuffer = uimg::ImageBuffer::Create(width, height, uimg::Format::RGB8);
+			imgBuffer = ImageBuffer::Create(width, height, Format::RGB8);
 			memcpy(imgBuffer->GetData(), imgData, imgBuffer->GetSize());
 		}
 	}
 	else if(pngImg.color_type & PNG_COLOR_MASK_ALPHA) {
 		if(numChannels != 1)
 			return nullptr;
-		imgBuffer = uimg::ImageBuffer::Create(width, height, uimg::Format::RGBA8);
+		imgBuffer = ImageBuffer::Create(width, height, Format::RGBA8);
 		memcpy(imgBuffer->GetData(), imgData, imgBuffer->GetSize());
 	}
 	else
