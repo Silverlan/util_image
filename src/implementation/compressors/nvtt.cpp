@@ -14,7 +14,7 @@ import :compressors.nvtt;
 import pragma.filesystem;
 
 struct OutputHandler : public nvtt::OutputHandler {
-	OutputHandler(VFilePtrReal f) : m_file {f} {}
+	OutputHandler(pragma::fs::VFilePtrReal f) : m_file {f} {}
 	virtual ~OutputHandler() override {}
 
 	// Indicate the start of a new compressed image that's part of the final texture.
@@ -26,7 +26,7 @@ struct OutputHandler : public nvtt::OutputHandler {
 	// Indicate the end of the compressed image. (New in NVTT 2.1)
 	virtual void endImage() override {}
   private:
-	VFilePtrReal m_file = nullptr;
+	pragma::fs::VFilePtrReal m_file = nullptr;
 };
 
 struct ErrorHandler : public nvtt::ErrorHandler {
@@ -69,131 +69,131 @@ struct ErrorHandler : public nvtt::ErrorHandler {
 	std::function<void(const std::string &)> m_errorHandler = nullptr;
 };
 
-static nvtt::Format to_nvtt_enum(image::TextureInfo::OutputFormat format)
+static nvtt::Format to_nvtt_enum(pragma::image::TextureInfo::OutputFormat format)
 {
 	switch(format) {
-	case image::TextureInfo::OutputFormat::RGB:
+	case pragma::image::TextureInfo::OutputFormat::RGB:
 		return nvtt::Format_RGB;
-	case image::TextureInfo::OutputFormat::RGBA:
+	case pragma::image::TextureInfo::OutputFormat::RGBA:
 		return nvtt::Format_RGBA;
-	case image::TextureInfo::OutputFormat::BC1:
+	case pragma::image::TextureInfo::OutputFormat::BC1:
 		return nvtt::Format_BC1;
-	case image::TextureInfo::OutputFormat::BC1a:
+	case pragma::image::TextureInfo::OutputFormat::BC1a:
 		return nvtt::Format_BC1a;
-	case image::TextureInfo::OutputFormat::BC2:
+	case pragma::image::TextureInfo::OutputFormat::BC2:
 		return nvtt::Format_BC2;
-	case image::TextureInfo::OutputFormat::BC3:
+	case pragma::image::TextureInfo::OutputFormat::BC3:
 		return nvtt::Format_BC3;
-	case image::TextureInfo::OutputFormat::BC3n:
+	case pragma::image::TextureInfo::OutputFormat::BC3n:
 		return nvtt::Format_BC3n;
-	case image::TextureInfo::OutputFormat::BC4:
+	case pragma::image::TextureInfo::OutputFormat::BC4:
 		return nvtt::Format_BC4;
-	case image::TextureInfo::OutputFormat::BC5:
+	case pragma::image::TextureInfo::OutputFormat::BC5:
 		return nvtt::Format_BC5;
-	//case image::TextureInfo::OutputFormat::DXT1n:
+	//case pragma::image::TextureInfo::OutputFormat::DXT1n:
 	//	return nvtt::Format_DXT1n;
-	case image::TextureInfo::OutputFormat::CTX1:
+	case pragma::image::TextureInfo::OutputFormat::CTX1:
 		return nvtt::Format_CTX1;
-	case image::TextureInfo::OutputFormat::BC6:
+	case pragma::image::TextureInfo::OutputFormat::BC6:
 		return nvtt::Format_BC6;
-	case image::TextureInfo::OutputFormat::BC7:
+	case pragma::image::TextureInfo::OutputFormat::BC7:
 		return nvtt::Format_BC7;
-	//case image::TextureInfo::OutputFormat::BC3_RGBM:
+	//case pragma::image::TextureInfo::OutputFormat::BC3_RGBM:
 	//	return nvtt::Format_BC3_RGBM;
-	case image::TextureInfo::OutputFormat::ETC1:
+	case pragma::image::TextureInfo::OutputFormat::ETC1:
 		return nvtt::Format_ETC1;
-	case image::TextureInfo::OutputFormat::ETC2_R:
+	case pragma::image::TextureInfo::OutputFormat::ETC2_R:
 		return nvtt::Format_ETC2_R;
-	case image::TextureInfo::OutputFormat::ETC2_RG:
+	case pragma::image::TextureInfo::OutputFormat::ETC2_RG:
 		return nvtt::Format_ETC2_RG;
-	case image::TextureInfo::OutputFormat::ETC2_RGB:
+	case pragma::image::TextureInfo::OutputFormat::ETC2_RGB:
 		return nvtt::Format_ETC2_RGB;
-	case image::TextureInfo::OutputFormat::ETC2_RGBA:
+	case pragma::image::TextureInfo::OutputFormat::ETC2_RGBA:
 		return nvtt::Format_ETC2_RGBA;
-	case image::TextureInfo::OutputFormat::ETC2_RGB_A1:
+	case pragma::image::TextureInfo::OutputFormat::ETC2_RGB_A1:
 		return nvtt::Format_ETC2_RGB_A1;
-	case image::TextureInfo::OutputFormat::ETC2_RGBM:
+	case pragma::image::TextureInfo::OutputFormat::ETC2_RGBM:
 		return nvtt::Format_ETC2_RGBM;
-	case image::TextureInfo::OutputFormat::KeepInputImageFormat:
+	case pragma::image::TextureInfo::OutputFormat::KeepInputImageFormat:
 		break;
 	default:
 		break;
 	}
-	static_assert(pragma::math::to_integral(image::TextureInfo::OutputFormat::Count) == 20);
+	static_assert(pragma::math::to_integral(pragma::image::TextureInfo::OutputFormat::Count) == 20);
 	return {};
 }
 
-static nvtt::Container to_nvtt_enum(image::TextureInfo::ContainerFormat format, image::TextureInfo::OutputFormat imgFormat)
+static nvtt::Container to_nvtt_enum(pragma::image::TextureInfo::ContainerFormat format, pragma::image::TextureInfo::OutputFormat imgFormat)
 {
 	switch(format) {
-	case image::TextureInfo::ContainerFormat::DDS:
+	case pragma::image::TextureInfo::ContainerFormat::DDS:
 		{
-			if(imgFormat == image::TextureInfo::OutputFormat::BC6 || imgFormat == image::TextureInfo::OutputFormat::BC7)
+			if(imgFormat == pragma::image::TextureInfo::OutputFormat::BC6 || imgFormat == pragma::image::TextureInfo::OutputFormat::BC7)
 				return nvtt::Container_DDS10; // These formats are only supported by DDS10
 			return nvtt::Container_DDS;
 		}
-	case image::TextureInfo::ContainerFormat::KTX:
+	case pragma::image::TextureInfo::ContainerFormat::KTX:
 		return nvtt::Container_KTX;
 	default:
 		break;
 	}
-	static_assert(pragma::math::to_integral(image::TextureInfo::ContainerFormat::Count) == 2);
+	static_assert(pragma::math::to_integral(pragma::image::TextureInfo::ContainerFormat::Count) == 2);
 	return {};
 }
 
-static nvtt::MipmapFilter to_nvtt_enum(image::TextureInfo::MipmapFilter filter)
+static nvtt::MipmapFilter to_nvtt_enum(pragma::image::TextureInfo::MipmapFilter filter)
 {
 	switch(filter) {
-	case image::TextureInfo::MipmapFilter::Box:
+	case pragma::image::TextureInfo::MipmapFilter::Box:
 		return nvtt::MipmapFilter_Box;
-	case image::TextureInfo::MipmapFilter::Kaiser:
+	case pragma::image::TextureInfo::MipmapFilter::Kaiser:
 		return nvtt::MipmapFilter_Kaiser;
 	}
-	static_assert(pragma::math::to_integral(image::TextureInfo::ContainerFormat::Count) == 2);
+	static_assert(pragma::math::to_integral(pragma::image::TextureInfo::ContainerFormat::Count) == 2);
 	return {};
 }
 
-static nvtt::WrapMode to_nvtt_enum(image::TextureInfo::WrapMode wrapMode)
+static nvtt::WrapMode to_nvtt_enum(pragma::image::TextureInfo::WrapMode wrapMode)
 {
 	switch(wrapMode) {
-	case image::TextureInfo::WrapMode::Clamp:
+	case pragma::image::TextureInfo::WrapMode::Clamp:
 		return nvtt::WrapMode_Clamp;
-	case image::TextureInfo::WrapMode::Repeat:
+	case pragma::image::TextureInfo::WrapMode::Repeat:
 		return nvtt::WrapMode_Repeat;
-	case image::TextureInfo::WrapMode::Mirror:
+	case pragma::image::TextureInfo::WrapMode::Mirror:
 		return nvtt::WrapMode_Mirror;
 	default:
 		break;
 	}
-	static_assert(pragma::math::to_integral(image::TextureInfo::ContainerFormat::Count) == 2);
+	static_assert(pragma::math::to_integral(pragma::image::TextureInfo::ContainerFormat::Count) == 2);
 	return {};
 }
 
-static nvtt::InputFormat get_nvtt_format(image::TextureInfo::InputFormat format)
+static nvtt::InputFormat get_nvtt_format(pragma::image::TextureInfo::InputFormat format)
 {
 	nvtt::InputFormat nvttFormat;
 	switch(format) {
-	case image::TextureInfo::InputFormat::R8G8B8A8_UInt:
-	case image::TextureInfo::InputFormat::B8G8R8A8_UInt:
+	case pragma::image::TextureInfo::InputFormat::R8G8B8A8_UInt:
+	case pragma::image::TextureInfo::InputFormat::B8G8R8A8_UInt:
 		nvttFormat = nvtt::InputFormat_BGRA_8UB;
 		break;
-	case image::TextureInfo::InputFormat::R16G16B16A16_Float:
+	case pragma::image::TextureInfo::InputFormat::R16G16B16A16_Float:
 		nvttFormat = nvtt::InputFormat_RGBA_16F;
 		break;
-	case image::TextureInfo::InputFormat::R32G32B32A32_Float:
+	case pragma::image::TextureInfo::InputFormat::R32G32B32A32_Float:
 		nvttFormat = nvtt::InputFormat_RGBA_32F;
 		break;
-	case image::TextureInfo::InputFormat::R32_Float:
+	case pragma::image::TextureInfo::InputFormat::R32_Float:
 		nvttFormat = nvtt::InputFormat_R_32F;
 		break;
-	case image::TextureInfo::InputFormat::KeepInputImageFormat:
+	case pragma::image::TextureInfo::InputFormat::KeepInputImageFormat:
 		break;
 	}
-	static_assert(pragma::math::to_integral(image::TextureInfo::InputFormat::Count) == 6);
+	static_assert(pragma::math::to_integral(pragma::image::TextureInfo::InputFormat::Count) == 6);
 	return nvttFormat;
 }
 
-std::optional<image::ITextureCompressor::ResultData> image::NvttTextureCompressor::Compress(const CompressInfo &compressInfo)
+std::optional<pragma::image::ITextureCompressor::ResultData> pragma::image::NvttTextureCompressor::Compress(const CompressInfo &compressInfo)
 {
 	auto &textureSaveInfo = compressInfo.textureSaveInfo;
 	auto &texInfo = compressInfo.textureSaveInfo.texInfo;
@@ -205,15 +205,15 @@ std::optional<image::ITextureCompressor::ResultData> image::NvttTextureCompresso
 	inputOptions.setWrapMode(to_nvtt_enum(texInfo.wrapMode));
 	inputOptions.setMipmapFilter(to_nvtt_enum(texInfo.mipMapFilter));
 
-	if(pragma::math::is_flag_set(texInfo.flags, image::TextureInfo::Flags::GenerateMipmaps))
+	if(pragma::math::is_flag_set(texInfo.flags, pragma::image::TextureInfo::Flags::GenerateMipmaps))
 		inputOptions.setMipmapGeneration(true);
 	else
 		inputOptions.setMipmapGeneration(compressInfo.numMipmaps > 1, compressInfo.numMipmaps - 1u);
 
 	auto texType = textureSaveInfo.cubemap ? nvtt::TextureType_Cube : nvtt::TextureType_2D;
 	auto alphaMode = texInfo.alphaMode;
-	if(texInfo.outputFormat == image::TextureInfo::OutputFormat::BC6)
-		alphaMode = image::TextureInfo::AlphaMode::Transparency;
+	if(texInfo.outputFormat == pragma::image::TextureInfo::OutputFormat::BC6)
+		alphaMode = pragma::image::TextureInfo::AlphaMode::Transparency;
 	inputOptions.setTextureLayout(texType, compressInfo.width, compressInfo.height);
 	for(auto iLayer = decltype(compressInfo.numLayers) {0u}; iLayer < compressInfo.numLayers; ++iLayer) {
 		for(auto iMipmap = decltype(compressInfo.numMipmaps) {0u}; iMipmap < compressInfo.numMipmaps; ++iMipmap) {
@@ -222,10 +222,10 @@ std::optional<image::ITextureCompressor::ResultData> image::NvttTextureCompresso
 			if(data == nullptr)
 				continue;
 			uint32_t wMipmap, hMipmap;
-			image::calculate_mipmap_size(compressInfo.width, compressInfo.height, wMipmap, hMipmap, iMipmap);
+			pragma::image::calculate_mipmap_size(compressInfo.width, compressInfo.height, wMipmap, hMipmap, iMipmap);
 			inputOptions.setMipmapData(data, wMipmap, hMipmap, 1, iLayer, iMipmap);
 
-			if(alphaMode == image::TextureInfo::AlphaMode::Auto) {
+			if(alphaMode == pragma::image::TextureInfo::AlphaMode::Auto) {
 				// Determine whether there are any alpha values < 1
 				auto numPixels = wMipmap * hMipmap;
 				for(auto i = decltype(numPixels) {0u}; i < numPixels; ++i) {
@@ -244,7 +244,7 @@ std::optional<image::ITextureCompressor::ResultData> image::NvttTextureCompresso
 						break;
 					}
 					if(alpha < 0.999f) {
-						alphaMode = image::TextureInfo::AlphaMode::Transparency;
+						alphaMode = pragma::image::TextureInfo::AlphaMode::Transparency;
 						break;
 					}
 				}
@@ -253,9 +253,9 @@ std::optional<image::ITextureCompressor::ResultData> image::NvttTextureCompresso
 				deleter();
 		}
 	}
-	inputOptions.setAlphaMode((alphaMode == image::TextureInfo::AlphaMode::Transparency) ? nvtt::AlphaMode::AlphaMode_Transparency : nvtt::AlphaMode::AlphaMode_None);
+	inputOptions.setAlphaMode((alphaMode == pragma::image::TextureInfo::AlphaMode::Transparency) ? nvtt::AlphaMode::AlphaMode_Transparency : nvtt::AlphaMode::AlphaMode_None);
 
-	static_assert(pragma::math::to_integral(image::TextureInfo::ContainerFormat::Count) == 2);
+	static_assert(pragma::math::to_integral(pragma::image::TextureInfo::ContainerFormat::Count) == 2);
 	/*auto f = FileManager::OpenFile<fs::VFilePtrReal>(fileNameWithExt,fs::FileMode::Write | fs::FileMode::Binary);
 if(f == nullptr)
 {
@@ -268,19 +268,19 @@ return false;
 	//OutputHandler outputHandler {f};
 
 	struct NvttOutputHandler : public nvtt::OutputHandler {
-		NvttOutputHandler(image::TextureOutputHandler &handler) : m_outputHandler {handler} {}
+		NvttOutputHandler(pragma::image::TextureOutputHandler &handler) : m_outputHandler {handler} {}
 		virtual void beginImage(int size, int width, int height, int depth, int face, int miplevel) override { m_outputHandler.beginImage(size, width, height, depth, face, miplevel); }
 		virtual bool writeData(const void *data, int size) override { return m_outputHandler.writeData(data, size); }
 		virtual void endImage() override { m_outputHandler.endImage(); }
 	  private:
-		image::TextureOutputHandler &m_outputHandler;
+		pragma::image::TextureOutputHandler &m_outputHandler;
 	};
 
 	std::unique_ptr<NvttOutputHandler> nvttOutputHandler = nullptr;
 	nvtt::OutputOptions outputOptions {};
 	outputOptions.reset();
 	outputOptions.setContainer(to_nvtt_enum(texInfo.containerFormat, texInfo.outputFormat));
-	outputOptions.setSrgbFlag(pragma::math::is_flag_set(texInfo.flags, image::TextureInfo::Flags::SRGB));
+	outputOptions.setSrgbFlag(pragma::math::is_flag_set(texInfo.flags, pragma::image::TextureInfo::Flags::SRGB));
 
 	ResultData resultData {};
 
@@ -290,8 +290,8 @@ return false;
 
 	auto &outputHandler = compressInfo.outputHandler;
 	if(outputHandler.index() == 0) {
-		auto &texOutputHandler = std::get<image::TextureOutputHandler>(outputHandler);
-		auto &r = const_cast<image::TextureOutputHandler &>(texOutputHandler);
+		auto &texOutputHandler = std::get<pragma::image::TextureOutputHandler>(outputHandler);
+		auto &r = const_cast<pragma::image::TextureOutputHandler &>(texOutputHandler);
 		nvttOutputHandler = std::unique_ptr<NvttOutputHandler> {new NvttOutputHandler {r}};
 		outputOptions.setOutputHandler(nvttOutputHandler.get());
 	}
@@ -341,7 +341,7 @@ return false;
 		inputOptions.setGamma(1.0f, 1.0f);
 		inputOptions.setNormalizeMipmaps(true);
 	}
-	else if(pragma::math::is_flag_set(texInfo.flags, image::TextureInfo::Flags::ConvertToNormalMap)) {
+	else if(pragma::math::is_flag_set(texInfo.flags, pragma::image::TextureInfo::Flags::ConvertToNormalMap)) {
 		inputOptions.setNormalMap(false);
 		inputOptions.setConvertToNormalMap(true);
 		inputOptions.setHeightEvaluation(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f, 0.0f);
@@ -367,4 +367,4 @@ return false;
 	return res ? resultData : std::optional<ResultData> {};
 }
 
-std::unique_ptr<image::ITextureCompressor> image::NvttTextureCompressor::Create() { return std::make_unique<NvttTextureCompressor>(); }
+std::unique_ptr<pragma::image::ITextureCompressor> pragma::image::NvttTextureCompressor::Create() { return std::make_unique<NvttTextureCompressor>(); }
