@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
 module pragma.image;
 
 import :buffer;
@@ -106,7 +104,8 @@ static Vector3 tone_mapping_gran_turismo(const Vector3 &x)
 
 static std::array<uint8_t, 3> to_ldr_color(const Vector3 &col)
 {
-	return {static_cast<uint8_t>(pragma::math::min(col.r * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max()))), static_cast<uint8_t>(pragma::math::min(col.g * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max()))),
+	return {static_cast<uint8_t>(pragma::math::min(col.r * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max()))),
+	  static_cast<uint8_t>(pragma::math::min(col.g * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max()))),
 	  static_cast<uint8_t>(pragma::math::min(col.b * std::numeric_limits<uint8_t>::max(), static_cast<float>(std::numeric_limits<uint8_t>::max())))};
 }
 

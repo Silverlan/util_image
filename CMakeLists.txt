@@ -35,6 +35,7 @@ option(ENABLE_SVG_SUPPORT "Enable SVG support" ON)
 
 set(PROJ_NAME util_image)
 pr_add_library(${PROJ_NAME} SHARED)
+pr_add_export_macro(${PROJ_NAME} DLLUIMG)
 
 pr_add_dependency(${PROJ_NAME} gli TARGET PRIVATE)
 pr_add_dependency(${PROJ_NAME} vfilesystem TARGET PUBLIC)
