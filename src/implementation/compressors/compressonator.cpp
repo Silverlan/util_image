@@ -286,7 +286,7 @@ std::optional<image::ITextureCompressor::ResultData> image::CompressonatorTextur
 	MipSet ms {};
 	auto res = cmips.AllocateMipSet(&ms, *channelFormat, *texDataType, *texType, compressInfo.width, compressInfo.height, compressInfo.numLayers);
 	if(!res) {
-		compressInfo.errorHandler("Failed to allocate mip set with " + std::to_string(compressInfo.numMipmaps) + " mipmaps and " + std::to_string(compressInfo.numLayers) + " layers!");
+		compressInfo.errorHandler("Failed to allocate mip set with " + util::to_string(compressInfo.numMipmaps) + " mipmaps and " + util::to_string(compressInfo.numLayers) + " layers!");
 		return {};
 	}
 	ms.m_format = *origFormat;
@@ -296,12 +296,12 @@ std::optional<image::ITextureCompressor::ResultData> image::CompressonatorTextur
 			std::function<void(void)> deleter = nullptr;
 			auto *data = compressInfo.getImageData(l, m, deleter);
 			if(!data) {
-				compressInfo.errorHandler("Failed to retrieve mipmap data for mipmap " + std::to_string(m) + " of layer " + std::to_string(l) + "!");
+				compressInfo.errorHandler("Failed to retrieve mipmap data for mipmap " + util::to_string(m) + " of layer " + util::to_string(l) + "!");
 				return {};
 			}
 			auto success = cmips.AllocateMipLevelData(cmips.GetMipLevel(&ms, m, l), ms.m_nWidth, ms.m_nHeight, *channelFormat, *texDataType);
 			if(!success) {
-				compressInfo.errorHandler("Failed to allocate memory for mipmap " + std::to_string(m) + " of layer " + std::to_string(l) + "!");
+				compressInfo.errorHandler("Failed to allocate memory for mipmap " + util::to_string(m) + " of layer " + util::to_string(l) + "!");
 				return {};
 			}
 			auto *pMipLv = cmips.GetMipLevel(&ms, m, l);
@@ -310,7 +310,7 @@ std::optional<image::ITextureCompressor::ResultData> image::CompressonatorTextur
 			auto expectedSize = ms.m_nWidth * ms.m_nHeight * (*pixelSize);
 			CMP_DWORD dwSize = pMipLv->m_dwLinearSize;
 			if(dwSize != expectedSize) {
-				compressInfo.errorHandler("Size mismatch for mipmap " + std::to_string(m) + " of layer " + std::to_string(l) + ": Expected " + std::to_string(expectedSize) + ", got " + std::to_string(dwSize) + "!");
+				compressInfo.errorHandler("Size mismatch for mipmap " + util::to_string(m) + " of layer " + util::to_string(l) + ": Expected " + util::to_string(expectedSize) + ", got " + util::to_string(dwSize) + "!");
 				return {};
 			}
 			std::memcpy(pData, data, dwSize);
